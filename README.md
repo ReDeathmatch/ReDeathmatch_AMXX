@@ -4,16 +4,19 @@
     <a href="https://github.com/wopox1337/ReDeathmatch">
         <picture>
             <source
+                width="500px"
                 media="(prefers-color-scheme: dark)"
-                srcset="https://user-images.githubusercontent.com/25423296/163456776-7f95b81a-f1ed-45f7-b7ab-8fa810d529fa.png"
+                srcset="https://user-images.githubusercontent.com/18553678/233882657-0ee4d8ea-2492-4af7-8db5-32430689c131.png"
             >
             <source
+                width="500px"
                 media="(prefers-color-scheme: light)"
-                srcset="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"
+                srcset="https://user-images.githubusercontent.com/18553678/233882657-0ee4d8ea-2492-4af7-8db5-32430689c131.png"
             >
             <img
-                alt=""
-                src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"
+                width="500px"
+                alt="Gun logo"
+                src="https://user-images.githubusercontent.com/18553678/233882657-0ee4d8ea-2492-4af7-8db5-32430689c131.png"
             >
         </picture>
     </a>
