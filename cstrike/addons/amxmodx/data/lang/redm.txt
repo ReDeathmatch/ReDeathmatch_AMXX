@@ -1,0 +1,25 @@
+[en]
+Currently = currently
+Already = already
+
+RandomWeapons = Random weapon
+Enabled = enabled
+Disabled = disabled
+PrimaryEquip = Primary equip
+SecondaryEquip = Secondary equip
+ToClosePressG = \wTo close the menu - press `\yG\w`
+CurrentMode = Current mode
+GunsHelp = Say ^3guns ^1to open equip menu.
+
+[ru]
+Currently = сейчас
+Already = уже
+
+RandomWeapons = Случайные оружия
+Enabled = включено
+Disabled = отключено
+PrimaryEquip = Основное оружие
+SecondaryEquip = Дополнительное оружие
+ToClosePressG = \wЧтобы закрыть меню - нажмите `\yG\w`
+CurrentMode = Текущий режим
+GunsHelp = Напишите ^3guns ^1чтобы открыть меню экипировки. 
