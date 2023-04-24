@@ -66,7 +66,7 @@ public plugin_precache() {
 }
 
 public plugin_init() {
-    register_plugin("Spawns manager", "1.0.0-beta.1", "Sergey Shorokhov")
+    register_plugin("Spawns manager", VERSION, "Sergey Shorokhov")
     register_dictionary("common.txt")
 
     get_mapname(g_mapName, charsmax(g_mapName))

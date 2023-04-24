@@ -5,6 +5,8 @@
 #define _redm_included
 
 
+new const VERSION[] = "%VERSION%" 
+
 /**
  * Returns whether Re:DM is active
  * 

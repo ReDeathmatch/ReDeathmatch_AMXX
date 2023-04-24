@@ -16,8 +16,6 @@
 #include "ReDeathmatch/ReDM_round_modes.inc"
 #include "ReDeathmatch/ReDM_api.inc"
 
-static const VERSION[] = "1.0.0-beta"
-
 static g_pcvar_redm_active
 
 static bool: g_prevState
