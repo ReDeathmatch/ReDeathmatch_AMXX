@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - "**.md"
+
+  pull_request:
+    types: [opened, reopened, synchronize]
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-20.04
+    outputs:
+      COMMIT_SHA: ${{ steps.declare_sha.outputs.COMMIT_SHA }}
+      SEMVER: ${{ steps.declare_sha.outputs.SEMVER }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Parse SemVer string (release)
+        id: semver_parser
+        if: |
+          github.event_name == 'release' &&
+          github.event.action == 'published' &&
+          startsWith(github.ref, 'refs/tags/')
+        uses: booxmedialtd/ws-action-parse-semver@v1.4.7
+        with:
+          input_string: ${{ github.ref }}
+          version_extractor_regex: 'refs\/tags\/(.*)$'
+
+      - name: Declare SHA & package name
+        id: declare_sha
+        shell: bash
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          echo "COMMIT_SHA=$SHA" >> $GITHUB_OUTPUT        
+          echo "SEMVER=${{ steps.semver_parser.outputs.fullversion }}" >> $GITHUB_OUTPUT
+
+      - name: Setup latest ReAPI includes
+        env:
+          REPO: "s1lentq/reapi"
+        run: |
+          mkdir -p dep/reapi
+          cd dep/reapi
+
+          curl \
+            --silent \
+            https://api.github.com/repos/$REPO/releases/latest | \
+            grep "browser_download_url" | \
+            grep -Eo 'https://[^\"]*' | \
+            xargs wget
+
+          7z x *.zip
+
+          echo "REAPI_INCLUDE_PATH=$(pwd)/addons/amxmodx/scripting/include" >> $GITHUB_ENV
+
+      - name: Update versions for plugins (release)
+        working-directory: cstrike/addons/amxmodx/scripting/include/
+        if: |
+          github.event_name == 'release' &&
+          github.event.action == 'published' &&
+          startsWith(github.ref, 'refs/tags/')
+        env:
+          PLUGIN_VERSION: "${{ steps.declare_sha.outputs.SEMVER }}"
+        run: sed -i "s|%VERSION%|$PLUGIN_VERSION|g" redm.inc
+
+      - name: Update versions for plugins (only for artifacts builds)
+        working-directory: cstrike/addons/amxmodx/scripting/include/
+        env:
+          PLUGIN_VERSION: "${{ steps.declare_sha.outputs.COMMIT_SHA }}"
+        run: sed -i "s|%VERSION%|$PLUGIN_VERSION|g" redm.inc
+
+      - name: Setup AMXXPawn Compiler
+        uses: wopox1337/setup-amxxpawn@v1
+        with:
+          version: "1.10.5428"
+
+      - name: Compile plugins
+        working-directory: cstrike/addons/amxmodx/scripting/
+        env:
+          REAPI_INCLUDE: ${{ env.REAPI_INCLUDE_PATH }}
+        run: |
+          compile() {
+            sourcefile=$1
+            amxxfile="$(echo $sourcefile | sed -e 's/\.sma$/.amxx/')"
+            output_path="../plugins/$amxxfile"
+
+            mkdir -p $(dirname $output_path)
+
+            echo -n "Compiling $sourcefile ... "
+            amxxpc $sourcefile -o"$output_path" \
+              -i"include" \
+              -i"$REAPI_INCLUDE"
+          }
+          export -f compile
+
+          find * -type f -name "*.sma" -exec bash -c 'compile "$0"' {} \;
+
+      - name: Move files
+        run: |
+          mkdir publish
+          mv cstrike/ publish/
+
+      - name: Deploy artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: ReDeathatch-${{ steps.declare_sha.outputs.COMMIT_SHA }}-dev
+          path: publish/*
+
+  publish:
+    name: "Publish release"
+    runs-on: ubuntu-20.04
+    needs: [build]
+    if: |
+      github.event_name == 'release' &&
+      github.event.action == 'published' &&
+      startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: ReDeathatch-${{ needs.build.outputs.COMMIT_SHA }}-dev
+
+      - name: Packaging binaries
+        id: packaging
+        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathatch-${{ needs.build.outputs.SEMVER }}.zip cstrike/
+
+      - name: Publish artifacts
+        uses: softprops/action-gh-release@v1
+        id: publish-job
+        if: |
+          startsWith(github.ref, 'refs/tags/') &&
+          steps.packaging.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            *.zip
