@@ -1,6 +1,4 @@
-# ReDeathmatch
-
-<h1 align="center">
+<header align="center">
     <a href="https://github.com/wopox1337/ReDeathmatch">
         <picture>
             <source
@@ -20,10 +18,14 @@
             >
         </picture>
     </a>
-</h1>
+</header>
+
+<p class="a">
+    ReDeathmath
+</p>
 
 <p align="center">
-    AMXModX plugins to provide Deathmatch gameplay in Counter-Strike 1.6 optimized to work with ReGameDLL:CS.
+    AMXModX plugins to provide Deathmatch gameplay in <a href="https://store.steampowered.com/app/10/CounterStrike/">Counter-Strike 1.6</a> optimized to work with <a href="https://github.com/s1lentq/ReGameDLL_CS">ReGameDLL_CS</a>.
 </p>
 
 <p align="center">
@@ -79,3 +81,11 @@
 - [Release builds](https://github.com/wopox1337/ReDeathmatch/releases)
 - [Dev builds](https://github.com/wopox1337/ReDeathmatch/actions/workflows/build.yml)
 
+<style type="text/css">
+    .a {
+        color: brown;
+        text-align: center;
+        font-family: 'Consolas';
+        font-size: 350%;
+    }
+</style>
