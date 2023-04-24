@@ -1,27 +1,11 @@
-<header align="center">
+<p align="center">
     <a href="https://github.com/wopox1337/ReDeathmatch">
-        <picture>
-            <source
-                width="500px"
-                media="(prefers-color-scheme: dark)"
-                srcset="https://user-images.githubusercontent.com/18553678/233882657-0ee4d8ea-2492-4af7-8db5-32430689c131.png"
-            >
-            <source
-                width="500px"
-                media="(prefers-color-scheme: light)"
-                srcset="https://user-images.githubusercontent.com/18553678/233882657-0ee4d8ea-2492-4af7-8db5-32430689c131.png"
-            >
-            <img
-                width="500px"
-                alt="Gun logo"
-                src="https://user-images.githubusercontent.com/18553678/233882657-0ee4d8ea-2492-4af7-8db5-32430689c131.png"
-            >
-        </picture>
+        <img
+            width="500px"
+            alt="Gun logo"
+            src="https://user-images.githubusercontent.com/18553678/233882657-0ee4d8ea-2492-4af7-8db5-32430689c131.png"
+        >
     </a>
-</header>
-
-<p class="a">
-    ReDeathmath
 </p>
 
 <p align="center">
@@ -80,12 +64,3 @@
 ## Downloads
 - [Release builds](https://github.com/wopox1337/ReDeathmatch/releases)
 - [Dev builds](https://github.com/wopox1337/ReDeathmatch/actions/workflows/build.yml)
-
-<style type="text/css">
-    .a {
-        color: brown;
-        text-align: center;
-        font-family: 'Consolas';
-        font-size: 350%;
-    }
-</style>
