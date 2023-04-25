@@ -21,7 +21,7 @@
     </a>
     <a href="https://github.com/wopox1337/ReDeathmatch/actions">
         <img
-            src="https://img.shields.io/github/workflow/status/wopox1337/ReDeathmatch/CI/master?style=flat-square&logo=github&logoColor=white"
+            src="https://img.shields.io/github/actions/workflow/status/wopox1337/ReDeathmatch/CI.yml?branch=master&style=flat-square&logo=github&logoColor=white"
             alt="Build status"
         >
     </a>
