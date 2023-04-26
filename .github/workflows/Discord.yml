@@ -2,6 +2,14 @@ name: Discord Notification
 
 on:
   push:
+  issues:
+    types: [opened, edited, milestoned]
+  issue_comment:
+  discussion:
+  discussion_comment:
+  fork:
+  gollum:
+  release:
 
 jobs:
   Discord:
