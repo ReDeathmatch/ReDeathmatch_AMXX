@@ -64,18 +64,51 @@ public MsgHook_DeathMsg(msgid, dest, receiver) {
     for(new p = 1; p <= MaxClients; p++) {
         // check player settings
 
-        if(p != killer && p != victim)
+        if (p != killer && p != victim)
             continue
 
-        if(!is_user_connected(p) || is_user_bot(p))
+        if (!is_user_connected(p) || is_user_bot(p))
             continue
-        
+
         UTIL_DeathMsg(MSG_ONE, p, killer, victim, headshot, killerWeaponName)
+    }
+
+    new observers[MAX_PLAYERS - 1]
+    new count = GetPlayerObservers(killer, observers)
+    for (new o; o < count; o++) {
+        UTIL_DeathMsg(MSG_ONE, observers[o], killer, victim, headshot, killerWeaponName)
+    }
+
+    count = GetPlayerObservers(victim, observers)
+    for (new o; o < count; o++) {
+        UTIL_DeathMsg(MSG_ONE, observers[o], killer, victim, headshot, killerWeaponName)
     }
 
     return PLUGIN_HANDLED
 }
 
+static GetPlayerObservers(const player, observers[MAX_PLAYERS - 1]) {
+    new count
+
+    for (new o = 1; o <= MaxClients; o++) {
+        if (o == player)
+            continue
+
+        if (!is_user_connected(o) || is_user_bot(o))
+            continue
+
+        if (get_entvar(o, var_iuser1) != OBS_IN_EYE)
+            continue
+        
+        new observerTarget = get_member(o, m_hObserverTarget)
+        if (observerTarget != player)
+            continue
+
+        observers[count++] = o
+    }
+
+    return count
+}
 
 public PrecacheEvent_Post(type, const name[]) {
     new const gunsEvents[][] = {
