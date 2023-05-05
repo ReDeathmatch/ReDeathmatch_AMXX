@@ -60,7 +60,7 @@ jobs:
           "timestamp": "${{github.event.head_commit.timestamp}}",
           "footer":{"text": "${{github.event.head_commit.timestamp}}"}
           }    ]'
-        uses: Ilshidur/action-discord@master
+        uses: Ilshidur/action-discord@0.3.2
       - name: echo
         run: | 
           echo ${{github.event_name}}
