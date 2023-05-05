@@ -124,7 +124,9 @@ static GetNextMode() {
     new currentIdx = g_currentRoundModeIdx
     
     if (strcmp(redm_modes_switch, "random") == 0) {
-        currentIdx = random_num(0, count - 1)
+        while (currentIdx == g_currentRoundModeIdx) {
+            currentIdx = random_num(0, count - 1)
+        }
     } else if (strcmp(redm_modes_switch, "sequentially") == 0) {
         ++currentIdx
         currentIdx %= count
