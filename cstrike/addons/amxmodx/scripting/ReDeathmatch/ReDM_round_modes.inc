@@ -75,7 +75,7 @@ public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame)
 
     show_dhudmessage(
         player,
-        HasLangKey(modeName) ? "%l: %l" : "%l: %s",
+        HasLangKey(modeName) ? "%l %l" : "%l %s",
         "CurrentMode",
         modeName
     )
