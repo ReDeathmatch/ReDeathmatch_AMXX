@@ -30,10 +30,8 @@ public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay)
     new modeName[32]
     GetModeInfo(nextModeIdx, modeName, charsmax(modeName))
 
-    new bool: isLang = _: GetLangTransKey(modeName) != -1
-
     client_print_color(0, print_team_red,
-        isLang ? "[Re:DM] %l ^3%l^1" : "[Re:DM] %l ^3%s^1",
+        HasLangKey(modeName) ? "[Re:DM] %l ^3%l^1" : "[Re:DM] %l ^3%s^1",
         "NextMode",
         modeName
     )
@@ -75,11 +73,9 @@ public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame)
 
     SetGlobalTransTarget(player)
 
-    new bool: isLang = (GetLangTransKey(modeName) != TransKey_Bad)
-
     show_dhudmessage(
         player,
-        isLang ? "%l: %l" : "%l: %s",
+        HasLangKey(modeName) ? "%l: %l" : "%l: %s",
         "CurrentMode",
         modeName
     )
