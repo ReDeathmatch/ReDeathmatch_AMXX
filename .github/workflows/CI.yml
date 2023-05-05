@@ -114,32 +114,32 @@ jobs:
           name: ReDeathatch-${{ steps.declare_sha.outputs.COMMIT_SHA }}-dev
           path: publish/*
 
-  publish:
-    name: "Publish release"
-    runs-on: ubuntu-20.04
-    needs: [build]
-    if: |
-      github.event_name == 'release' &&
-      github.event.action == 'published' &&
-      startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3.0.2
-        with:
-          name: ReDeathatch-${{ needs.build.outputs.COMMIT_SHA }}-dev
+  # publish:
+  #   name: "Publish release"
+  #   runs-on: ubuntu-20.04
+  #   needs: [build]
+  #   if: |
+  #     github.event_name == 'release' &&
+  #     github.event.action == 'published' &&
+  #     startsWith(github.ref, 'refs/tags/')
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v3.0.2
+  #       with:
+  #         name: ReDeathatch-${{ needs.build.outputs.COMMIT_SHA }}-dev
 
-      - name: Packaging binaries
-        id: packaging
-        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathatch-${{ needs.build.outputs.SEMVER }}.zip cstrike/
+  #     - name: Packaging binaries
+  #       id: packaging
+  #       run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathatch-${{ needs.build.outputs.SEMVER }}.zip cstrike/
 
-      - name: Publish artifacts
-        uses: softprops/action-gh-release@v1
-        id: publish-job
-        if: |
-          startsWith(github.ref, 'refs/tags/') &&
-          steps.packaging.outcome == 'success'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: |
-            *.zip
+  #     - name: Publish artifacts
+  #       uses: softprops/action-gh-release@v1
+  #       id: publish-job
+  #       if: |
+  #         startsWith(github.ref, 'refs/tags/') &&
+  #         steps.packaging.outcome == 'success'
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         files: |
+  #           *.zip
