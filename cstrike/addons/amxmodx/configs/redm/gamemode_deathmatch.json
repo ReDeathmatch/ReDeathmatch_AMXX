@@ -75,8 +75,9 @@
         "mp_weapons_allow_map_placed": "0",
         "mp_damage_headshot_only": "0"
     },
-    "modes": {
-        "Pistols - HS ONLY": {
+    "modes": [
+        {
+            "name": "Pistols - HS ONLY",
             "equip": {
                 "secondary": [
                     "weapon_usp",
@@ -94,7 +95,8 @@
                 "mp_free_armor": "0"
             }
         },
-        "Second round weapons": {
+        {
+            "name": "Second round weapons",
             "equip": {
                 "primary": [
                     "weapon_scout",
@@ -125,13 +127,14 @@
                 "mp_free_armor": "1"
             }
         },
-        "All weapons - HS ONLY": {
+        {
+            "name": "All weapons - HS ONLY",
             "cvars": {
                 "mp_damage_headshot_only": "1"
             }
         },
-        "All weapons": {
-            
+        {
+            "name": "All weapons"
         }
-    }
+    ]
 }

@@ -179,26 +179,26 @@ JSON: Config_GetModeEquip() {
         return Invalid_JSON
     }
 
-    new JSON: objModes = json_object_get_value(Config_GetCurrent(), "modes")
-    new count = json_object_get_count(objModes)
+    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
+    new count = json_array_get_count(arrModes)
     if (!count) {
-        json_free(objModes)
+        json_free(arrModes)
 
         return Invalid_JSON
     }
 
     new currentModeIdx = RoundModes_GetCurrentMode()
     if (currentModeIdx < 0) {
-        json_free(objModes)
+        json_free(arrModes)
 
         return Invalid_JSON
     }
 
 
-    new JSON: objMode = json_object_get_value_at(objModes, currentModeIdx)
+    new JSON: objMode = json_array_get_value(arrModes, currentModeIdx)
     if (!json_object_has_value(objMode, "equip")) {
         json_free(objMode)
-        json_free(objModes)
+        json_free(arrModes)
 
         return Invalid_JSON
     }
@@ -208,7 +208,7 @@ JSON: Config_GetModeEquip() {
 
     json_free(objEquip)
     json_free(objMode)
-    json_free(objModes)
+    json_free(arrModes)
 
     return obj
 }
