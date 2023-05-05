@@ -77,7 +77,7 @@
     },
     "modes": [
         {
-            "name": "Pistols - HS ONLY",
+            "name": "PISTOLS_ONLY_HS",
             "equip": {
                 "secondary": [
                     "weapon_usp",
@@ -96,7 +96,7 @@
             }
         },
         {
-            "name": "Second round weapons",
+            "name": "SECOND_ROUND_WAEPONS",
             "equip": {
                 "primary": [
                     "weapon_scout",
@@ -128,13 +128,13 @@
             }
         },
         {
-            "name": "All weapons - HS ONLY",
+            "name": "ALL_WEAPONS_HS_ONLY",
             "cvars": {
                 "mp_damage_headshot_only": "1"
             }
         },
         {
-            "name": "All weapons"
+            "name": "ALL_WEAPONS"
         }
     ]
 }

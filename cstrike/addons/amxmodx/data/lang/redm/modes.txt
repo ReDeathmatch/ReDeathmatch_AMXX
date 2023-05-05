@@ -1,0 +1,11 @@
+[en]
+ALL_WEAPONS = All weapons
+ALL_WEAPONS_HS_ONLY = All weapons (only HS)
+PISTOLS_ONLY_HS = Pistols (only HS)
+SECOND_ROUND_WAEPONS = Second round weapons
+
+[ru]
+ALL_WEAPONS = Все оружия
+ALL_WEAPONS_HS_ONLY = Все оружия (только HS)
+PISTOLS_ONLY_HS = Пистолеты (только HS)
+SECOND_ROUND_WAEPONS = Оружия 2-го раунда
