@@ -28,7 +28,7 @@ static const g_soundEffects[][] = {
 
 public plugin_init() {
     register_plugin("ReDeathmatch", VERSION, "Sergey Shorokhov")
-    register_dictionary("redm.txt")
+    register_dictionary("redm/redm.txt")
 
     create_cvar("redm_version", VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
     

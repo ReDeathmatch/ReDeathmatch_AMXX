@@ -171,3 +171,7 @@ stock UTIL_DumpJSON(JSON: obj, msg[]) {
 
     server_print("%s:`%s`", msg, buffer)
 }
+
+stock bool: HasLangKey(const string[]) {
+    return (GetLangTransKey(string) != TransKey_Bad)
+}

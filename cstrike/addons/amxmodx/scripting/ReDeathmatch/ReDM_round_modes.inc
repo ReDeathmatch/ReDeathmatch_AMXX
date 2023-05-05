@@ -2,6 +2,8 @@ static g_currentRoundModeIdx = -1
 static redm_modes_switch[32]
 
 RoundModes_Init() {
+    register_dictionary("redm/modes.txt")
+
     RegisterHookChain(RG_RoundEnd, "RoundEnd", .post = false)
     RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
     RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip", .post = false)
@@ -28,7 +30,9 @@ public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay)
     new modeName[32]
     GetModeInfo(nextModeIdx, modeName, charsmax(modeName))
 
-    client_print_color(0, print_team_red, "[Re:DM] Next mode is `^3%s^1`",
+    client_print_color(0, print_team_red,
+        HasLangKey(modeName) ? "[Re:DM] %l ^3%l^1" : "[Re:DM] %l ^3%s^1",
+        "NextMode",
         modeName
     )
 
@@ -39,8 +43,7 @@ public CSGameRules_RestartRound() {
     if (g_currentRoundModeIdx == -1)
         return
 
-    new modeName[32]
-    if (!GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName)))
+    if (!GetModeInfo(g_currentRoundModeIdx))
         return
 
     ApplyMode(g_currentRoundModeIdx)
@@ -70,18 +73,16 @@ public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame)
 
     SetGlobalTransTarget(player)
 
-    new bool: isLang = (GetLangTransKey(modeName) != TransKey_Bad)
-
     show_dhudmessage(
         player,
-        isLang ? "%l: %l" : "%l: %s",
+        HasLangKey(modeName) ? "%l %l" : "%l %s",
         "CurrentMode",
         modeName
     )
 }
 
 
-static GetModeInfo(const index, name[], len) {
+static GetModeInfo(const index, name[] = "", len = 0) {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
         return false
 
