@@ -85,20 +85,26 @@ static GetModeInfo(const index, name[], len) {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
         return false
 
-    new JSON: objModes = json_object_get_value(Config_GetCurrent(), "modes")
+    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
 
-    new count = json_object_get_count(objModes)
+    new count = json_array_get_count(arrModes)
     if (!count) {
+        json_free(arrModes)
         return false
     }
     
+    new JSON: objMode = json_array_get_value(arrModes, index)
+
     if (index < 0 || index >= count) {
+        json_free(arrModes)
+        json_free(objMode)
         return false
     }
 
-    json_object_get_name(objModes, index, name, len)
+    json_object_get_string(objMode, "name", name, len)
 
-    json_free(objModes)
+    json_free(arrModes)
+    json_free(objMode)
 
     return true
 }
@@ -107,13 +113,13 @@ static GetNextMode() {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
         return -1
 
-    new JSON: objModes = json_object_get_value(Config_GetCurrent(), "modes")
+    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
 
-    new count = json_object_get_count(objModes)
-    json_free(objModes)
-    
-    if (!count)
+    new count = json_array_get_count(arrModes)
+    if (!count) {
+        json_free(arrModes)
         return -1
+    }
     
     new currentIdx = g_currentRoundModeIdx
     
@@ -137,13 +143,15 @@ bool: ApplyMode(const index) {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
         return false
 
-    new JSON: objModes = json_object_get_value(Config_GetCurrent(), "modes")
+    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
 
-    new count = json_object_get_count(objModes)
-    if (!count)
+    new count = json_array_get_count(arrModes)
+    if (!count) {
+        json_free(arrModes)
         return false
+    }
 
-    new JSON: objMode = json_object_get_value_at(objModes, index)
+    new JSON: objMode = json_array_get_value(arrModes, index)
     if (json_object_has_value(objMode, "cvars")) {
         new JSON: objCvars = json_object_get_value(objMode, "cvars")
 
@@ -153,7 +161,7 @@ bool: ApplyMode(const index) {
     }
 
     json_free(objMode)
-    json_free(objModes)
+    json_free(arrModes)
 
     return true
 }
