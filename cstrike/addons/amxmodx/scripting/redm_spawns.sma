@@ -872,7 +872,7 @@ static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnId
     new Float: spawnOrigin[3], Float: spawnAngle[3], Float: spawnVAngle[3], spawnTeam, spawnGroup[32]
     GetSpawnFromObject(spawnIdx, spawnOrigin, spawnAngle, spawnVAngle, spawnTeam, spawnGroup)
 
-    // Doesn't match because of the spawn command
+    // Doesn't match because of the spawn team
     if (targetTeam && spawnTeam && (spawnTeam != targetTeam))
         return false
 
