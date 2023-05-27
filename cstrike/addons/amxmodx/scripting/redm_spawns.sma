@@ -300,6 +300,8 @@ static Menu_Editor(const player/* , const level */) {
         .slot = false
     )
 
+    menu_setprop(menu, MPROP_EXIT, MEXIT_NEVER)
+
     menu_display(player, menu)
 }
 
