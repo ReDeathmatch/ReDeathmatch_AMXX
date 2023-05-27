@@ -30,6 +30,9 @@ EquipManager_Init() {
     register_concmd("redm_dump_equip", "ConCmd_redm_dump_equip", ADMIN_MAP, "Dump loaded equipset from config to table.")
 
     register_clcmd("drop", "ClCmd_Drop")
+    register_clcmd("say /guns", "ClCmd_Drop")
+    register_clcmd("say !guns", "ClCmd_Drop")
+    register_clcmd("guns", "ClCmd_Drop")
     register_clcmd("cl_autobuy", "ClCmd_cl_autobuy")
 }
 
