@@ -431,7 +431,7 @@ static bool: Add(const Float: origin[3], const Float: angle[3], const Float: vAn
 
     set_pev(entity, pev_team, team)
     set_pev(entity, pev_netname, group)
-    engfunc(EngFunc_SetModel, g_spawnViewModels[team])
+    engfunc(EngFunc_SetModel, entity, g_spawnViewModels[team])
 
     return true
 }
@@ -450,7 +450,7 @@ static Spawn_Delete(const entity) {
 
 static Spawn_SetTeam(const player, const entity, const team) {
     set_pev(entity, pev_team, team)
-    engfunc(EngFunc_SetModel, g_spawnViewModels[team])
+    engfunc(EngFunc_SetModel, entity, g_spawnViewModels[team])
 
     Editor_SetEntityFocus(player, entity)
 }
