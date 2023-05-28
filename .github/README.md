@@ -71,9 +71,7 @@ Many features have long been built and optimized to work directly in ReGameDLL_C
 - Installed [ReAPI](https://github.com/s1lentq/reapi) amxx module; 
       
 ## Installation
-- [Download the latest](https://github.com/wopox1337/ReDeathmatch/releases/latest) stable version from the release section.
-- Extract the `cstrike` folder to the root folder of the HLDS server;
-- Make sure that all plugins are running and in the correct order, using the `amxx list` command.
+Check the wiki [Installation](https://github.com/wopox1337/ReDeathmatch/wiki/Installation)
 
 ## Updating
 - Put new plugins and lang-files (`plugins/*.amxx` & `data/lang/*.txt`) into `amxmodx/` folder on the HLDS server;
