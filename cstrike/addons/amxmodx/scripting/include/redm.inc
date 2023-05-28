@@ -7,6 +7,12 @@
 
 new const VERSION[] = "%VERSION%" 
 
+// AMXX 1.9.0 compatibility
+#if !defined MAX_MAPNAME_LENGTH
+    #define MAX_MAPNAME_LENGTH 64
+#endif
+
+
 /**
  * Returns whether Re:DM is active
  * 

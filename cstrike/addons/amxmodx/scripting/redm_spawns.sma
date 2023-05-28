@@ -422,7 +422,7 @@ static bool: Spawn_Add(const player) {
     return Add(origin, angle, vAngle, team, g_editorProps[player][ep_group])
 }
 
-static bool: Add(const Float: origin[3], const Float: angle[3], const Float: vAngle[3], const team, const group[32]) {
+static bool: Add(const Float: origin[3], const Float: angle[3], const Float: vAngle[3], const team, const group[]) {
     new entity = Spawn_CreateEntity()
     if (!Spawn_EntitySetPosition(entity, origin, angle, vAngle)) {
         Spawn_Delete(entity)
