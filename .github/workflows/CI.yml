@@ -111,7 +111,7 @@ jobs:
       - name: Deploy artifact
         uses: actions/upload-artifact@v3.1.2
         with:
-          name: ReDeathatch-${{ steps.declare_sha.outputs.COMMIT_SHA }}-dev
+          name: ReDeathmatch-${{ steps.declare_sha.outputs.COMMIT_SHA }}-dev
           path: publish/*
 
   publish:
@@ -126,11 +126,11 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v3.0.2
         with:
-          name: ReDeathatch-${{ needs.build.outputs.COMMIT_SHA }}-dev
+          name: ReDeathmatch-${{ needs.build.outputs.COMMIT_SHA }}-dev
 
       - name: Packaging binaries
         id: packaging
-        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathatch-${{ needs.build.outputs.SEMVER }}.zip cstrike/
+        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathmatch-${{ needs.build.outputs.SEMVER }}.zip cstrike/
 
       - name: Publish artifacts
         uses: softprops/action-gh-release@v1
