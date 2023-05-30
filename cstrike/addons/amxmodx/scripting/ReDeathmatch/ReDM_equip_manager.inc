@@ -250,7 +250,7 @@ public MenuHandler_ChooseEquip(const player, const menu, const item) {
 
     UTIL_PlaySoundEffect(player, "fvox/blip.wav", .pitch = 80)
 
-    new bool: hasNextSection = bool: (++section % EquipType_e)
+    new bool: hasNextSection = (++section % EquipType_e) != 0
     if (!hasNextSection) {
         client_print_color(player, print_team_red, "[Re:DM] %l",
             "GunsHelp"

@@ -34,7 +34,7 @@ public bool: native_redm_active(const plugin_id, const argc) {
 }
 
 public bool: native_redm_set_active(const plugin_id, const argc) {
-    new bool: active = bool: get_param(1)
+    new bool: active = get_param(1) != 0
 
     if (IsActive() && active)
         return false

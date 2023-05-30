@@ -192,7 +192,7 @@ public PlaybackEvent_Post(flags, invoker, eventid, Float: delay, Float: Origin[3
 }
 
 static bool: IsGunsEvent(const eventId) {
-    return bool: (g_gunsEventsId & (1 << eventId))
+    return (g_gunsEventsId & (1 << eventId)) != 0
 }
 
 public BlockMapAutoEquipEntites() {
