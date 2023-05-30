@@ -142,7 +142,7 @@ stock UTIL_ReloadWeapons(const player, bool: currentWeapon = false) {
 }
 
 stock bool: IsBlind(const player) {
-    return bool:(Float: get_member(player, m_blindUntilTime) > get_gametime())
+    return Float: get_member(player, m_blindUntilTime) > get_gametime()
 }
 
 stock FixedUnsigned16(Float: value, scale = (1 << 12)) {
