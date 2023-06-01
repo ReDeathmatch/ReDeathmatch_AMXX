@@ -85,7 +85,7 @@
             }
         },
         {
-            "name": "SECOND_ROUND_WAEPONS",
+            "name": "SECOND_ROUND_WEAPONS",
             "equip": {
                 "primary": [
                     "weapon_scout",
