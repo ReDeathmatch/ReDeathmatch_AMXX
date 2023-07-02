@@ -69,7 +69,7 @@ public plugin_init() {
     register_plugin("Spawns manager", VERSION, "Sergey Shorokhov")
     register_dictionary("common.txt")
 
-    get_mapname(g_mapName, charsmax(g_mapName))
+    rh_get_mapname(g_mapName, charsmax(g_mapName))
     GameDLLSpawnsCountFix()
 
     register_clcmd("enter_spawnGroup", "ClCmd_EnterSpawnGroup")
