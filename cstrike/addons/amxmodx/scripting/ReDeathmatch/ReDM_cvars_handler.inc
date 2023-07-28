@@ -14,7 +14,9 @@ public ConCmd_redm_dump_cvars(const player) {
 CvarsHandler_LoadConfig(const JSON: config) {
     new JSON: cvars = json_object_get_value(config, "cvars")
     if (cvars == Invalid_JSON) {
-        set_fail_state("Can't read `cvars` section from config")
+        new buffer[512]
+        json_serial_to_string(config, buffer, charsmax(buffer), .pretty = true)
+        set_fail_state("Can't read `cvars` section from config = `%s`", buffer)
     }
 
     CvarsHandler_LoadCvars(cvars)
