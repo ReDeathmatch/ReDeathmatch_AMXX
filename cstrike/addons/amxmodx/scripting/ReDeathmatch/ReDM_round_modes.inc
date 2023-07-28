@@ -16,6 +16,9 @@ RoundModes_Init() {
 }
 
 public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
+    if (!IsActive())
+        return
+
     if (strcmp(redm_modes_switch, "disable") == 0)
         return
 
@@ -40,6 +43,9 @@ public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay)
 }
 
 public CSGameRules_RestartRound() {
+    if (!IsActive())
+        return
+
     if (g_currentRoundModeIdx == -1)
         return
 
@@ -54,6 +60,9 @@ public CSGameRules_RestartRound() {
 }
 
 public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame) {
+    if (!IsActive())
+        return
+
     set_member(player, m_bNotKilled, false)
     rg_set_user_armor(player, 0, ARMOR_NONE)
 
@@ -138,6 +147,9 @@ static GetNextMode() {
 
 
 bool: ApplyMode(const index) {
+    if (!IsActive())
+        return
+
     if (index < 0)
         return false
 
