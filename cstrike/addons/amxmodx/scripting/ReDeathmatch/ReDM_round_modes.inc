@@ -148,7 +148,7 @@ static GetNextMode() {
 
 bool: ApplyMode(const index) {
     if (!IsActive())
-        return
+        return false
 
     if (index < 0)
         return false
