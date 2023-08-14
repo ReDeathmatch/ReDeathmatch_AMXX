@@ -229,7 +229,7 @@ public MenuCallback_Primary(const player, const menu, const item) {
 
 public MenuHandler_ChooseEquip(const player, const menu, const item) {
     if (!IsActive())
-        return
+        return PLUGIN_HANDLED
 
     new info[2]
     menu_item_getinfo(
