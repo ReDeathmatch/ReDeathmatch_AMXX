@@ -24,6 +24,7 @@ static redm_keep_weapon_slot = 1
 EquipManager_Init() {
     RegisterHookChain(RG_CBasePlayer_GiveDefaultItems, "CBasePlayer_GiveDefaultItems", .post = false)
     // RegisterHookChain(RG_CBasePlayer_GiveNamedItem, "CBasePlayer_GiveNamedItem", .post = false)
+    RegisterHookChain(RG_CBasePlayer_AddPlayerItem, "CBasePlayer_AddPlayerItem", .post = false)
 
     bind_pcvar_num(create_cvar("redm_keep_weapon_slot", "1"), redm_keep_weapon_slot)
 
@@ -250,7 +251,7 @@ public MenuHandler_ChooseEquip(const player, const menu, const item) {
 
     UTIL_PlaySoundEffect(player, "fvox/blip.wav", .pitch = 80)
 
-    new bool: hasNextSection = (++section % EquipType_e) != 0
+    new bool: hasNextSection = (++section % EquipType_e) != EquipType_e: 0
     if (!hasNextSection) {
         client_print_color(player, print_team_red, "[Re:DM] %l",
             "GunsHelp"
@@ -297,6 +298,11 @@ public CBasePlayer_GiveDefaultItems(const player) {
     }
 
     return HC_SUPERCEDE
+}
+
+public CBasePlayer_AddPlayerItem(const player, const item) {
+    // Restore weaponState
+    set_member(item, m_Weapon_iWeaponState, g_weaponState[player])
 }
 
 static stock InventorySlotType: GetWeaponSlot(const weaponId) {
@@ -367,9 +373,6 @@ public Player_ForceSlotChoose(const player) {
 
     // Restore activeItem
     rg_internal_cmd(player, weaponName)
-
-    // Restore weaponState
-    set_member(item, m_Weapon_iWeaponState, g_weaponState[player])
 }
 
 static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
