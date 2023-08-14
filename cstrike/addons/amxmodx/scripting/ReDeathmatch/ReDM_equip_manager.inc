@@ -228,6 +228,9 @@ public MenuCallback_Primary(const player, const menu, const item) {
 }
 
 public MenuHandler_ChooseEquip(const player, const menu, const item) {
+    if (!IsActive())
+        return
+
     new info[2]
     menu_item_getinfo(
         menu, item,
@@ -301,6 +304,9 @@ public CBasePlayer_GiveDefaultItems(const player) {
 }
 
 public CBasePlayer_AddPlayerItem(const player, const item) {
+    if (!IsActive())
+        return
+
     // Restore weaponState
     set_member(item, m_Weapon_iWeaponState, g_weaponState[player])
 }
