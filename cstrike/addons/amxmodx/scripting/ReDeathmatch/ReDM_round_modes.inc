@@ -69,6 +69,10 @@ public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame)
     if (g_currentRoundModeIdx == -1)
         return
 
+    set_task(0.3, "RoundInfoMessage", player)
+}
+
+public RoundInfoMessage(const player) {
     new modeName[32]
     GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName))
 
