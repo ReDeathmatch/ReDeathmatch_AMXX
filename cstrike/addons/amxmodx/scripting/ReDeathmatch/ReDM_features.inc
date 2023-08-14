@@ -6,11 +6,14 @@ static Float: redm_sounds_distance
 static Float: redm_healer
 static Float: redm_healer_hs
 static redm_fade
+static redm_fade_colors[32]
 static redm_refill_ammo
 static redm_hitsound
 static mp_damage_headshot_only
 static bool: redm_hide_other_deathnotice
-
+static redm_protection_color_t[32]
+static redm_protection_color_ct[32]
+static bool: mp_respawn_immunity_effects
 
 Features_Precache() {
     g_fwdPrecacheEvent = register_forward(FM_PrecacheEvent , "PrecacheEvent_Post", ._post = true)
@@ -31,15 +34,21 @@ Features_Init() {
     RegisterHookChain(RG_CBasePlayer_TakeDamage, "CBasePlayer_TakeDamage_Post", .post = true)
     RegisterHookChain(RG_CBasePlayer_TraceAttack, "CBasePlayer_TraceAttack", .post = false)
     // RegisterHookChain(RH_SV_StartSound, "SV_StartSound", .post = false)
+    RegisterHookChain(RG_CBasePlayer_SetSpawnProtection, "CBasePlayer_SetSpawnProtection_Post", .post = true)
+    RegisterHookChain(RG_CBasePlayer_RemoveSpawnProtection, "CBasePlayer_RemoveSpawnProtection", .post = true)
 
     bind_pcvar_float(create_cvar("redm_healer", "10.0"), redm_healer)
     bind_pcvar_float(create_cvar("redm_healer_hs", "20.0"), redm_healer_hs)
     bind_pcvar_float(create_cvar("redm_sounds_distance", "1500.0"), redm_sounds_distance)
     bind_pcvar_num(create_cvar("redm_fade", "1"), redm_fade)
+    bind_pcvar_string(create_cvar("redm_fade_colors", "0 200 0 50"), redm_fade_colors, charsmax(redm_fade_colors))
     bind_pcvar_num(create_cvar("redm_refill_ammo", "1"), redm_refill_ammo)
     bind_pcvar_num(create_cvar("redm_hitsound", "1"), redm_hitsound)
     bind_pcvar_num(create_cvar("mp_damage_headshot_only", "0"), mp_damage_headshot_only)
     bind_pcvar_num(create_cvar("redm_hide_other_deathnotice", "1"), redm_hide_other_deathnotice)
+    bind_pcvar_string(create_cvar("redm_protection_color_t", "200 0 0 15"), redm_protection_color_t, charsmax(redm_protection_color_t))
+    bind_pcvar_string(create_cvar("redm_protection_color_ct", "0 0 200 15"), redm_protection_color_ct, charsmax(redm_protection_color_ct))
+    bind_pcvar_num(get_cvar_pointer("mp_respawn_immunity_effects"), mp_respawn_immunity_effects)
 }
 
 public MsgHook_HudTextArgs() {
@@ -236,7 +245,7 @@ public Features_PlayerKilled(const victim, const killer) {
         return
 
     if (redm_fade) {
-        UTIL_ScreenFade(killer)
+        UTIL_ScreenFade(killer, .color = ParseColors4(redm_fade_colors))
     }
 }
 
@@ -255,6 +264,35 @@ public CBasePlayer_TraceAttack(victim, attacker, Float: damage, Float: vecDir[3]
 
     new bool: hitHead = get_tr2(tracehandle, TR_iHitgroup) == HIT_HEAD
     return hitHead ? HC_CONTINUE : HC_SUPERCEDE
+}
+
+public CBasePlayer_SetSpawnProtection_Post(const player, const Float: time) {
+    if (!mp_respawn_immunity_effects)
+        return
+
+    new TeamName: team = get_member(player, m_iTeam)
+    if (team != TEAM_CT && team != TEAM_TERRORIST)
+        return
+
+    new colors[4]
+    colors = ParseColors4(team == TEAM_CT ? redm_protection_color_ct : redm_protection_color_t)
+  
+    fm_set_rendering(
+        player,
+        .r = colors[0],
+        .g = colors[1],
+        .b = colors[2],
+        .amount = colors[3],
+        .fx = kRenderFxGlowShell,
+        .render = kRenderNormal
+    )
+}
+
+public CBasePlayer_RemoveSpawnProtection(const player) {
+    if (!mp_respawn_immunity_effects)
+        return
+
+    fm_set_rendering(player)
 }
 
 stock WeaponIdType: GetCurrentWeapon(const player) {
