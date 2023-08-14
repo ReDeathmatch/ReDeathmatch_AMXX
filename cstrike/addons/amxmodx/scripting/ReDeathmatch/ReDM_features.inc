@@ -267,6 +267,9 @@ public CBasePlayer_TraceAttack(victim, attacker, Float: damage, Float: vecDir[3]
 }
 
 public CBasePlayer_SetSpawnProtection_Post(const player, const Float: time) {
+    if (!IsActive())
+        return
+
     if (!mp_respawn_immunity_effects)
         return
 
@@ -289,6 +292,9 @@ public CBasePlayer_SetSpawnProtection_Post(const player, const Float: time) {
 }
 
 public CBasePlayer_RemoveSpawnProtection(const player) {
+    if (!IsActive())
+        return
+
     if (!mp_respawn_immunity_effects)
         return
 
