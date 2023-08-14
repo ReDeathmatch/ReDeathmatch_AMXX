@@ -6,6 +6,7 @@ static Float: redm_sounds_distance
 static Float: redm_healer
 static Float: redm_healer_hs
 static redm_fade
+static redm_fade_colors[32]
 static redm_refill_ammo
 static redm_hitsound
 static mp_damage_headshot_only
@@ -36,6 +37,7 @@ Features_Init() {
     bind_pcvar_float(create_cvar("redm_healer_hs", "20.0"), redm_healer_hs)
     bind_pcvar_float(create_cvar("redm_sounds_distance", "1500.0"), redm_sounds_distance)
     bind_pcvar_num(create_cvar("redm_fade", "1"), redm_fade)
+    bind_pcvar_string(create_cvar("redm_fade_colors", "0 200 0 50"), redm_fade_colors, charsmax(redm_fade_colors))
     bind_pcvar_num(create_cvar("redm_refill_ammo", "1"), redm_refill_ammo)
     bind_pcvar_num(create_cvar("redm_hitsound", "1"), redm_hitsound)
     bind_pcvar_num(create_cvar("mp_damage_headshot_only", "0"), mp_damage_headshot_only)
@@ -236,7 +238,7 @@ public Features_PlayerKilled(const victim, const killer) {
         return
 
     if (redm_fade) {
-        UTIL_ScreenFade(killer)
+        UTIL_ScreenFade(killer, .color = ParseColors4(redm_fade_colors))
     }
 }
 

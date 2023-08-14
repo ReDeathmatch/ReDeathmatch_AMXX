@@ -149,7 +149,7 @@ stock FixedUnsigned16(Float: value, scale = (1 << 12)) {
     return clamp(floatround(value * scale), 0, 0xFFFF)
 }
 
-stock UTIL_ScreenFade(const player, const Float: fxTime = 0.2, const Float: holdTime = 0.2, const color[3] = {0, 200, 0}, const alpha = 50) {
+stock UTIL_ScreenFade(const player, const Float: fxTime = 0.2, const Float: holdTime = 0.2, const color[4] = {0, 200, 0, 50}) {
     if (IsBlind(player))
         return
 
@@ -167,7 +167,7 @@ stock UTIL_ScreenFade(const player, const Float: fxTime = 0.2, const Float: hold
     write_byte(color[0])
     write_byte(color[1])
     write_byte(color[2])
-    write_byte(alpha)
+    write_byte(color[3])
     message_end()
 }
 
@@ -180,4 +180,28 @@ stock UTIL_DumpJSON(JSON: obj, msg[]) {
 
 stock bool: HasLangKey(const string[]) {
     return (GetLangTransKey(string) != TransKey_Bad)
+}
+
+stock ParseColors4(const buffer[]) {
+    new stringParsed[4][4]
+    new colors[4]
+
+    if (!strlen(buffer))
+        return colors
+    
+    new parsedArgs = parse(
+        buffer,
+        stringParsed[0], charsmax(stringParsed[]),  // R
+        stringParsed[1], charsmax(stringParsed[]),  // G
+        stringParsed[2], charsmax(stringParsed[]),  // B
+        stringParsed[3], charsmax(stringParsed[])   // A
+    )
+
+    if (parsedArgs < 3)
+        return colors
+
+    for (new i; i < sizeof(stringParsed); i++)
+        colors[i] = strtol(stringParsed[i])
+
+    return colors
 }
