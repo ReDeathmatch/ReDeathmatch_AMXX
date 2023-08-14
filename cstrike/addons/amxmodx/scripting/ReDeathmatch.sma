@@ -175,6 +175,7 @@ static ApplyState(const bool: active) {
     if (active) {
         ReloadConfig()
     } else {
+        RoundModes_ResetCurrentMode()
         RestoreAllCvars()
     }
 
