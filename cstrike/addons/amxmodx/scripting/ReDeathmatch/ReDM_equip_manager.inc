@@ -277,15 +277,7 @@ public CBasePlayer_GiveDefaultItems(const player) {
     if (redm_keep_weapon_slot)
         RequestFrame("Player_ForceSlotChoose", player)
 
-    // TODO: rework it
-    if (g_playerRandomWeapons[player]) {
-        for (new EquipType_e: section; section < EquipType_e; section++) {
-            if (!HasEquipItems(section))
-                continue
-
-            g_playerWeapons[player][section] = random_num(0, ArraySize(Array: g_equip[section]) - 1)
-        }
-    }
+    rg_give_item(player, "weapon_knife")
 
     for (new EquipType_e: section; section < EquipType_e; section++) {
         if (!HasEquipItems(section))
@@ -300,11 +292,7 @@ public CBasePlayer_GiveDefaultItems(const player) {
 
             return HC_CONTINUE
         }
-    }
 
-    rg_give_item(player, "weapon_knife")
-
-    for (new EquipType_e: section; section < EquipType_e; section++) {
         Player_GiveWeapon(player, section)
     }
 
