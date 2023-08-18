@@ -289,15 +289,15 @@ public CBasePlayer_SetSpawnProtection_Post(const player, const Float: time) {
         .fx = kRenderFxGlowShell,
         .render = kRenderNormal
     )
+
+    g_protectionState[player] = true
 }
 
 public CBasePlayer_RemoveSpawnProtection(const player) {
-    if (!IsActive())
+    if (!g_protectionState[player])
         return
 
-    if (!mp_respawn_immunity_effects)
-        return
-
+    g_protectionState[player] = false
     fm_set_rendering(player)
 }
 
