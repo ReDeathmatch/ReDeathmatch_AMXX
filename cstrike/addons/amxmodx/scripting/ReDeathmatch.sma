@@ -174,6 +174,7 @@ SetActive(const bool: active) {
 static ApplyState(const bool: active) {
     if (active) {
         ReloadConfig()
+        set_member_game(m_bGameStarted, true)
     } else {
         RoundModes_ResetCurrentMode()
         RestoreAllCvars()
