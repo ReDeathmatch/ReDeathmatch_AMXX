@@ -1,6 +1,7 @@
 static g_fwdPrecacheEvent = -1
 static g_gunsEventsId
 static g_oldGroupinfo[MAX_PLAYERS + 1]
+static bool: g_protectionState[MAX_PLAYERS + 1]
 
 static Float: redm_sounds_distance
 static Float: redm_healer
