@@ -40,7 +40,6 @@ EquipManager_Init() {
 EquipManager_PutInServer(const player) {
     EquipManager_PlayerResetEquip(player)
     g_lastWeaponSlot[player] = PRIMARY_WEAPON_SLOT
-    g_weaponState[player] = (WPNSTATE_USP_SILENCED | WPNSTATE_M4A1_SILENCED)
 }
 
 EquipManager_LoadConfig(const JSON: objEquip) {
