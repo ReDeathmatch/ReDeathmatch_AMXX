@@ -45,24 +45,18 @@ CvarsHandler_LoadCvars(const JSON: objCvars) {
 }
 
 static CvarChangeValue(const cvar[], const value[]) {
-    if (!IsActive()) {
-        if (!g_cvarValues) {
-            g_cvarValues = TrieCreate()
-        }
+    if (!g_cvarValues) {
+        g_cvarValues = TrieCreate()
+    }
 
-        new oldValue[32]
-        get_cvar_string(cvar, oldValue, charsmax(oldValue))
+    new oldValue[32]
+    get_cvar_string(cvar, oldValue, charsmax(oldValue))
 
-        if (strcmp(oldValue, value) == 0)
-            return
+    if (strcmp(oldValue, value) == 0)
+        return
 
-        new storedValue[32]
-        if (TrieGetString(g_cvarValues, cvar, storedValue, charsmax(storedValue))) {
-            LogMessageEx(Warning, "CvarChangeValue: WARNING! CVar `%s` already has stored value: `%s` and been replaced by `%s` ", 
-                cvar, storedValue, value
-            )
-        }
-
+    if (!TrieKeyExists(g_cvarValues, cvar)) {
+        // Store only original CVar value
         TrieSetString(g_cvarValues, cvar, oldValue)
     }
 
@@ -128,7 +122,7 @@ stock DumpAllSavedCvars(const player = 0) {
         "#", "CVar", "old", "current"
     )
     console_print(player, "| -- | -------------------------------- | -------- | -------- |")
-    while(!TrieIterEnded(iter)) {
+    while (!TrieIterEnded(iter)) {
         new key[32]
         TrieIterGetKey(iter, key, charsmax(key))
 
