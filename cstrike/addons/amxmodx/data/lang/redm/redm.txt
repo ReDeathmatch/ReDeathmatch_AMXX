@@ -11,6 +11,7 @@ ToClosePressG = \wTo close the menu - press `\yG\w`
 CurrentMode = Current mode:
 NextMode = Next Mode - 
 GunsHelp = Say ^3guns ^1to open equip menu.
+ModeChanges = The game mode changes.
 
 [ru]
 Currently = сейчас
@@ -25,3 +26,4 @@ ToClosePressG = \wЧтобы закрыть меню - нажмите `\yG\w`
 CurrentMode = Текущий режим:
 NextMode = Следующий режим - 
 GunsHelp = Напишите ^3guns ^1чтобы открыть меню экипировки. 
+ModeChanges = Смена режима игры.

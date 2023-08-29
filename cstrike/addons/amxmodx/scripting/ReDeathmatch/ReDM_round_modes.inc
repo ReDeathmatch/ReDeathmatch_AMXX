@@ -4,7 +4,7 @@ static redm_modes_switch[32]
 RoundModes_Init() {
     register_dictionary("redm/modes.txt")
 
-    RegisterHookChain(RG_RoundEnd, "RoundEnd", .post = false)
+    RegisterHookChain(RG_RoundEnd, "RoundEnd_Post", .post = true)
     RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
     RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip", .post = false)
 
@@ -15,7 +15,7 @@ RoundModes_Init() {
     )
 }
 
-public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
+public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
     if (!IsActive())
         return
 
@@ -26,12 +26,10 @@ public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay)
     if (nextModeIdx == -1)
         return
 
-    // TODO:
-    // SetHookChainArg(1, ATYPE_INTEGER, WINSTATUS_NONE)
-    // SetHookChainArg(2, ATYPE_INTEGER, ROUND_TARGET_SAVED)
+    g_currentRoundModeIdx = nextModeIdx
 
     new modeName[32]
-    GetModeInfo(nextModeIdx, modeName, charsmax(modeName))
+    GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName))
 
     client_print_color(0, print_team_red,
         HasLangKey(modeName) ? "[Re:DM] %l ^3%l^1" : "[Re:DM] %l ^3%s^1",
@@ -39,7 +37,8 @@ public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay)
         modeName
     )
 
-    g_currentRoundModeIdx = nextModeIdx
+    // TODO: better will be hook EndRoundMessage()
+    client_print(0, print_center, "%l", "ModeChanges")
 }
 
 public CSGameRules_RestartRound() {
