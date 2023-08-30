@@ -12,6 +12,8 @@ CurrentMode = Current mode:
 NextMode = Next Mode - 
 YouCanChooseEquip = You can select equipment by pressing `^3G^1` (or \3/guns^1).
 ModeChanges = The game mode changes.
+Modes = Game modes
+DisableForceMode = Disable forced mode
 
 [ru]
 Currently = сейчас
@@ -27,3 +29,5 @@ CurrentMode = Текущий режим:
 NextMode = Следующий режим - 
 YouCanChooseEquip = Вы можете выбрать экипировку нажав `^3G^1` (или ^3/guns^1).
 ModeChanges = Смена режима игры.
+Modes = Режимы игры
+DisableForceMode = Отключить фиксированный режим

@@ -1,5 +1,8 @@
+new g_forcedModeIdx = -1
 static g_currentRoundModeIdx = -1
 static redm_modes_switch[32]
+
+#include "ReDeathmatch/Modes/Menus.inc"
 
 RoundModes_Init() {
     register_dictionary("redm/modes.txt")
@@ -13,6 +16,8 @@ RoundModes_Init() {
         redm_modes_switch,
         charsmax(redm_modes_switch)
     )
+
+    ModesMenus_Init()
 }
 
 public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
@@ -93,8 +98,7 @@ public RoundInfoMessage(const player) {
     )
 }
 
-
-static GetModeInfo(const index, name[] = "", len = 0) {
+GetModeInfo(const index, name[] = "", len = 0) {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
         return false
 
@@ -133,9 +137,13 @@ static GetNextMode() {
         json_free(arrModes)
         return -1
     }
-    
+
+    if (IsModeForced()) {
+        return g_forcedModeIdx
+    }
+
     new currentIdx = g_currentRoundModeIdx
-    
+
     if (strcmp(redm_modes_switch, "random") == 0) {
         while (currentIdx == g_currentRoundModeIdx) {
             currentIdx = random_num(0, count - 1)
@@ -144,7 +152,7 @@ static GetNextMode() {
         ++currentIdx
         currentIdx %= count
     }
-    
+
     return currentIdx
 }
 
@@ -190,4 +198,13 @@ RoundModes_GetCurrentMode() {
 
 RoundModes_ResetCurrentMode() {
     g_currentRoundModeIdx = -1    
+}
+
+bool: IsModeForced() {
+    // TODO: find better
+    return g_forcedModeIdx > -1
+}
+
+Float: CHalfLifeMultiplay__GetRoundRestartDelay() {
+	return get_cvar_float("mp_round_restart_delay")
 }
