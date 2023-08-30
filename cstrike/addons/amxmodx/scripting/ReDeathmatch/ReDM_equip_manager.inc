@@ -20,6 +20,7 @@ static WeaponState: g_weaponState[MAX_PLAYERS + 1]
 static bool: g_inEquipMenu[MAX_PLAYERS + 1]
 
 static redm_keep_weapon_slot = 1
+static bool: redm_open_equip_menu = false
 
 EquipManager_Init() {
     RegisterHookChain(RG_CBasePlayer_GiveDefaultItems, "CBasePlayer_GiveDefaultItems", .post = false)
@@ -27,6 +28,7 @@ EquipManager_Init() {
     RegisterHookChain(RG_CBasePlayer_AddPlayerItem, "CBasePlayer_AddPlayerItem", .post = false)
 
     bind_pcvar_num(create_cvar("redm_keep_weapon_slot", "1"), redm_keep_weapon_slot)
+    bind_pcvar_num(create_cvar("redm_open_equip_menu", "0"), redm_open_equip_menu)
 
     register_concmd("redm_dump_equip", "ConCmd_redm_dump_equip", ADMIN_MAP, "Dump loaded equipset from config to table.")
 
@@ -40,6 +42,11 @@ EquipManager_Init() {
 EquipManager_PutInServer(const player) {
     EquipManager_PlayerResetEquip(player)
     g_lastWeaponSlot[player] = PRIMARY_WEAPON_SLOT
+
+    if (is_user_bot(player) || is_user_hltv(player))
+        return
+
+    set_task(5.0, "Message_YouCanChooseEquip", player)
 }
 
 EquipManager_LoadConfig(const JSON: objEquip) {
@@ -256,7 +263,7 @@ public MenuHandler_ChooseEquip(const player, const menu, const item) {
     new bool: hasNextSection = (++section % EquipType_e) != EquipType_e: 0
     if (!hasNextSection) {
         client_print_color(player, print_team_red, "[Re:DM] %l",
-            "GunsHelp"
+            "YouCanChooseEquip"
         )
 
         return PLUGIN_HANDLED
@@ -291,7 +298,8 @@ public CBasePlayer_GiveDefaultItems(const player) {
         }
 
         if (g_playerWeapons[player][section] == EQUIP_NOT_CHOOSEN) {
-            Menu_ChooseEquip(player, section)
+            if (redm_open_equip_menu)
+                Menu_ChooseEquip(player, section)
 
             return HC_CONTINUE
         }
@@ -459,4 +467,10 @@ static DumpEquip(const player = 0) {
     }
 
     console_print(player, "^n")
+}
+
+public Message_YouCanChooseEquip(const player) {
+    SetGlobalTransTarget(player)
+
+    client_print_color(player, print_team_red, "[Re:DM] %l", "YouCanChooseEquip")
 }

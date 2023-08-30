@@ -10,7 +10,7 @@ SecondaryEquip = Secondary equip
 ToClosePressG = \wTo close the menu - press `\yG\w`
 CurrentMode = Current mode:
 NextMode = Next Mode - 
-GunsHelp = Say ^3guns ^1to open equip menu.
+YouCanChooseEquip = You can select equipment by pressing `^3G^1` (or \3/guns^1).
 ModeChanges = The game mode changes.
 
 [ru]
@@ -25,5 +25,5 @@ SecondaryEquip = Дополнительное оружие
 ToClosePressG = \wЧтобы закрыть меню - нажмите `\yG\w`
 CurrentMode = Текущий режим:
 NextMode = Следующий режим - 
-GunsHelp = Напишите ^3guns ^1чтобы открыть меню экипировки. 
+YouCanChooseEquip = Вы можете выбрать экипировку нажав `^3G^1` (или ^3/guns^1).
 ModeChanges = Смена режима игры.
