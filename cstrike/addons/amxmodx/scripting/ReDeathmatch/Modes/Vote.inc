@@ -19,7 +19,7 @@ new bool: g_voteStarted
 // continue cur mode
 
 static redm_mode_vote_time = 15
-static bool: redm_mode_vote_enable = 1
+static bool: redm_mode_vote_enable = true
 
 ModeVote_Init() {
     RegisterHookChain(RG_CBasePlayer_ResetMaxSpeed, "CBasePlayer_ResetMaxSpeed_Post", .post = true)
