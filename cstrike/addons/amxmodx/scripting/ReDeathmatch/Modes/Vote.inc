@@ -78,13 +78,11 @@ ModeVote_RestartRound() {
     if (!g_voteStarted)
         return VOTE_NOTVOTED
 
-    new votedModeIdx = Vote_End()
+    new votedModeIdx = VoteEnd()
     return votedModeIdx
 }
 
 VoteStart(const voteTime = 15) {
-    server_print("-- VoteStart(voteTime:%i)", voteTime)
-
     set_member_game(m_iRoundWinStatus, WINSTATUS_NONE)
     set_member_game(m_flRestartRoundTime, get_gametime() + float(voteTime))
     set_member_game(m_bRoundTerminating, false)
@@ -102,7 +100,6 @@ VoteStart(const voteTime = 15) {
 }
 
 public VoteTimer_Counter() {
-    // server_print("VoteTimer_Counter(remaining: %.3f)", ModeVote_GetVoteTimeRemaining())
     Menu_VoteMode()
 }
 
@@ -152,14 +149,13 @@ Vote_PlayerGetVote(const player) {
     return g_votes[player]
 }
 
-Vote_End() {
+VoteEnd() {
     reset_menu(0)
 
     new modeIdx = Vote_GetResult()
 
     g_voteStarted = false
 
-    server_print("-- Vote_End(modeIdx:%i)", modeIdx)
     return modeIdx
 }
 
