@@ -27,10 +27,10 @@ static const g_soundEffects[][] = {
 }
 
 public plugin_init() {
-    register_plugin("ReDeathmatch", VERSION, "Sergey Shorokhov")
+    register_plugin("ReDeathmatch", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("redm/redm.txt")
 
-    create_cvar("redm_version", VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
+    create_cvar("redm_version", REDM_VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
     
     ApiInit_Forwards()
 
@@ -156,9 +156,9 @@ public ConCmd_redm_status(const player, level, cid) {
 public ConCmd_redm(const player, level, cid) {
     SetGlobalTransTarget(player)
 
-    console_print(player, "[Re:DM] Version `%s`", VERSION)
+    console_print(player, "[Re:DM] Version `%s`", REDM_VERSION)
     console_print(player, "[Re:DM] https://github.com/wopox1337/ReDeathmatch")
-    console_print(player, "[Re:DM] Copyright (c) 2023 Sergey Shorokhov", VERSION)
+    console_print(player, "[Re:DM] Copyright (c) 2023 Sergey Shorokhov", REDM_VERSION)
 
     return PLUGIN_HANDLED
 }
