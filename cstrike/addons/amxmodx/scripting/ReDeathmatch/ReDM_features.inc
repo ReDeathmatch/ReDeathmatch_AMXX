@@ -246,7 +246,7 @@ public Features_PlayerKilled(const victim, const killer) {
         return
 
     if (redm_fade) {
-        UTIL_ScreenFade(killer, .color = ParseColors4(redm_fade_colors))
+        UTIL_ScreenFade(killer, .color = ParseColors4(redm_fade_colors), .fadeFlags = FFADE_IN)
     }
 }
 

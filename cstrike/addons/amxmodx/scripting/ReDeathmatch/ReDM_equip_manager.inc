@@ -281,6 +281,8 @@ public CBasePlayer_GiveDefaultItems(const player) {
     if (!IsActive())
         return HC_CONTINUE
 
+    ModeVote_GiveDefaultItems(player)
+
     if (is_user_bot(player))
         return HC_CONTINUE
 

@@ -11,6 +11,14 @@ ToClosePressG = \wTo close the menu - press `\yG\w`
 CurrentMode = Current mode:
 NextMode = Next Mode - 
 YouCanChooseEquip = You can select equipment by pressing `^3G^1` (or \3/guns^1).
+ModeChanges = The game mode changes.
+Modes = Game modes
+DisableForceMode = Disable forced mode
+NextGameMode = next game mode
+Choose = Choose
+Selecting = Selecting
+Extend = extend
+
 
 [ru]
 Currently = сейчас
@@ -25,3 +33,10 @@ ToClosePressG = \wЧтобы закрыть меню - нажмите `\yG\w`
 CurrentMode = Текущий режим:
 NextMode = Следующий режим - 
 YouCanChooseEquip = Вы можете выбрать экипировку нажав `^3G^1` (или ^3/guns^1).
+ModeChanges = Смена режима игры.
+Modes = Режимы игры
+DisableForceMode = Отключить фиксированный режим
+NextGameMode = следующий игровой режим
+Choose = Выберите
+Selecting = Выбор
+Extend = продлить

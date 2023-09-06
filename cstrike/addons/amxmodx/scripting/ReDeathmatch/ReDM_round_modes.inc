@@ -1,10 +1,14 @@
+static g_forcedModeIdx = -1
 static g_currentRoundModeIdx = -1
 static redm_modes_switch[32]
+
+#include "ReDeathmatch/Modes/Menus.inc"
+#include "ReDeathmatch/Modes/Vote.inc"
 
 RoundModes_Init() {
     register_dictionary("redm/modes.txt")
 
-    RegisterHookChain(RG_RoundEnd, "RoundEnd", .post = false)
+    RegisterHookChain(RG_RoundEnd, "RoundEnd_Post", .post = true)
     RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
     RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip", .post = false)
 
@@ -13,11 +17,22 @@ RoundModes_Init() {
         redm_modes_switch,
         charsmax(redm_modes_switch)
     )
+
+    ModesMenus_Init()
+    ModeVote_Init()
 }
 
-public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
+public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
     if (!IsActive())
         return
+
+    new bool: voteStarted = ModeVote_RoundEnd_Post()
+
+    if (voteStarted) {
+        client_print(0, print_center, "%l %l.", "Selecting", "NextGameMode")
+
+        return
+    }
 
     if (strcmp(redm_modes_switch, "disable") == 0)
         return
@@ -26,12 +41,10 @@ public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay)
     if (nextModeIdx == -1)
         return
 
-    // TODO:
-    // SetHookChainArg(1, ATYPE_INTEGER, WINSTATUS_NONE)
-    // SetHookChainArg(2, ATYPE_INTEGER, ROUND_TARGET_SAVED)
+    g_currentRoundModeIdx = nextModeIdx
 
     new modeName[32]
-    GetModeInfo(nextModeIdx, modeName, charsmax(modeName))
+    GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName))
 
     client_print_color(0, print_team_red,
         HasLangKey(modeName) ? "[Re:DM] %l ^3%l^1" : "[Re:DM] %l ^3%s^1",
@@ -39,12 +52,17 @@ public RoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay)
         modeName
     )
 
-    g_currentRoundModeIdx = nextModeIdx
+    // TODO: better will be hook EndRoundMessage()
+    client_print(0, print_center, "%l", "ModeChanges")
 }
 
 public CSGameRules_RestartRound() {
     if (!IsActive())
         return
+
+    new votedModeIdx = ModeVote_RestartRound()
+    if (votedModeIdx >= 0)
+        g_currentRoundModeIdx = votedModeIdx
 
     if (g_currentRoundModeIdx == -1)
         return
@@ -94,27 +112,35 @@ public RoundInfoMessage(const player) {
     )
 }
 
-
-static GetModeInfo(const index, name[] = "", len = 0) {
+JSON: GetModesArr(& count = 0) {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
-        return false
+        return Invalid_JSON
 
     new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
 
-    new count = json_array_get_count(arrModes)
+    count = json_array_get_count(arrModes)
     if (!count) {
         json_free(arrModes)
-        return false
+
+        return Invalid_JSON
     }
     
-    new JSON: objMode = json_array_get_value(arrModes, index)
+    return arrModes
+}
+
+bool: GetModeInfo(const index, name[] = "", len = 0) {
+    new count
+    new JSON: arrModes = GetModesArr(count)
+    if (arrModes == Invalid_JSON)
+        return false
 
     if (index < 0 || index >= count) {
         json_free(arrModes)
-        json_free(objMode)
+
         return false
     }
 
+    new JSON: objMode = json_array_get_value(arrModes, index)
     json_object_get_string(objMode, "name", name, len)
 
     json_free(arrModes)
@@ -124,19 +150,19 @@ static GetModeInfo(const index, name[] = "", len = 0) {
 }
 
 static GetNextMode() {
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+    new count
+    new JSON: arrModes = GetModesArr(count)
+    if (arrModes == Invalid_JSON)
         return -1
 
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-
-    new count = json_array_get_count(arrModes)
-    if (!count) {
+    if (IsModeForced()) {
         json_free(arrModes)
-        return -1
+
+        return g_forcedModeIdx
     }
-    
+
     new currentIdx = g_currentRoundModeIdx
-    
+
     if (strcmp(redm_modes_switch, "random") == 0) {
         while (currentIdx == g_currentRoundModeIdx) {
             currentIdx = random_num(0, count - 1)
@@ -145,7 +171,7 @@ static GetNextMode() {
         ++currentIdx
         currentIdx %= count
     }
-    
+
     return currentIdx
 }
 
@@ -159,16 +185,9 @@ bool: ApplyMode(const index) {
 
     ReloadConfig()
 
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+    new JSON: arrModes = GetModesArr()
+    if (arrModes == Invalid_JSON)
         return false
-
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-
-    new count = json_array_get_count(arrModes)
-    if (!count) {
-        json_free(arrModes)
-        return false
-    }
 
     new JSON: objMode = json_array_get_value(arrModes, index)
     if (json_object_has_value(objMode, "cvars")) {
@@ -186,9 +205,22 @@ bool: ApplyMode(const index) {
 }
 
 RoundModes_GetCurrentMode() {
-    return g_currentRoundModeIdx    
+    return g_forcedModeIdx > -1 ? g_forcedModeIdx : g_currentRoundModeIdx    
+}
+
+RoundModes_SetCurrentMode(const modeIdx) {
+    g_currentRoundModeIdx = modeIdx
 }
 
 RoundModes_ResetCurrentMode() {
     g_currentRoundModeIdx = -1    
+}
+
+bool: IsModeForced() {
+    // TODO: find better
+    return g_forcedModeIdx > -1
+}
+
+Float: CHalfLifeMultiplay__GetRoundRestartDelay() {
+	return get_cvar_float("mp_round_restart_delay")
 }
