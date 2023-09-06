@@ -1,8 +1,9 @@
-new g_forcedModeIdx = -1
+static g_forcedModeIdx = -1
 static g_currentRoundModeIdx = -1
 static redm_modes_switch[32]
 
 #include "ReDeathmatch/Modes/Menus.inc"
+#include "ReDeathmatch/Modes/Vote.inc"
 
 RoundModes_Init() {
     register_dictionary("redm/modes.txt")
@@ -18,11 +19,20 @@ RoundModes_Init() {
     )
 
     ModesMenus_Init()
+    ModeVote_Init()
 }
 
 public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
     if (!IsActive())
         return
+
+    new bool: voteStarted = ModeVote_RoundEnd_Post()
+
+    if (voteStarted) {
+        client_print(0, print_center, "%l %l.", "Selecting", "NextGameMode")
+
+        return
+    }
 
     if (strcmp(redm_modes_switch, "disable") == 0)
         return
@@ -49,6 +59,10 @@ public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmD
 public CSGameRules_RestartRound() {
     if (!IsActive())
         return
+
+    new votedModeIdx = ModeVote_RestartRound()
+    if (votedModeIdx >= 0)
+        g_currentRoundModeIdx = votedModeIdx
 
     if (g_currentRoundModeIdx == -1)
         return
@@ -98,26 +112,35 @@ public RoundInfoMessage(const player) {
     )
 }
 
-GetModeInfo(const index, name[] = "", len = 0) {
+JSON: GetModesArr(& count = 0) {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
-        return false
+        return Invalid_JSON
 
     new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
 
-    new count = json_array_get_count(arrModes)
+    count = json_array_get_count(arrModes)
     if (!count) {
         json_free(arrModes)
-        return false
+
+        return Invalid_JSON
     }
     
-    new JSON: objMode = json_array_get_value(arrModes, index)
+    return arrModes
+}
+
+bool: GetModeInfo(const index, name[] = "", len = 0) {
+    new count
+    new JSON: arrModes = GetModesArr(count)
+    if (arrModes == Invalid_JSON)
+        return false
 
     if (index < 0 || index >= count) {
         json_free(arrModes)
-        json_free(objMode)
+
         return false
     }
 
+    new JSON: objMode = json_array_get_value(arrModes, index)
     json_object_get_string(objMode, "name", name, len)
 
     json_free(arrModes)
@@ -127,18 +150,14 @@ GetModeInfo(const index, name[] = "", len = 0) {
 }
 
 static GetNextMode() {
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+    new count
+    new JSON: arrModes = GetModesArr(count)
+    if (arrModes == Invalid_JSON)
         return -1
-
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-
-    new count = json_array_get_count(arrModes)
-    if (!count) {
-        json_free(arrModes)
-        return -1
-    }
 
     if (IsModeForced()) {
+        json_free(arrModes)
+
         return g_forcedModeIdx
     }
 
@@ -166,16 +185,9 @@ bool: ApplyMode(const index) {
 
     ReloadConfig()
 
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+    new JSON: arrModes = GetModesArr()
+    if (arrModes == Invalid_JSON)
         return false
-
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-
-    new count = json_array_get_count(arrModes)
-    if (!count) {
-        json_free(arrModes)
-        return false
-    }
 
     new JSON: objMode = json_array_get_value(arrModes, index)
     if (json_object_has_value(objMode, "cvars")) {
@@ -193,7 +205,11 @@ bool: ApplyMode(const index) {
 }
 
 RoundModes_GetCurrentMode() {
-    return g_currentRoundModeIdx    
+    return g_forcedModeIdx > -1 ? g_forcedModeIdx : g_currentRoundModeIdx    
+}
+
+RoundModes_SetCurrentMode(const modeIdx) {
+    g_currentRoundModeIdx = modeIdx
 }
 
 RoundModes_ResetCurrentMode() {

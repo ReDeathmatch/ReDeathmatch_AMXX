@@ -91,6 +91,10 @@ public client_putinserver(player) {
     EquipManager_PutInServer(player)
 }
 
+public client_disconnected(player, bool: drop, message[], maxLen) {
+    ModeVote_Disconnected(player)
+}
+
 public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor) {
     if (!IsActive())
         return
