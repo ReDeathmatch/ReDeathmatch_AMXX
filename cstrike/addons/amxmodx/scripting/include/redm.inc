@@ -5,7 +5,7 @@
 #define _redm_included
 
 
-new const VERSION[] = "3711549" 
+new const VERSION[] = "%VERSION%" 
 
 // AMXX 1.9.0 compatibility
 #if !defined MAX_MAPNAME_LENGTH
