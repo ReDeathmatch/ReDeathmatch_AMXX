@@ -903,9 +903,12 @@ static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnId
         if (disatanceToEnemy > searchDistance)
             continue
 
-        spawnOrigin[2] += 17.0 // check the head
+        new Float: spawnHeadOrigin[3]
+        spawnHeadOrigin = spawnOrigin
+        spawnHeadOrigin[2] + 17.0 // check the head
+
         if (mp_randomspawn_los) {
-            if (/* fm_is_in_viewcone(i, spawnOrigin) && */ fm_is_visible(i, spawnOrigin, true)) {
+            if (/* fm_is_in_viewcone(i, spawnOrigin) && */ fm_is_visible(i, spawnHeadOrigin, true)) {
                 return false
             }
         } 
