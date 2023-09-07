@@ -214,15 +214,18 @@ public MenuCallback_ChooseNextMode(const player, const menu, const item) {
 
     new votesCount = Vote_GetItemVotesCount(item)
     new playerVote = Vote_PlayerGetVote(player)
+
+    strcat(buffer, (item == playerVote) ? "\r" : "\w", charsmax(buffer))
+    
     new playersCount = Vote_GetPlayersCount()
     new Float: votedPercent = (votesCount * 100.0) / playersCount
-
-    if (item == playerVote)
-        strcat(buffer, "\r", charsmax(buffer))
 
     strcat(buffer, fmt("\R%.0f%%", votedPercent), charsmax(buffer))
 
     menu_item_setname(menu, item, buffer)
+
+    if (!Vote_CanExtendCurrentMode() && isCurrentModeItem)
+        return ITEM_DISABLED
 
     new bool: playerHasVote = Vote_IsPlayerVoted(player)
     if(playerHasVote) {

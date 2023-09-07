@@ -14,12 +14,15 @@ static Array: g_vote = Invalid_Array
 static g_votes[MAX_PLAYERS + 1] = { VOTE_NOTVOTED, ... }
 static Array: g_playersInVote = Invalid_Array
 
+static g_modeExtendedTimes
+
 new bool: g_voteStarted
 
 // continue cur mode
 
 static redm_mode_vote_time = 15
 static bool: redm_mode_vote_enable = true
+static redm_mode_vote_extend_times = 1
 
 ModeVote_Init() {
     RegisterHookChain(RG_CBasePlayer_ResetMaxSpeed, "CBasePlayer_ResetMaxSpeed_Post", .post = true)
@@ -39,6 +42,14 @@ ModeVote_Init() {
             .has_min = true, .min_val = 0.0
         ),
         redm_mode_vote_time
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_mode_vote_extend_times",
+            "1",
+            .has_min = true, .min_val = 0.0
+        ),
+        redm_mode_vote_extend_times
     )
 }
  
@@ -79,6 +90,11 @@ ModeVote_RestartRound() {
         return VOTE_NOTVOTED
 
     new votedModeIdx = VoteEnd()
+
+    if (votedModeIdx == RoundModes_GetCurrentMode())
+        ++g_modeExtendedTimes
+    else g_modeExtendedTimes = 0
+
     return votedModeIdx
 }
 
@@ -323,4 +339,8 @@ bool: Vote_RemovePlayerFromVoters(const player) {
     
     ArrayDeleteItem(g_playersInVote, idx)
     return true
+}
+
+bool: Vote_CanExtendCurrentMode() {
+    return g_modeExtendedTimes < redm_mode_vote_extend_times
 }
