@@ -29,7 +29,7 @@ enum EditorProps_s {
 
 static g_editorProps[MAX_PLAYERS + 1][EditorProps_s]
 
-new JSON: g_arrSpawns = Invalid_JSON
+static JSON: g_arrSpawns = Invalid_JSON
 
 static const g_spawnViewModels[_: TeamName - 1][] = {
     "models/player/vip/vip.mdl",
@@ -47,16 +47,11 @@ static Float: g_gravityValues[] = {
     1.0, 0.5, 0.25, 0.05
 } 
 
-// Determines whether players are to spawn. 0 = default; 1 = both teams; 2 = Terrorists; 3 = CTs.
-new mp_randomspawn = 1
+static mp_randomspawn
+static mp_randomspawn_los
+static Float: mp_randomspawn_dist
 
-// If non-zero, a randomly spawning player will, if possible, not be spawned at a spawn point with direct line of sight to another player. (2 = check viewcone)
-new mp_randomspawn_los = 2
-
-// If greater than 0, a randomly spawning player will, if possible, not be spawned at a spawn point where the smallest distance to another player is smaller than the value of this ConVar.
-new Float: mp_randomspawn_dist = 1500.0
-
-new bool: mp_freeforall
+static bool: mp_freeforall
 
 
 public plugin_precache() {
@@ -66,7 +61,7 @@ public plugin_precache() {
 }
 
 public plugin_init() {
-    register_plugin("Spawns manager", REDM_VERSION, "Sergey Shorokhov")
+    register_plugin("ReDM: Spawns manager", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("common.txt")
 
     rh_get_mapname(g_mapName, charsmax(g_mapName))
@@ -81,9 +76,36 @@ public plugin_cfg() {
     bind_pcvar_num(get_cvar_pointer("mp_freeforall"), mp_freeforall)
     // set_pcvar_bounds(get_cvar_pointer("mp_forcerespawn"), CvarBound_Lower, true, 0.1) // TODO
 
-    bind_pcvar_num(create_cvar("mp_randomspawn", "1"), mp_randomspawn)
-    bind_pcvar_num(create_cvar("mp_randomspawn_los", "2"), mp_randomspawn_los)
-    bind_pcvar_float(create_cvar("mp_randomspawn_dist", "1500.0"), mp_randomspawn_dist)
+    bind_pcvar_num(
+        create_cvar(
+            "mp_randomspawn", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 3.0,
+            .description = "Enables the system of selecting spawns. \
+                `0` - disable, \
+                `1` - for all, \
+                `2` - only for T, \
+                `3` - only for CT"
+            ),
+        mp_randomspawn
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "mp_randomspawn_los", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Check the spawn point for visibility by enemies (line of sight)."
+        ),
+        mp_randomspawn_los
+    )
+    bind_pcvar_float(
+        create_cvar(
+            "mp_randomspawn_dist", "1500.0",
+            .has_min = true, .min_val = 0.0,
+            .description = "Minimum distance to the enemy to enable spawn checks."
+        ),
+        mp_randomspawn_dist
+    )
     
     RegisterHookChain(RG_CBasePlayer_UseEmpty, "CBasePlayer_UseEmpty", .post = false)
 

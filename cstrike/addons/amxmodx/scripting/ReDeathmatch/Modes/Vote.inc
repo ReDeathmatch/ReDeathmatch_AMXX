@@ -29,25 +29,26 @@ ModeVote_Init() {
 
     bind_pcvar_num(
         create_cvar(
-            "redm_mode_vote_enable",
-            "1",
-            .has_min = true, .min_val = 0.0
+            "redm_mode_vote_enable", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Enable voting for the next game mode."
         ),
         redm_mode_vote_enable
     )
     bind_pcvar_num(
         create_cvar(
-            "redm_mode_vote_time",
-            "15",
-            .has_min = true, .min_val = 0.0
+            "redm_mode_vote_time", "15",
+            .has_min = true, .min_val = 0.0,
+            .description = "Time to vote for the next mode (sec)."
         ),
         redm_mode_vote_time
     )
     bind_pcvar_num(
         create_cvar(
-            "redm_mode_vote_extend_times",
-            "1",
-            .has_min = true, .min_val = 0.0
+            "redm_mode_vote_extend_times", "1",
+            .has_min = true, .min_val = 0.0,
+            .description = "How many times can the game mode be extended."
         ),
         redm_mode_vote_extend_times
     )

@@ -13,7 +13,13 @@ RoundModes_Init() {
     RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip", .post = false)
 
     bind_pcvar_string(
-        create_cvar("redm_modes_switch", "sequentially"),
+        create_cvar(
+            "redm_modes_switch", "sequentially",
+            .description = "Game mode change mode. \
+                `0`, `disable` - disable modes, \
+                `random` - random change, \
+                `sequentially` - sequential mode change."
+        ),
         redm_modes_switch,
         charsmax(redm_modes_switch)
     )

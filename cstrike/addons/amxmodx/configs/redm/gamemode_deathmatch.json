@@ -30,6 +30,81 @@
         ]
     },
     "cvars": {
+    // ReDM: Spawns
+        /* Enables the system of selecting spawns. 
+        0 - disable
+        1 - for all
+        2 - only for T
+        3 - only for CT */
+        "mp_randomspawn": "1",
+
+        /* Check the spawn point for visibility by enemies (line of sight).
+        0 - disable
+        1 - enable */
+        "mp_randomspawn_los": "1",
+
+        // Minimum distance to the enemy to enable spawn checks.
+        "mp_randomspawn_dist": "1500",
+
+        // Name of the spawn manager
+        "redm_spawn_preset": "preset",
+
+    // ReDM: Features
+        // Restore weapon slot on respawn.
+        "redm_keep_weapon_slot": "1",
+
+        // Open weapon equip menu on spawn.
+        "redm_open_equip_menu": "0",
+
+        // How much to restore HP when killing an enemy.
+        "redm_healer": "10",
+
+        // How much to restore HP when killing with HS an enemy.
+        "redm_healer_hs": "15",
+
+        // Mute the sounds of other players at a distance.
+        "redm_sounds_distance": "1500",
+
+        // Highlight the display when you kill someone.
+        "redm_fade": "1",
+
+        // Kill highlights color [RGBA]
+        "redm_fade_colors": "0 200 0 50",
+
+        // Refill ammo on kills.
+        "redm_refill_ammo": "1",
+
+        // Play a sound when an enemy is hit.
+        "redm_hitsound": "1",
+
+        // Enable hits only in HS.
+        "mp_damage_headshot_only": "0",
+
+        // Hide other players' killfeed.
+        "redm_hide_other_deathnotice": "1",
+
+        // On spawn protection colors [RGBA]
+        "redm_protection_color_t": "200 0 0 15",
+        "redm_protection_color_ct": "0 0 200 15",
+    
+    // ReDM: Modes
+        /* Game mode change mode.
+            `0`, `disable` - disable modes
+            `random` - random change
+            `sequentially` - sequential mode change
+        */
+        "redm_modes_switch": "sequentially",
+
+        // Enable voting for the next game mode.
+        "redm_mode_vote_enable": "1",
+
+        // Time to vote for the next mode (sec).
+        "redm_mode_vote_time": "15",
+
+        // How many times can the game mode be extended.
+        "redm_mode_vote_extend_times": "1",
+
+    // ReGameDLL Settings
         "mp_freeforall": "1",
         "bot_deathmatch": "1",
         "bot_defer_to_human": "0",
@@ -61,8 +136,7 @@
         "mp_scoreboard_showmoney": "0",
         "mp_show_radioicon": "0",
         "mp_timelimit": "30",
-        "mp_weapons_allow_map_placed": "0",
-        "mp_damage_headshot_only": "0"
+        "mp_weapons_allow_map_placed": "0"
     },
     "modes": [
         {
