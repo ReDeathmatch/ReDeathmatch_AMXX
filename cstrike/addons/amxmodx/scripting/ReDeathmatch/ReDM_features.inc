@@ -38,17 +38,97 @@ Features_Init() {
     RegisterHookChain(RG_CBasePlayer_SetSpawnProtection, "CBasePlayer_SetSpawnProtection_Post", .post = true)
     RegisterHookChain(RG_CBasePlayer_RemoveSpawnProtection, "CBasePlayer_RemoveSpawnProtection", .post = true)
 
-    bind_pcvar_float(create_cvar("redm_healer", "10.0"), redm_healer)
-    bind_pcvar_float(create_cvar("redm_healer_hs", "20.0"), redm_healer_hs)
-    bind_pcvar_float(create_cvar("redm_sounds_distance", "1500.0"), redm_sounds_distance)
-    bind_pcvar_num(create_cvar("redm_fade", "1"), redm_fade)
-    bind_pcvar_string(create_cvar("redm_fade_colors", "0 200 0 50"), redm_fade_colors, charsmax(redm_fade_colors))
-    bind_pcvar_num(create_cvar("redm_refill_ammo", "1"), redm_refill_ammo)
-    bind_pcvar_num(create_cvar("redm_hitsound", "1"), redm_hitsound)
-    bind_pcvar_num(create_cvar("mp_damage_headshot_only", "0"), mp_damage_headshot_only)
-    bind_pcvar_num(create_cvar("redm_hide_other_deathnotice", "1"), redm_hide_other_deathnotice)
-    bind_pcvar_string(create_cvar("redm_protection_color_t", "200 0 0 15"), redm_protection_color_t, charsmax(redm_protection_color_t))
-    bind_pcvar_string(create_cvar("redm_protection_color_ct", "0 0 200 15"), redm_protection_color_ct, charsmax(redm_protection_color_ct))
+    bind_pcvar_float(
+        create_cvar(
+            "redm_healer", "10.0",
+            .has_min = true, .min_val = 0.0,
+            .description = "How much to restore HP when killing an enemy."
+        ),
+        redm_healer
+    )
+    bind_pcvar_float(
+        create_cvar(
+            "redm_healer_hs", "20.0",
+            .has_min = true, .min_val = 0.0,
+            .description = "How much to restore HP when killing with HS an enemy."
+        ),
+        redm_healer_hs
+    )
+    bind_pcvar_float(
+        create_cvar(
+            "redm_sounds_distance", "1500.0",
+            .has_min = true, .min_val = 0.0,
+            .description = "Mute the sounds of other players at a distance."
+        ),
+        redm_sounds_distance
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_fade", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Highlight the display when you kill someone."
+        ),
+        redm_fade
+    )
+    bind_pcvar_string(
+        create_cvar(
+            "redm_fade_colors", "0 200 0 50",
+            .description = "Kill highlights color [RGBA]"
+        ),
+        redm_fade_colors, charsmax(redm_fade_colors)
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_refill_ammo", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Refill ammo on kills."
+        ),
+        redm_refill_ammo
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_hitsound", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Play a sound when an enemy is hit."
+        ),
+        redm_hitsound
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "mp_damage_headshot_only", "0",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Enable hits only in HS."
+        ),
+        mp_damage_headshot_only
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_hide_other_deathnotice", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Hide other players' killfeed."
+        ),
+        redm_hide_other_deathnotice
+    )
+    bind_pcvar_string(
+        create_cvar(
+            "redm_protection_color_t", "200 0 0 15",
+            .description = "On spawn T protection colors [RGBA]"
+        ),
+        redm_protection_color_t, charsmax(redm_protection_color_t)
+    )
+    bind_pcvar_string(
+        create_cvar(
+            "redm_protection_color_ct", "0 0 200 15",
+            .description = "On spawn CT protection colors [RGBA]"
+        ),
+        redm_protection_color_ct, charsmax(redm_protection_color_ct)
+    )
+
     bind_pcvar_num(get_cvar_pointer("mp_respawn_immunity_effects"), mp_respawn_immunity_effects)
 }
 

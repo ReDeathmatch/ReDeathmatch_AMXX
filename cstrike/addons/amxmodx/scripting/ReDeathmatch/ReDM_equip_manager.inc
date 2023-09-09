@@ -27,10 +27,26 @@ EquipManager_Init() {
     // RegisterHookChain(RG_CBasePlayer_GiveNamedItem, "CBasePlayer_GiveNamedItem", .post = false)
     RegisterHookChain(RG_CBasePlayer_AddPlayerItem, "CBasePlayer_AddPlayerItem", .post = false)
 
-    bind_pcvar_num(create_cvar("redm_keep_weapon_slot", "1"), redm_keep_weapon_slot)
-    bind_pcvar_num(create_cvar("redm_open_equip_menu", "0"), redm_open_equip_menu)
+    bind_pcvar_num(
+        create_cvar(
+            "redm_keep_weapon_slot", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Restore weapon slot on respawn."
+        ),
+        redm_keep_weapon_slot
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_open_equip_menu", "0",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Open weapon equip menu on spawn."
+        ),
+        redm_open_equip_menu
+    )
 
-    register_concmd("redm_dump_equip", "ConCmd_redm_dump_equip", ADMIN_MAP, "Dump loaded equipset from config to table.")
+    register_concmd("redm_dump_equip", "ConCmd_redm_dump_equip", ADMIN_MAP, "Dump loaded equipset from config to table in console.")
 
     register_clcmd("drop", "ClCmd_Drop")
     register_clcmd("say /guns", "ClCmd_Drop")
