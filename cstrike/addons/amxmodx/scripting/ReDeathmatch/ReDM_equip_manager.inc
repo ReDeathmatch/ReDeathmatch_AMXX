@@ -368,15 +368,12 @@ public CBasePlayer_GiveNamedItem(const player, const weaponName[]) {
 }
 
 public EquipManager_PlayerKilled(const victim, const killer) {
-    if (!is_user_alive(killer))
-        return
-
-    new item = get_member(killer, m_pActiveItem)
+    new item = get_member(victim, m_pActiveItem)
     if (!is_entity(item))
         return
-    
-    Player_SaveActiveSlot(killer, item)
-    Player_SaveWeaponState(killer, item)
+
+    Player_SaveActiveSlot(victim, item)
+    Player_SaveWeaponState(victim, item)
 }
 
 static Player_SaveActiveSlot(const player, const item) {
