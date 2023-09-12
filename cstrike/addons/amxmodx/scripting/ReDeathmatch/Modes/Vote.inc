@@ -69,7 +69,7 @@ bool: ModeVote_RoundEnd_Post() {
     return true
 }
 
-ModeVote_GiveDefaultItems(const player) {
+ModeVote_OnSpawnEquip(const player) {
     if (!g_voteStarted)
         return
 

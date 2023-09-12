@@ -23,7 +23,8 @@ static redm_keep_weapon_slot = 1
 static bool: redm_open_equip_menu = false
 
 EquipManager_Init() {
-    RegisterHookChain(RG_CBasePlayer_GiveDefaultItems, "CBasePlayer_GiveDefaultItems", .post = false)
+    RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip", .post = false)
+    RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip_Post", .post = true)
     // RegisterHookChain(RG_CBasePlayer_GiveNamedItem, "CBasePlayer_GiveNamedItem", .post = false)
     RegisterHookChain(RG_CBasePlayer_AddPlayerItem, "CBasePlayer_AddPlayerItem", .post = false)
 
@@ -293,39 +294,53 @@ public MenuHandler_ChooseEquip(const player, const menu, const item) {
     return PLUGIN_HANDLED
 }
 
-public CBasePlayer_GiveDefaultItems(const player) {
+public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame) {
     if (!IsActive())
-        return HC_CONTINUE
+        return
 
-    ModeVote_GiveDefaultItems(player)
+    RoundModes_OnSpawnEquip(player)
+    ModeVote_OnSpawnEquip(player)
 
-    if (is_user_bot(player))
-        return HC_CONTINUE
+    set_member(player, m_bNotKilled, false)
+    rg_set_user_armor(player, 0, ARMOR_NONE)
 
     if (redm_keep_weapon_slot)
         RequestFrame("Player_ForceSlotChoose", player)
 
-    rg_give_item(player, "weapon_knife")
-
+    new bool: fullyEquipped = true
     for (new EquipType_e: section; section < EquipType_e; section++) {
         if (!HasEquipItems(section))
             continue
-        
-        if (g_playerRandomWeapons[player]) {
+
+        if (g_playerRandomWeapons[player])
             g_playerWeapons[player][section] = random_num(0, ArraySize(Array: g_equip[section]) - 1)
-        }
 
-        if (g_playerWeapons[player][section] == EQUIP_NOT_CHOOSEN) {
-            if (redm_open_equip_menu)
-                Menu_ChooseEquip(player, section)
+        if (g_playerWeapons[player][section] != EQUIP_NOT_CHOOSEN)
+            continue
 
-            return HC_CONTINUE
-        }
-
-        Player_GiveWeapon(player, section)
+        fullyEquipped = false
     }
 
-    return HC_SUPERCEDE
+    if (fullyEquipped) {
+        rg_give_item(player, "weapon_knife")
+
+        SetHookChainArg(2, ATYPE_BOOL, (addDefault = false))
+    }
+}
+
+public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equipGame) {
+    for (new EquipType_e: section; section < EquipType_e; section++) {
+        if (g_playerWeapons[player][section] != EQUIP_NOT_CHOOSEN) {
+            Player_GiveWeapon(player, section)
+
+            continue
+        }
+
+        if (redm_open_equip_menu)
+            Menu_ChooseEquip(player, section)
+
+        return
+    }
 }
 
 public CBasePlayer_AddPlayerItem(const player, const item) {
