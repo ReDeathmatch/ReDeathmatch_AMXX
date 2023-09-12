@@ -214,8 +214,8 @@ RoundModes_GetCurrentMode() {
     return g_forcedModeIdx > -1 ? g_forcedModeIdx : g_currentRoundModeIdx    
 }
 
-RoundModes_SetCurrentMode(const modeIdx) {
-    g_currentRoundModeIdx = modeIdx
+RoundModes_SetForcedMode(const modeIdx = -1) {
+    g_forcedModeIdx = modeIdx
 }
 
 RoundModes_ResetCurrentMode() {

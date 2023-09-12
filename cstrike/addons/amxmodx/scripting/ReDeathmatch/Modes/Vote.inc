@@ -61,6 +61,9 @@ bool: ModeVote_RoundEnd_Post() {
     if (!get_playersnum_ex(GetPlayers_ExcludeBots | GetPlayers_ExcludeHLTV))
         return false
 
+    if (IsModeForced())
+        return false
+
     VoteStart(redm_mode_vote_time)
 
     return true
