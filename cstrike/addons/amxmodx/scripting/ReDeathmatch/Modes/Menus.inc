@@ -113,7 +113,7 @@ public MenuHandler_Modes(const player, const menu, const item) {
 
     new modeIdx = (item - 1)
 
-    RoundModes_SetCurrentMode(modeIdx)
+    RoundModes_SetForcedMode(modeIdx)
 
     rg_round_end(
         CHalfLifeMultiplay__GetRoundRestartDelay(),
