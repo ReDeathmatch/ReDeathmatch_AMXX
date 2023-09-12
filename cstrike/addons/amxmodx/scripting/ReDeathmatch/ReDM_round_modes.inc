@@ -10,7 +10,7 @@ RoundModes_Init() {
 
     RegisterHookChain(RG_RoundEnd, "RoundEnd_Post", .post = true)
     RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
-    RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip", .post = false)
+    
 
     bind_pcvar_string(
         create_cvar(
@@ -83,13 +83,7 @@ public CSGameRules_RestartRound() {
     }
 }
 
-public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame) {
-    if (!IsActive())
-        return
-
-    set_member(player, m_bNotKilled, false)
-    rg_set_user_armor(player, 0, ARMOR_NONE)
-
+RoundModes_OnSpawnEquip(const player) {
     if (g_currentRoundModeIdx == -1)
         return
 
