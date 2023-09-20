@@ -49,10 +49,9 @@ EquipManager_Init() {
 
     register_concmd("redm_dump_equip", "ConCmd_redm_dump_equip", ADMIN_MAP, "Dump loaded equipset from config to table in console.")
 
-    register_clcmd("drop", "ClCmd_Drop")
-    register_clcmd("say /guns", "ClCmd_Drop")
-    register_clcmd("say !guns", "ClCmd_Drop")
-    register_clcmd("guns", "ClCmd_Drop")
+    register_clcmd("say /guns", "ClCmd_Guns")
+    register_clcmd("say !guns", "ClCmd_Guns")
+    register_clcmd("guns", "ClCmd_Guns")
     register_clcmd("cl_autobuy", "ClCmd_cl_autobuy")
 }
 
@@ -129,7 +128,7 @@ public ClCmd_cl_autobuy(const player) {
     return PLUGIN_HANDLED
 }
 
-public ClCmd_Drop(const player) {
+public ClCmd_Guns(const player) {
     if (!IsActive())
         return PLUGIN_CONTINUE
 
