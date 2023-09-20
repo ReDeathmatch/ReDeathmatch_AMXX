@@ -393,6 +393,9 @@ public CBasePlayer_RemoveSpawnProtection(const player) {
 }
 
 public CBasePlayer_DropPlayerItem(const player, const itemName[]) {
+    if (!IsActive())
+        return HC_CONTINUE
+
     if (!redm_block_drop_weapon)
         return HC_CONTINUE
 
