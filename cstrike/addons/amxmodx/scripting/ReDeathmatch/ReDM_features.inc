@@ -3,6 +3,7 @@ static g_gunsEventsId
 static g_oldGroupinfo[MAX_PLAYERS + 1]
 static bool: g_protectionState[MAX_PLAYERS + 1]
 
+static bool: redm_open_equip_menu_by_g
 static bool: redm_block_drop_weapon
 static Float: redm_sounds_distance
 static Float: redm_healer
@@ -39,6 +40,15 @@ Features_Init() {
     RegisterHookChain(RG_CBasePlayer_RemoveSpawnProtection, "CBasePlayer_RemoveSpawnProtection", .post = true)
     RegisterHookChain(RG_CBasePlayer_DropPlayerItem, "CBasePlayer_DropPlayerItem", .post = false)
 
+    bind_pcvar_num(
+        create_cvar(
+            "redm_open_equip_menu_by_g", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Open equip menu by pressing `G` (drop command)."
+        ),
+        redm_open_equip_menu_by_g
+    )
     bind_pcvar_num(
         create_cvar(
             "redm_block_drop_weapon", "1",
@@ -140,6 +150,21 @@ Features_Init() {
     )
 
     bind_pcvar_num(get_cvar_pointer("mp_respawn_immunity_effects"), mp_respawn_immunity_effects)
+
+    
+    register_clcmd("drop", "ClCmd_Drop", .FlagManager = false)
+}
+
+public ClCmd_Drop(const player) {
+    if (!IsActive())
+        return PLUGIN_CONTINUE
+
+    if (!redm_open_equip_menu_by_g)
+        return PLUGIN_CONTINUE
+
+    amxclient_cmd(player, "guns")
+
+    return PLUGIN_HANDLED
 }
 
 public MsgHook_HudTextArgs() {
