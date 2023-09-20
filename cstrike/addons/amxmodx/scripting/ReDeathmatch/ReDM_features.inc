@@ -3,6 +3,7 @@ static g_gunsEventsId
 static g_oldGroupinfo[MAX_PLAYERS + 1]
 static bool: g_protectionState[MAX_PLAYERS + 1]
 
+static bool: redm_block_drop_weapon
 static Float: redm_sounds_distance
 static Float: redm_healer
 static Float: redm_healer_hs
@@ -34,10 +35,19 @@ Features_Init() {
 
     RegisterHookChain(RG_CBasePlayer_TakeDamage, "CBasePlayer_TakeDamage_Post", .post = true)
     RegisterHookChain(RG_CBasePlayer_TraceAttack, "CBasePlayer_TraceAttack", .post = false)
-    // RegisterHookChain(RH_SV_StartSound, "SV_StartSound", .post = false)
     RegisterHookChain(RG_CBasePlayer_SetSpawnProtection, "CBasePlayer_SetSpawnProtection_Post", .post = true)
     RegisterHookChain(RG_CBasePlayer_RemoveSpawnProtection, "CBasePlayer_RemoveSpawnProtection", .post = true)
+    RegisterHookChain(RG_CBasePlayer_DropPlayerItem, "CBasePlayer_DropPlayerItem", .post = false)
 
+    bind_pcvar_num(
+        create_cvar(
+            "redm_block_drop_weapon", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Block the ability to drop the weapon.."
+        ),
+        redm_block_drop_weapon
+    )
     bind_pcvar_float(
         create_cvar(
             "redm_healer", "10.0",
@@ -382,18 +392,22 @@ public CBasePlayer_RemoveSpawnProtection(const player) {
     fm_set_rendering(player)
 }
 
+public CBasePlayer_DropPlayerItem(const player, const itemName[]) {
+    if (!redm_block_drop_weapon)
+        return HC_CONTINUE
+
+    client_printex(player, print_center, "#Weapon_Cannot_Be_Dropped")
+
+    SetHookChainReturn(ATYPE_INTEGER, 0)
+    return HC_SUPERCEDE
+}
+
 stock WeaponIdType: GetCurrentWeapon(const player) {
     new activeItem = get_member(player, m_pActiveItem)
     if (!activeItem)
         return WEAPON_NONE
 
     return WeaponIdType: get_member(activeItem, m_iId)
-}
-
-public SV_StartSound(const recipients, const entity, const channel, const sample[], const volume, Float:attenuation, const fFlags, const pitch) {
-    /* server_print("s:`%s`, r:%i, att:%.2f, pitch:%i",
-        sample, recipients, attenuation, pitch
-    ) */
 }
 
 static stock UTIL_DeathMsg(const dest, const receiver, const killer, const victim, const headshot, const weaponName[]) {
