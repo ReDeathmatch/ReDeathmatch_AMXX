@@ -44,7 +44,7 @@ Features_Init() {
             "redm_block_drop_weapon", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
-            .description = "Block the ability to drop the weapon.."
+            .description = "Block the ability to drop the weapon."
         ),
         redm_block_drop_weapon
     )

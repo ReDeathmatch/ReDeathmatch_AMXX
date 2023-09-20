@@ -50,6 +50,9 @@
         "redm_spawn_preset": "preset",
 
     // ReDM: Features
+        // Block the ability to drop the weapon.
+        "redm_block_drop_weapon": "1",
+
         // Restore weapon slot on respawn.
         "redm_keep_weapon_slot": "1",
 
