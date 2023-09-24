@@ -1,0 +1,209 @@
+static const Float: BARRIER_REDRAW_TIME = 5.0
+
+static g_entBarrier = -1
+
+static g_spriteLaserbeam
+static g_spriteBubble
+
+static bool: redm_aim_barrier
+static redm_aim_barrier_always_show
+
+AimBarriers_Precache() {
+    g_spriteLaserbeam = precache_model("sprites/laserbeam.spr")
+    g_spriteBubble = precache_model("sprites/bubble.spr")
+}
+
+AimBarriers_Init() {
+    bind_pcvar_num(
+        create_cvar(
+            "redm_aim_barrier", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Enable a barrier in the middle of the map (`anti-rush' system). \
+                It does not work on `de_`, `cs_` `css_` maps."
+        ),
+        redm_aim_barrier
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_aim_barrier_always_show", "2",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 2.0,
+            .description = "Barrier display mode. \
+                `0` - disable, \
+                `1` - display permanently (beta), \
+                `2` - display only when touched."
+        ),
+        redm_aim_barrier_always_show
+    )
+
+    new const prefixBlocklist[][] = { "de_", "cs_", "css_" }
+    if (!IsMapCombatible(prefixBlocklist, sizeof(prefixBlocklist)))
+        return
+
+    g_entBarrier = CreateBarrier()
+
+    if (redm_aim_barrier_always_show == 1) {
+        set_task_ex(BARRIER_REDRAW_TIME, "BarrierRedraw", .flags = SetTask_Repeat)
+        BarrierRedraw()
+    }
+
+    RegisterHam(Ham_Touch, "trigger_push", "CTriggerPush_Touch", .Post = false)
+}
+
+static CreateBarrier() {
+    new Float: middle[3], longerAxis
+    CWorld_GetCenter(middle, longerAxis)
+
+    new Float: mins[3] = { -10.0, -10.0, -8192.0 }
+    new Float: maxs[3] = { 10.0, 10.0, 8192.0 }
+
+    mins[!longerAxis] *= 500
+    maxs[!longerAxis] *= 500
+
+    return CBarrier_Spawn(middle, mins, maxs, 2.0)
+}
+
+static bool: GetAvgOrigin(const classname[], Float: out[3], bool: simple = false) {
+    new count
+
+    new ent = MaxClients
+    while ((ent = fm_find_ent_by_class(ent, classname))) {
+        new Float: origin[3]
+        pev(ent, pev_origin, origin)
+
+        xs_vec_add(out, origin, out)
+        ++count
+
+        if (simple)
+            break
+    }
+
+    if (!count)
+        return false
+
+    for (new i; i < sizeof out; i++) {
+        out[i] /= float(count)
+    }
+
+    return true
+}
+
+static CWorld_GetCenter(Float: out[3], &longerAxis) {
+    new const startEntClassname[] = "info_player_deathmatch"
+    new const endEntClassname[] = "info_player_start"
+
+    new Float: start[3], Float: end[3]
+    GetAvgOrigin(startEntClassname, start)
+    GetAvgOrigin(endEntClassname, end)
+
+    for (new i; i < sizeof(out); i++)
+        out[i] = (start[i] + end[i]) / 2
+
+    longerAxis = floatabs(out[0] - start[0]) < floatabs(out[1] - start[1])
+
+    set_pev(0, pev_origin, out, sizeof(out)) // TODO: hacky ?!
+}
+
+static CBarrier_Spawn(const Float: origin[3], const Float: mins[3], const Float: maxs[3], const Float: pushForce = 2.0) {
+    new ent = fm_create_entity("trigger_push")
+    set_pev(ent, pev_origin, origin)
+    set_pev(ent, pev_speed, -pushForce)
+
+    dllfunc(DLLFunc_Spawn, ent)
+    engfunc(EngFunc_SetSize, ent, mins, maxs)
+
+    return ent
+}
+
+public CTriggerPush_Touch(const entity, const other) {
+    if (!IsActive())
+        return HAM_SUPERCEDE
+
+    if (pev_valid(other) != 2)
+        return HAM_IGNORED
+
+    return CBarrier_Touch(entity, other)
+}
+
+static CBarrier_Touch(const entity, const other) {
+    if (!redm_aim_barrier)
+        return HAM_SUPERCEDE
+
+    static Float: velocity[3]
+    pev(other, pev_velocity, velocity)
+
+    set_pev(entity, pev_movedir, velocity)
+
+    if (redm_aim_barrier_always_show == 2) {
+        new Float: gameTime = get_gametime()
+
+        static Float: nextEffctsTime
+        if (nextEffctsTime > gameTime)
+            return HAM_IGNORED
+        
+        const Float: drawDelay = 0.5
+        nextEffctsTime = gameTime + drawDelay
+
+        CBarrier_Draw(entity, other, drawDelay)
+    }
+
+    return HAM_IGNORED
+}
+
+static CBarrier_Draw(const entity, const toucher, const Float: drawDelay) {
+    static Float: origin[3]
+    pev(entity, pev_origin, origin)
+
+    static Float: tourcherOrigin[3]
+    tourcherOrigin = origin
+    if (toucher) {
+        pev(toucher, pev_absmin, tourcherOrigin)
+        tourcherOrigin[2] += 10
+    }
+
+    static Float: mins[3]
+    pev(entity, pev_mins, mins)
+
+    static Float: maxs[3]
+    pev(entity, pev_maxs, maxs)
+
+    static Float: start[3]
+    xs_vec_copy(origin, start)
+
+    static Float: end[3]
+    xs_vec_copy(origin, end)
+    
+    new longerAxis = floatabs(origin[0] - mins[0]) > floatabs(origin[1] - mins[1])
+
+    start[!longerAxis] -= mins[!longerAxis]
+    end[!longerAxis] -= maxs[!longerAxis]
+    start[2] = end[2] = ((tourcherOrigin[2]) + (mins[2] * 2))
+
+    new s[3], e[3]
+    FVecIVec(start, s)
+    FVecIVec(end, e)
+
+    new Float: overlap = 0.0 // -0.8
+    new lifeTime = floatround((drawDelay + overlap) * 10, floatround_ceil)
+    te_create_beam_between_points(
+        s, e,
+        g_spriteLaserbeam, 
+        0,
+        30,
+        lifeTime,
+        255,
+        .r = 100, .g = 0, .b = 0,
+        .speed = 3,
+        .noise = 0
+    )
+
+    te_create_bubble_line(s, e, g_spriteBubble, 255, .height = 1000, .randomness = true)
+}
+
+public BarrierRedraw() {
+    if (redm_aim_barrier_always_show != 1)
+        return
+
+    CBarrier_Draw(g_entBarrier, 0, BARRIER_REDRAW_TIME)
+}

@@ -1,3 +1,5 @@
+#include "ReDeathmatch/Features/AimBarriers.inc"
+
 static g_fwdPrecacheEvent = -1
 static g_gunsEventsId
 static g_oldGroupinfo[MAX_PLAYERS + 1]
@@ -19,6 +21,8 @@ static redm_protection_color_ct[32]
 static bool: mp_respawn_immunity_effects
 
 Features_Precache() {
+    AimBarriers_Precache()
+
     g_fwdPrecacheEvent = register_forward(FM_PrecacheEvent , "PrecacheEvent_Post", ._post = true)
 }
 
@@ -39,6 +43,8 @@ Features_Init() {
     RegisterHookChain(RG_CBasePlayer_SetSpawnProtection, "CBasePlayer_SetSpawnProtection_Post", .post = true)
     RegisterHookChain(RG_CBasePlayer_RemoveSpawnProtection, "CBasePlayer_RemoveSpawnProtection", .post = true)
     RegisterHookChain(RG_CBasePlayer_DropPlayerItem, "CBasePlayer_DropPlayerItem", .post = false)
+
+    AimBarriers_Init()
 
     bind_pcvar_num(
         create_cvar(

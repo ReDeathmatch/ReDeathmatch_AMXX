@@ -8,6 +8,8 @@
 #include <reapi>
 #include <redm>
 
+#tryinclude <msgstocks>
+
 #include "ReDeathmatch/ReDM_config.inc"
 #include "ReDeathmatch/ReDM_cvars_handler.inc"
 #include "ReDeathmatch/ReDM_spawn_manager.inc"

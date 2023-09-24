@@ -272,3 +272,17 @@ stock UTIL_RoundTime(const player = 0, const tmRemaining = 0) {
     write_short(tmRemaining + 1)
     message_end()
 }
+
+stock bool: IsMapCombatible(const prefixBlocklist[][], const size) {
+    new mapName[32]
+    get_mapname(mapName, charsmax(mapName))
+
+    for (new i; i < size; i++) {
+        if (containi(mapName, prefixBlocklist[i]) == -1)
+            continue
+        
+        return false
+    }
+
+    return true
+}
