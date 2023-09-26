@@ -97,10 +97,9 @@ static CWorld_GetCenter(Float: out[3], &longerAxis) {
     GetAvgOrigin(startEntClassname, start)
     GetAvgOrigin(endEntClassname, end)
 
-    for (new i; i < sizeof(out); i++)
-        out[i] = (start[i] + end[i]) / 2
+    _xs_vec_lerp(start, end, out, 0.5)
 
-    longerAxis = floatabs(out[0] - start[0]) < floatabs(out[1] - start[1])
+    longerAxis = floatabs(out[XS_X] - start[XS_X]) < floatabs(out[XS_Y] - start[XS_Y])
 
     set_pev(0, pev_origin, out, sizeof(out)) // TODO: hacky ?!
 }
@@ -159,7 +158,7 @@ static CBarrier_Draw(const entity, const toucher, const Float: drawDelay) {
     tourcherOrigin = origin
     if (toucher) {
         pev(toucher, pev_absmin, tourcherOrigin)
-        tourcherOrigin[2] += 10
+        tourcherOrigin[XS_Z] += 10
     }
 
     static Float: mins[3]
@@ -174,11 +173,11 @@ static CBarrier_Draw(const entity, const toucher, const Float: drawDelay) {
     static Float: end[3]
     xs_vec_copy(origin, end)
     
-    new longerAxis = floatabs(origin[0] - mins[0]) > floatabs(origin[1] - mins[1])
+    new longerAxis = floatabs(origin[XS_X] - mins[XS_X]) > floatabs(origin[XS_Y] - mins[XS_Y])
 
     start[!longerAxis] -= mins[!longerAxis]
     end[!longerAxis] -= maxs[!longerAxis]
-    start[2] = end[2] = ((tourcherOrigin[2]) + (mins[2] * 2))
+    start[XS_Z] = end[XS_Z] = ((tourcherOrigin[XS_Z]) + (mins[XS_Z] * 2))
 
     new s[3], e[3]
     FVecIVec(start, s)
