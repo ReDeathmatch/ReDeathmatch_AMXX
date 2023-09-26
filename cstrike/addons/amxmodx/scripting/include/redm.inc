@@ -14,56 +14,56 @@
 
 
 /**
- * Returns whether Re:DM is active
+ * Returns whether Re:DM is active.
  * 
- * @return      True if active, false overwise.
+ * @return      True if Re:DM is active, false otherwise.
  */
 native bool: redm_active()
 
 /**
- * Sets Re:DM to active (do not set the cvar!)
+ * Sets Re:DM to active (do not set the cvar!).
  * 
- * @return      True if active, false overwise.
+ * @param active    True to set Re:DM active, false to deactivate it.
+ * @return          True if Re:DM is successfully set to active or inactive, false otherwise.
  */
 native bool: redm_set_active(const bool: active)
 
 /**
- * Getting config from main plugin.
+ * Retrieves the main plugin's configuration as a JSON handle.
  * 
- * @return      Config JSON handle, Invalid_JSON if error occurred.
+ * @return      Config JSON handle. Returns Invalid_JSON if an error occurs.
  */
 native JSON: redm_get_config()
 
 /**
- * Getting equip config from main plugin.
+ * Retrieves the equipment configuration from the main plugin as a JSON handle.
  * 
- * @return      Config JSON handle, Invalid_JSON if error occurred.
+ * @return      Equip config JSON handle. Returns Invalid_JSON if an error occurs.
  */
 native JSON: redm_get_equip_config()
 
 /**
- * Get the number of registered spawner styles.
+ * Gets the number of registered spawner styles.
  * 
- * @return      Number of styles.
+ * @return      The number of registered spawner styles.
  */
 native redm_spawnstyles()
 
 /**
- * Get a spawn style info by index (indices start at 0).
+ * Retrieves spawn style information by index.
  * 
  * @param style_index   Style index.
  * @param name          Buffer to copy the name.
- * @param maxlength     Maximum size of buffer.
+ * @param maxlength     Maximum size of the buffer.
  * 
- * @error               If an invalid handle is provided
- *                      an error will be thrown.
+ * @error               Throws an error if an invalid handle is provided.
  * 
- * @return      Number of cells copied from buffer.
+ * @return              The number of characters copied into the 'name' buffer.
  */
 native redm_styleinfo(const style_index, name[], const length)
 
 /**
- * Adds a spawn style handler
+ * Adds a spawn style handler with the specified name and function.
  */
 native redm_addstyle(const name[], const function[])
 
@@ -74,38 +74,57 @@ native redm_addstyle(const name[], const function[])
 native redm_setstyle(const name[])
 
 /**
- * Returns the current style id
+ * Returns the current style ID.
+ * 
+ * @return      The ID of the current spawn style.
  */
 native redm_curstyle()
 
 /**
- * Called before initialization start.
+ * Called before initialization starts.
  */
 forward ReDM_ChangeState(const bool: active)
 
 /**
- * Called before initialization start.
+ * Called before initialization starts.
  */
 forward ReDM_InitStart()
 
 /**
- * Called after fully initialized.
+ * Called after full initialization.
  */
 forward ReDM_Initialized()
 
 /**
+ * Forward for retrieving the config name.
  * 
+ * @param config    Buffer to copy the config name.
+ * @param len       Maximum length of the buffer.
  */
 forward ReDM_GetConfigName(config[], const len)
 
 /**
+ * Forward for retrieving the config prefix name.
  * 
+ * @param config    Buffer to copy the config prefix name.
+ * @param len       Maximum length of the buffer.
+ * @param mapPrefix Buffer containing the map prefix.
  */
 forward ReDM_GetConfigPrefixName(config[], const len, const mapPrefix[])
 
 
 
 enum LogLevel { Trace, Debug, Info, Warning, Error, Fatal }
+
+/**
+ * Logs a message with the specified log level.
+ *
+ * This function logs a message with the given log level along with a timestamp.
+ *
+ * @param level     The log level (e.g., Info, Warning, Error).
+ * @param message   The message to log. You can use format specifiers as in printf.
+ * @param ...       Additional parameters for message formatting.
+ */
 stock LogMessageEx(const LogLevel: level = Info, const message[], any: ...) {
 	static const logLevelString[LogLevel][] = { "TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL" }
 	static buffer[4096]
@@ -118,6 +137,16 @@ stock LogMessageEx(const LogLevel: level = Info, const message[], any: ...) {
 	server_print("%s", buffer)
 }
 
+/**
+ * Plays a sound effect for a player with specified volume and pitch.
+ *
+ * This function plays a sound effect for a player with the specified volume and pitch.
+ *
+ * @param player    The player to play the sound effect to.
+ * @param sound     The name of the sound file to play.
+ * @param vol       The volume of the sound (default is 0.7).
+ * @param pitch     The pitch of the sound (default is PITCH_NORM).
+ */
 stock UTIL_PlaySoundEffect(const player, const sound[], const Float: vol = 0.7, const pitch = PITCH_NORM) {
     rh_emit_sound2(
         player,
@@ -129,6 +158,15 @@ stock UTIL_PlaySoundEffect(const player, const sound[], const Float: vol = 0.7, 
     )
 }
 
+/**
+ * Reloads weapons for a player, optionally for the currently active weapon.
+ *
+ * This function reloads weapons for a player. If `currentWeapon` is true, it reloads the currently active weapon,
+ * otherwise, it reloads all weapons.
+ *
+ * @param player          The player for whom to reload weapons.
+ * @param currentWeapon   If true, reloads the currently active weapon; otherwise, reloads all weapons (default).
+ */
 stock UTIL_ReloadWeapons(const player, bool: currentWeapon = false) {
     if (!currentWeapon) {
         rg_instant_reload_weapons(player)
@@ -141,10 +179,28 @@ stock UTIL_ReloadWeapons(const player, bool: currentWeapon = false) {
     }
 }
 
-stock bool: IsBlind(const player) {
+/**
+ * Checks if a player is blinded.
+ *
+ * This function checks if a player is blinded based on the current game time.
+ *
+ * @param player    The player to check for blindness.
+ * @return          Returns true if the player is blinded; otherwise, returns false.
+ */
+stock bool: CBasePlayer_IsBlind(const player) {
     return Float: get_member(player, m_blindUntilTime) > get_gametime()
 }
 
+/**
+ * Converts a floating-point value to a FixedUnsigned16 format.
+ *
+ * This function converts a floating-point value to the FixedUnsigned16 format,
+ * clamping it within the valid range [0, 0xFFFF].
+ *
+ * @param value     The floating-point value to convert.
+ * @param scale     The scaling factor (default is 1 << 12).
+ * @return          Returns the FixedUnsigned16 representation of the value.
+ */
 stock FixedUnsigned16(Float: value, scale = (1 << 12)) {
     return clamp(floatround(value * scale), 0, 0xFFFF)
 }
@@ -156,8 +212,19 @@ enum {
     FFADE_STAYOUT = 0x0004, // ignores the duration, stays faded out until new ScreenFade message received
 }
 
+/**
+ * Initiates a screen fade effect for a player.
+ *
+ * This function initiates a screen fade effect for a player with specified parameters.
+ *
+ * @param player    The player to apply the screen fade effect to.
+ * @param fxTime    The duration of the fade-in effect (default is 0.2 seconds).
+ * @param holdTime  The duration to hold the fade (default is 0.2 seconds).
+ * @param color     An array representing the RGBA color values for the fade effect (default is [0, 200, 0, 50]).
+ * @param fadeFlags Flags to control the fade effect (default is FFADE_OUT).
+ */
 stock UTIL_ScreenFade(const player, const Float: fxTime = 0.2, const Float: holdTime = 0.2, const color[4] = {0, 200, 0, 50}, const fadeFlags = FFADE_OUT) {
-    if (IsBlind(player))
+    if (CBasePlayer_IsBlind(player))
         return
 
     static msgId_ScreenFade
@@ -176,6 +243,14 @@ stock UTIL_ScreenFade(const player, const Float: fxTime = 0.2, const Float: hold
     message_end()
 }
 
+/**
+ * Dumps a JSON object to the server log.
+ *
+ * This function serializes a JSON object to a string and logs it to the server log.
+ *
+ * @param obj   The JSON object to dump.
+ * @param msg   A message prefix to include in the log entry.
+ */
 stock UTIL_DumpJSON(JSON: obj, msg[]) {
     new buffer[1024]
     json_serial_to_string(obj, buffer, charsmax(buffer))
@@ -183,10 +258,26 @@ stock UTIL_DumpJSON(JSON: obj, msg[]) {
     server_print("%s:`%s`", msg, buffer)
 }
 
+/**
+ * Checks if a language translation key exists.
+ *
+ * This function checks if a language translation key exists for a given string.
+ *
+ * @param string    The string to check for a translation key.
+ * @return          Returns true if a translation key exists; otherwise, returns false.
+ */
 stock bool: HasLangKey(const string[]) {
     return (GetLangTransKey(string) != TransKey_Bad)
 }
 
+/**
+ * Parses a color buffer into an array of RGBA values.
+ *
+ * This function parses a color buffer (e.g., "255 0 0 128") into an array of RGBA values.
+ *
+ * @param buffer    The color buffer to parse.
+ * @return          Returns an array of RGBA values [R, G, B, A].
+ */
 stock ParseColors4(const buffer[]) {
     new stringParsed[4][4]
     new colors[4]
@@ -251,6 +342,14 @@ stock registerClCmd(const clientCmd[], const function[], flags = -1, const info[
     return clCmdId
 }
 
+/**
+ * Sends a "BarTime" message to the specified player indicating a time duration.
+ *
+ * This function sends a message to the specified player to display a time duration in a progress bar.
+ *
+ * @param player    The player ID to send the message to. Defaults to 0 (all players).
+ * @param duration  The duration to display in the progress bar.
+ */
 stock UTIL_BarTime(const player = 0, const duration) {
     static msgId_BarTime
     if (!msgId_BarTime) {
@@ -262,6 +361,14 @@ stock UTIL_BarTime(const player = 0, const duration) {
     message_end()
 }
 
+/**
+ * Sends a "RoundTime" message to the specified player indicating remaining time for the round.
+ *
+ * This function sends a message to the specified player to display the remaining time for the round.
+ *
+ * @param player      The player ID to send the message to. Defaults to 0 (all players).
+ * @param tmRemaining The remaining time for the round to display.
+ */
 stock UTIL_RoundTime(const player = 0, const tmRemaining = 0) {
     static msgId_RoundTime
     if (!msgId_RoundTime) {
@@ -288,17 +395,17 @@ stock UTIL_RoundTime(const player = 0, const tmRemaining = 0) {
  *                          Returns false if the current map's name contains any of the specified prefixes.
  */
 stock bool: IsMapCompatible(const prefixBlocklist[][], const size = sizeof(prefixBlocklist)) {
-    new mapName[32];
-    get_mapname(mapName, charsmax(mapName));
+    new mapName[32]
+    get_mapname(mapName, charsmax(mapName))
 
     for (new i; i < size; i++) {
         if (containi(mapName, prefixBlocklist[i]) == -1)
-            continue;
+            continue
         
-        return false;
+        return false
     }
 
-    return true;
+    return true
 }
 
 /**
