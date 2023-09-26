@@ -7,7 +7,7 @@ static g_fwdGetConfigPrefixName = -1
 
 
 public plugin_natives() {
-    register_native("redm_active", "native_redm_active")
+    register_native("redm_is_active", "native_redm_is_active")
     register_native("redm_set_active", "native_redm_set_active")
     register_native("redm_get_config", "native_redm_get_config")
     register_native("redm_get_equip_config", "native_redm_get_equip_config")
@@ -29,7 +29,7 @@ ApiInit_Forwards() {
     g_fwdGetConfigPrefixName = CreateMultiForward("ReDM_GetConfigPrefixName", ET_IGNORE, FP_ARRAY, FP_CELL, FP_STRING)
 }
 
-public bool: native_redm_active(const plugin_id, const argc) {
+public bool: native_redm_is_active(const plugin_id, const argc) {
     return IsActive()
 }
 

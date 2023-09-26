@@ -18,7 +18,7 @@
  * 
  * @return      True if Re:DM is active, false otherwise.
  */
-native bool: redm_active()
+native bool: redm_is_active()
 
 /**
  * Sets Re:DM to active (do not set the cvar!).
