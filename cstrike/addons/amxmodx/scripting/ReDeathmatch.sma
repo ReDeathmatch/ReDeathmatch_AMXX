@@ -18,7 +18,6 @@
 #include "ReDeathmatch/ReDM_round_modes.inc"
 #include "ReDeathmatch/ReDM_api.inc"
 
-static g_pcvar_redm_active
 
 static bool: g_prevState
 
@@ -28,15 +27,32 @@ static const g_soundEffects[][] = {
     "buttons/bell1.wav",
 }
 
+static bool: redm_active
+
 public plugin_init() {
     register_plugin("ReDeathmatch", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("redm/redm.txt")
 
     create_cvar("redm_version", REDM_VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
-    
-    ApiInit_Forwards()
 
-    Config_Init()
+    bind_pcvar_num(
+        create_cvar(
+            "redm_active", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .description = "Controls the state of Re:DM. \
+                Don't use into ReDM configs!"
+        ),
+        redm_active
+    )
+    hook_cvar_change(get_cvar_pointer("redm_active"), "CvarChange_redm_active")
+
+    register_concmd("redm_enable", "ConCmd_redm_enable", ADMIN_MAP, "Enables Re:DM.")
+    register_concmd("redm_disable", "ConCmd_redm_disable", ADMIN_MAP, "Disables Re:DM.")
+    register_concmd("redm_status", "ConCmd_redm_status", ADMIN_MAP, "Get Re:DM status.")
+    register_concmd("redm", "ConCmd_redm", ADMIN_ALL, "Get info.")
+
+    ApiInit_Forwards()
 }
 
 public plugin_precache() {
@@ -57,17 +73,10 @@ public plugin_cfg() {
 
     RegisterHookChain(RG_CSGameRules_PlayerKilled, "CSGameRules_PlayerKilled_Post", .post = true)
 
-    g_pcvar_redm_active = create_cvar("redm_active", "0", (FCVAR_SERVER|FCVAR_SPONLY))
-
-    register_concmd("redm_enable", "ConCmd_redm_enable", ADMIN_MAP, "Enables Re:DM.")
-    register_concmd("redm_disable", "ConCmd_redm_disable", ADMIN_MAP, "Disables Re:DM.")
-    register_concmd("redm_status", "ConCmd_redm_status", ADMIN_MAP, "Get Re:DM status.")
-    register_concmd("redm", "ConCmd_redm", ADMIN_ALL, "Get info.")
-
     CallApi_Initialized()
+    Config_Init()
 
-    if (Config_GetCurrent() != Invalid_JSON)
-        SetActive(true)
+    SetActive(redm_active)
 }
 
 public plugin_end() {
@@ -106,6 +115,10 @@ public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor
     
     Features_PlayerKilled(victim, killer)
     EquipManager_PlayerKilled(victim, killer)
+}
+
+public CvarChange_redm_active(const cvar, const oldValue[], const value[]) {
+    SetActive(strtol(value) != 0)
 }
 
 public ConCmd_redm_enable(const player, const level, const cid) {
@@ -166,7 +179,7 @@ public ConCmd_redm(const player, level, cid) {
 }
 
 bool: IsActive() {
-    return get_pcvar_num(g_pcvar_redm_active) != 0
+    return redm_active
 }
 
 SetActive(const bool: active) {
@@ -174,7 +187,7 @@ SetActive(const bool: active) {
 
     ApplyState(active)
 
-    set_pcvar_num(g_pcvar_redm_active, active ? 1 : 0)
+    set_cvar_num("redm_active", active ? 1 : 0)
 }
 
 static ApplyState(const bool: active) {
