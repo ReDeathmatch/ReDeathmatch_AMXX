@@ -328,22 +328,6 @@ stock Float: _xs_inverse_lerp(const Float: a, const Float: b, const Float: value
 }
 
 /**
- * Linearly interpolates between two 2D vectors.
- *
- * @param a         Start value, returned when t = 0.
- * @param b         End value, returned when t = 1.
- * @param out       The output vector. Can be one of the input vectors.
- * @param t         Value used to interpolate between a and b.
- *
- * @noreturn
- */
-stock _xs_vec_lerp_2d(Float: a[2], Float: b[2], out[2], const Float: t) {
-    for (new i; i < sizeof(out); i++) {
-        out[i] = a[i] + (b[i] - a[i]) * t;
-    }
-}
-
-/**
  * Linearly interpolates between two vectors.
  *
  * @param a         Start value, returned when t = 0.
@@ -353,8 +337,8 @@ stock _xs_vec_lerp_2d(Float: a[2], Float: b[2], out[2], const Float: t) {
  *
  * @noreturn
  */
-stock _xs_vec_lerp(Float: a[3], Float: b[3], Float: out[3], const Float: t) {
-    for (new i; i < sizeof(out); i++) {
+stock _xs_vec_lerp(Float: a[], Float: b[], Float: out[], const Float: t, const size = sizeof(out)) {
+    for (new i; i < size; i++) {
         out[i] = a[i] + (b[i] - a[i]) * t;
     }
 }
@@ -402,22 +386,28 @@ stock Float: _xs_vec_lerp_angle(Float: a, Float: b, const Float: t) {
 }
 
 /**
- * Converts a 3D vector represented as an array of floats to a formatted string.
+ * Converts a vector represented as an array of floats to a formatted string.
  *
- * @param vec       The 3D vector represented as an array of floats.
+ * @param vec       The vector represented as an array of floats.
  * @param output    The output string where the formatted vector will be stored.
  * @param len       The maximum length of the output string.
+ * @param precision The number of decimal places for each vector component.
+ * @param size      The size of the vector array.
  *
  * @return          Returns the number of characters written to the output string.
  *                  It is the length of the formatted vector string.
  */
-stock _xs_vec_to_string(const Float: vec[3], output[], const len, const precision = 1) {
-    new vectorFormat[64];
-    formatex(vectorFormat, sizeof(vectorFormat), "(%%.%if, %%.%if, %%.%if)",
-        precision, precision, precision
-    );
+stock _xs_vec_to_string(const Float: vec[], output[], const len, const precision = 1, const size = sizeof(vec)) {
+    new _len = copy(output, len, "(");
 
-    return formatex(output, len, vectorFormat, vec[0], vec[1], vec[2]);
+    for (new i = 0; i < size && _len < len; ++i) {
+        _len += format(output[_len], (len - _len),
+            fmt("%%.%if%s", precision, (i < size - 1) ? ", " : ")"),
+            vec[i]
+        );
+    }
+
+    return _len;
 }
 
 stock const XS_X = 0;
