@@ -33,6 +33,8 @@ public plugin_init() {
     register_plugin("ReDeathmatch", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("redm/redm.txt")
 
+    RegisterHookChain(RG_CSGameRules_PlayerKilled, "CSGameRules_PlayerKilled_Post", .post = true)
+
     create_cvar("redm_version", REDM_VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
 
     bind_pcvar_num(
@@ -63,20 +65,18 @@ public plugin_precache() {
 }
 
 public plugin_cfg() {
-    CvarsHandler_Init()
     CallApi_InitStart()
+    {
+        CvarsHandler_Init()
+        Features_Init()
+        SpawnManager_Init()
+        RoundModes_Init()
+        EquipManager_Init()
+        Config_Init()
 
-    Features_Init()
-    SpawnManager_Init()
-    RoundModes_Init()
-    EquipManager_Init()
-
-    RegisterHookChain(RG_CSGameRules_PlayerKilled, "CSGameRules_PlayerKilled_Post", .post = true)
-
+        SetActive(redm_active)
+    }
     CallApi_Initialized()
-    Config_Init()
-
-    SetActive(redm_active)
 }
 
 public plugin_end() {
