@@ -1,7 +1,5 @@
 static const Float: BARRIER_REDRAW_TIME = 5.0
 
-static g_entBarrier = -1
-
 static g_spriteLaserbeam
 static g_spriteBubble
 
@@ -41,12 +39,7 @@ AimBarriers_Init() {
     if (!IsMapCompatible(prefixBlocklist))
         return
 
-    g_entBarrier = CreateBarrier()
-
-    if (redm_aim_barrier_always_show == 1) {
-        set_task_ex(BARRIER_REDRAW_TIME, "BarrierRedraw", .flags = SetTask_Repeat)
-        BarrierRedraw()
-    }
+    CreateBarrier()
 
     RegisterHam(Ham_Touch, "trigger_push", "CTriggerPush_Touch", .Post = false)
 }
@@ -61,7 +54,10 @@ static CreateBarrier() {
     mins[!longerAxis] *= 500
     maxs[!longerAxis] *= 500
 
-    return CBarrier_Spawn(middle, mins, maxs, 2.0)
+    new ent = CBarrier_Spawn(middle, mins, maxs, 2.0)
+    set_task_ex(BARRIER_REDRAW_TIME, "BarrierRedraw", ent, .flags = SetTask_Repeat)
+
+    return ent
 }
 
 static bool: GetAvgOrigin(const classname[], Float: out[3], bool: simple = false) {
@@ -200,9 +196,9 @@ static CBarrier_Draw(const entity, const toucher, const Float: drawDelay) {
     te_create_bubble_line(s, e, g_spriteBubble, 255, .height = 1000, .randomness = true)
 }
 
-public BarrierRedraw() {
+public BarrierRedraw(const entity) {
     if (redm_aim_barrier_always_show != 1)
         return
 
-    CBarrier_Draw(g_entBarrier, 0, BARRIER_REDRAW_TIME)
+    CBarrier_Draw(entity, 0, BARRIER_REDRAW_TIME)
 }
