@@ -273,18 +273,32 @@ stock UTIL_RoundTime(const player = 0, const tmRemaining = 0) {
     message_end()
 }
 
-stock bool: IsMapCombatible(const prefixBlocklist[][], const size) {
-    new mapName[32]
-    get_mapname(mapName, charsmax(mapName))
+
+/**
+ * Checks if the current map's name is compatible with a list of prefix blocklists.
+ *
+ * This function compares the current map's name with a list of prefixes specified in `prefixBlocklist`.
+ * It returns true if the map's name does not contain any of the specified prefixes, and false otherwise.
+ *
+ * @param prefixBlocklist   An array of strings representing the prefixes that should not be present in the map's name.
+ * @param size              The size of the `prefixBlocklist` array.
+ *
+ * @return                  Returns true if the current map's name is compatible with the prefix blocklist,
+ *                          meaning it does not contain any of the specified prefixes.
+ *                          Returns false if the current map's name contains any of the specified prefixes.
+ */
+stock bool: IsMapCompatible(const prefixBlocklist[][], const size = sizeof(prefixBlocklist)) {
+    new mapName[32];
+    get_mapname(mapName, charsmax(mapName));
 
     for (new i; i < size; i++) {
         if (containi(mapName, prefixBlocklist[i]) == -1)
-            continue
+            continue;
         
-        return false
+        return false;
     }
 
-    return true
+    return true;
 }
 
 /**

@@ -38,7 +38,7 @@ AimBarriers_Init() {
     )
 
     new const prefixBlocklist[][] = { "de_", "cs_", "css_" }
-    if (!IsMapCombatible(prefixBlocklist, sizeof(prefixBlocklist)))
+    if (!IsMapCompatible(prefixBlocklist))
         return
 
     g_entBarrier = CreateBarrier()
