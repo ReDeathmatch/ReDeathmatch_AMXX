@@ -50,6 +50,16 @@
         "redm_spawn_preset": "preset",
 
     // ReDM: Features
+        /* Enable a barrier in the middle of the map (`anti-rush' system).
+        It dont work on `de_`, `cs_` `css_` maps. */
+        "redm_aim_barrier": "1",
+
+        /* Barrier display mode
+        `0` - disable,
+        `1` - display permanently (beta),
+        `2` - display only when touched. */
+        "redm_aim_barrier_always_show": "2",
+
         // Open equip menu by pressing `G` (drop command).
         "redm_open_equip_menu_by_g": "1",
 
