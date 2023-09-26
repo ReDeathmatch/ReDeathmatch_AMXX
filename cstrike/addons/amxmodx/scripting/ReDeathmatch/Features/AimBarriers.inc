@@ -197,6 +197,9 @@ static CBarrier_Draw(const entity, const toucher, const Float: drawDelay) {
 }
 
 public BarrierRedraw(const entity) {
+    if (!IsActive())
+        return
+
     if (redm_aim_barrier_always_show != 1)
         return
 
