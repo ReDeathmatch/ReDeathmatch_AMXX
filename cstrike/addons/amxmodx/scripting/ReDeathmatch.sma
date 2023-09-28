@@ -33,6 +33,8 @@ public plugin_init() {
     register_plugin("ReDeathmatch", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("redm/redm.txt")
 
+    RegisterHookChain(RG_RoundEnd, "RoundEnd_Post", .post = true)
+    RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
     RegisterHookChain(RG_CSGameRules_PlayerKilled, "CSGameRules_PlayerKilled_Post", .post = true)
 
     create_cvar("redm_version", REDM_VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
@@ -80,7 +82,7 @@ public plugin_cfg() {
 }
 
 public plugin_end() {
-    RestoreAllCvars()
+    CvarsHandler_RestoreValue()
 }
 
 public plugin_pause() {
@@ -106,6 +108,20 @@ public client_disconnected(player, bool: drop, message[], maxLen) {
     ModeVote_Disconnected(player)
 }
 
+public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
+    if (!IsActive())
+        return
+    
+    RoundModes_RoundEnd()
+}
+
+public CSGameRules_RestartRound() {
+    if (!IsActive())
+        return
+
+    RoundModes_RestartRound()
+}
+
 public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor) {
     if (!IsActive())
         return
@@ -121,10 +137,10 @@ public CvarChange_redm_active(const cvar, const oldValue[], const value[]) {
     SetActive(strtol(value) != 0)
 }
 
-public ConCmd_redm_enable(const player, const level, const cid) {
+public ConCmd_redm_enable(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
 
-    if (!cmd_access(player, level, cid, 1))
+    if (!cmd_access(player, level, commandId, 1))
         return PLUGIN_HANDLED
 
     if (IsActive()) {
@@ -139,10 +155,10 @@ public ConCmd_redm_enable(const player, const level, const cid) {
     return PLUGIN_HANDLED
 }
 
-public ConCmd_redm_disable(const player, level, cid) {
+public ConCmd_redm_disable(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
     
-    if (!cmd_access(player, level, cid, 1))
+    if (!cmd_access(player, level, commandId, 1))
         return PLUGIN_HANDLED
 
     if (!IsActive()) {
@@ -157,7 +173,7 @@ public ConCmd_redm_disable(const player, level, cid) {
     return PLUGIN_HANDLED
 }
 
-public ConCmd_redm_status(const player, level, cid) {
+public ConCmd_redm_status(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
 
     console_print(player, "* ReDeathmatch %l - `%l`.", 
@@ -168,7 +184,7 @@ public ConCmd_redm_status(const player, level, cid) {
     return PLUGIN_HANDLED
 }
 
-public ConCmd_redm(const player, level, cid) {
+public ConCmd_redm(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
 
     console_print(player, "[Re:DM] Version `%s`", REDM_VERSION)
@@ -178,10 +194,20 @@ public ConCmd_redm(const player, level, cid) {
     return PLUGIN_HANDLED
 }
 
+/**
+ * Checks if the Re:DM mode is currently active.
+ *
+ * @return              Returns true if Re:DM is active, false otherwise.
+ */
 bool: IsActive() {
     return redm_active
 }
 
+/**
+ * Sets the Re:DM mode to active or inactive.
+ *
+ * @param active        If true, activates Re:DM; if false, deactivates it.
+ */
 SetActive(const bool: active) {
     CallApi_ChangeState(active)
 
@@ -190,13 +216,18 @@ SetActive(const bool: active) {
     set_cvar_num("redm_active", active ? 1 : 0)
 }
 
+/**
+ * Applies the Re:DM mode state, either activating or deactivating it.
+ *
+ * @param active        If true, activates Re:DM; if false, deactivates it.
+ */
 static ApplyState(const bool: active) {
     if (active) {
-        ReloadConfig()
+        Config_Reload()
         set_member_game(m_bGameStarted, true)
     } else {
         RoundModes_ResetCurrentMode()
-        RestoreAllCvars()
+        CvarsHandler_RestoreValue()
     }
 
     set_cvar_num("sv_restart", 1)
