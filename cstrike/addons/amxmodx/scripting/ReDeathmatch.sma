@@ -82,6 +82,9 @@ public plugin_cfg() {
 }
 
 public plugin_end() {
+    if (!IsActive())
+        return
+
     CvarsHandler_RestoreValue()
 }
 
@@ -101,10 +104,16 @@ public plugin_unpause() {
 }
 
 public client_putinserver(player) {
+    if (!IsActive())
+        return
+
     EquipManager_PutInServer(player)
 }
 
 public client_disconnected(player, bool: drop, message[], maxLen) {
+    if (!IsActive())
+        return
+
     ModeVote_Disconnected(player)
 }
 
@@ -131,7 +140,7 @@ public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor
 
     if (killer == victim)
         return
-    
+
     Features_PlayerKilled(victim, killer)
     EquipManager_PlayerKilled(victim)
 }
