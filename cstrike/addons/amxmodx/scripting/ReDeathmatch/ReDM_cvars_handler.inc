@@ -1,17 +1,32 @@
 static Trie: g_cvarValues = Invalid_Trie
 
-
 CvarsHandler_Init() {
     register_concmd("redm_dump_cvars", "ConCmd_redm_dump_cvars", ADMIN_MAP, "Dump changed CVar to table.")
 }
 
-public ConCmd_redm_dump_cvars(const player) {
+/**
+ * Displays saved CVAR values to the specified player.
+ *
+ * @param player        The player to whom the CVAR values should be displayed.
+ * @param level         The access level of the player executing the command.
+ * @param commandId     The ID of the command.
+ * @return              Returns PLUGIN_HANDLED.
+ */
+public ConCmd_redm_dump_cvars(const player, const level, const commandId) {
+    if (!cmd_access(player, level, commandId, 1))
+        return PLUGIN_HANDLED
+
     DumpAllSavedCvars(player)
 
     return PLUGIN_HANDLED
 }
 
-CvarsHandler_LoadConfig(const JSON: config) {
+/**
+ * Loads CVAR settings from a Re:DM configuration.
+ *
+ * @param config        JSON handle representing the Re:DM configuration.
+ */
+CvarsHandler_Load(const JSON: config) {
     new JSON: cvars = json_object_get_value(config, "cvars")
     if (cvars == Invalid_JSON) {
         new buffer[512]
@@ -19,12 +34,20 @@ CvarsHandler_LoadConfig(const JSON: config) {
         set_fail_state("Can't read `cvars` section from config = `%s`", buffer)
     }
 
-    CvarsHandler_LoadCvars(cvars)
+    CvarsHandler_ApplyCvars(cvars)
 
     json_free(cvars)
 }
 
-CvarsHandler_LoadCvars(const JSON: objCvars) {
+/**
+ * Applies CVAR settings from a JSON object.
+ *
+ * This function applies CVAR settings specified in a JSON object to their corresponding CVARs.
+ * The JSON object is expected to have CVAR names as keys and their values as string values.
+ *
+ * @param objCvars      JSON handle containing the CVAR settings.
+ */
+CvarsHandler_ApplyCvars(const JSON: objCvars) {
     new cvarsCount = json_object_get_count(objCvars)
     if (!cvarsCount) {
         // set_fail_state("Section `cvars` hasn't settings in config")
@@ -38,13 +61,19 @@ CvarsHandler_LoadCvars(const JSON: objCvars) {
         json_object_get_name(objCvars, i, key, charsmax(key))
         json_get_string(cvarSetting, value, charsmax(value))
 
-        CvarChangeValue(key, value)
+        ChangeValue(key, value)
 
         json_free(cvarSetting)
     }
 }
 
-static CvarChangeValue(const cvar[], const value[]) {
+/**
+ * Changes the value of a CVAR and stores its old value.
+ *
+ * @param cvar          The name of the CVAR to change.
+ * @param value         The new value for the CVAR.
+ */
+static ChangeValue(const cvar[], const value[]) {
     if (!g_cvarValues) {
         g_cvarValues = TrieCreate()
     }
@@ -63,11 +92,21 @@ static CvarChangeValue(const cvar[], const value[]) {
     set_cvar_string(cvar, value)
 }
 
-static stock bool: CvarRestoreValue(const cvar[]) {
+/**
+ * Restores the value of a CVAR or all CVARs to their stored values.
+ *
+ * @param cvar          The name of the CVAR to restore. If empty, all CVARs are restored.
+ * @return              Returns true if the CVAR(s) are successfully restored, false otherwise.
+ *                      If a specific CVAR is provided and it has no stored value, a warning is logged, and the function returns false.
+ */
+bool: CvarsHandler_RestoreValue(const cvar[] = "") {
+    if (strlen(cvar) == 0)
+        return RestoreAllStoredValues()
+
     new storedValue[32]
     if (!TrieGetString(g_cvarValues, cvar, storedValue, charsmax(storedValue))) {
-        LogMessageEx(Warning, "CvarRestoreValue: WARNING! CVar `%s` hasn't stored value. Can't restore.", 
-            cvar, storedValue, value
+        LogMessageEx(Warning, "CvarsHandler_RestoreValue: WARNING! CVar `%s` hasn't stored value. Can't restore.", 
+            cvar
         )
 
         return false
@@ -78,15 +117,20 @@ static stock bool: CvarRestoreValue(const cvar[]) {
     return true
 }
 
-RestoreAllCvars() {
+/**
+ * Restores all CVARs to their stored values.
+ *
+ * @return              Returns true if all CVARs are successfully restored, false otherwise.
+ */
+static bool: RestoreAllStoredValues() {
     if (g_cvarValues == Invalid_Trie) {
-        LogMessageEx(Debug, "RestoreAllCvars(): WARNING! CVars not saved. Can't restore.")
-        return
+        LogMessageEx(Debug, "RestoreAllStoredValues(): WARNING! CVars not saved. Can't restore.")
+        return false
     }
 
     new TrieIter: iter = TrieIterCreate(g_cvarValues)
 
-    while(!TrieIterEnded(iter)) {
+    while (!TrieIterEnded(iter)) {
         new key[32]
         TrieIterGetKey(iter, key, charsmax(key))
 
@@ -100,8 +144,19 @@ RestoreAllCvars() {
 
     TrieIterDestroy(iter)
     TrieClear(g_cvarValues)
+
+    return true
 }
 
+/**
+ * Dumps all saved CVars to the console or a specific player.
+ *
+ * This function is used to display all saved CVars to the console or a specific player. It retrieves
+ * the saved CVar values from the global Trie data structure and compares them with the current
+ * values of the CVars, showing the old and current values.
+ *
+ * @param player The player to whom the CVar information will be displayed (default is console).
+ */
 stock DumpAllSavedCvars(const player = 0) {
     if (g_cvarValues == Invalid_Trie) {
         LogMessageEx(Debug, "DumpAllSavedCvars(): WARNING! CVars not saved. Can't restore.")

@@ -218,6 +218,21 @@ public MsgHook_DeathMsg(msgid, dest, receiver) {
     return PLUGIN_HANDLED
 }
 
+/**
+ * Retrieves the list of players who are currently observing a specified player.
+ *
+ * This function identifies and returns a list of players who are currently observing the given player.
+ * Observers are typically other players who are spectating the target player in first-person mode.
+ * The list of observers is stored in the 'observers' array.
+ *
+ * @param player     The player for whom to retrieve the list of observers.
+ * @param observers  An array to store the list of observers' player IDs. It should be pre-allocated and have a maximum size of (MAX_PLAYERS - 1).
+ *
+ * @return The number of observers found for the specified player.
+ *
+ * @remark To use this function, make sure to pre-allocate the 'observers' array with enough space
+ *         to store the potential maximum number of observers, which is (MAX_PLAYERS - 1).
+ */
 static GetPlayerObservers(const player, observers[MAX_PLAYERS - 1]) {
     new count
 
@@ -264,7 +279,6 @@ public PrecacheEvent_Post(type, const name[]) {
 
     return FMRES_IGNORED
 }
-
 
 public PlaybackEvent(flags, invoker, eventid, Float: delay, Float: Origin[3], Float: Angles[3], Float: fparam1, Float: fparam2, iparam1, iparam2, bparam1, bparam2) {
     if (!IsActive())
@@ -443,17 +457,3 @@ stock WeaponIdType: GetCurrentWeapon(const player) {
 
     return WeaponIdType: get_member(activeItem, m_iId)
 }
-
-static stock UTIL_DeathMsg(const dest, const receiver, const killer, const victim, const headshot, const weaponName[]) {
-  static msg_deathMsg
-  if(!msg_deathMsg)
-    msg_deathMsg = get_user_msgid("DeathMsg")
-
-  message_begin(dest, msg_deathMsg, _, receiver)
-  write_byte(killer)
-  write_byte(victim)
-  write_byte(headshot)
-  write_string(weaponName)
-  message_end()
-}
-

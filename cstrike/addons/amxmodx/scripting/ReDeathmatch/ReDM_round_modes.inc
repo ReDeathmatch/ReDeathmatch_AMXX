@@ -1,16 +1,17 @@
-static g_forcedModeIdx = -1
-static g_currentRoundModeIdx = -1
-static redm_modes_switch[32]
-
 #include "ReDeathmatch/Modes/Menus.inc"
 #include "ReDeathmatch/Modes/Vote.inc"
 
+enum {
+    RoundMode_NotSet = -1, /**< Round game-mode is not set */
+}
+
+static g_currentRoundModeIdx = RoundMode_NotSet
+static g_forcedModeIdx = RoundMode_NotSet
+
+static redm_modes_switch[32]
+
 RoundModes_Init() {
     register_dictionary("redm/modes.txt")
-
-    RegisterHookChain(RG_RoundEnd, "RoundEnd_Post", .post = true)
-    RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
-    
 
     bind_pcvar_string(
         create_cvar(
@@ -28,10 +29,10 @@ RoundModes_Init() {
     ModeVote_Init()
 }
 
-public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmDelay) {
-    if (!IsActive())
-        return
-
+/**
+ * Handles mode voting and mode switching.
+ */
+RoundModes_RoundEnd() {
     new bool: voteStarted = ModeVote_RoundEnd_Post()
 
     if (voteStarted) {
@@ -44,13 +45,13 @@ public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmD
         return
 
     new nextModeIdx = GetNextMode()
-    if (nextModeIdx == -1)
+    if (nextModeIdx == RoundMode_NotSet)
         return
 
-    g_currentRoundModeIdx = nextModeIdx
+    SetCurrentMode(nextModeIdx)
 
     new modeName[32]
-    GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName))
+    RoundModes_GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName))
 
     client_print_color(0, print_team_red,
         HasLangKey(modeName) ? "[Re:DM] %l ^3%l^1" : "[Re:DM] %l ^3%s^1",
@@ -62,29 +63,29 @@ public RoundEnd_Post(WinStatus: status, ScenarioEventEndRound: event, Float: tmD
     client_print(0, print_center, "%l", "ModeChanges")
 }
 
-public CSGameRules_RestartRound() {
+RoundModes_RestartRound() {
     if (!IsActive())
         return
 
     new votedModeIdx = ModeVote_RestartRound()
     if (votedModeIdx >= 0)
-        g_currentRoundModeIdx = votedModeIdx
+        SetCurrentMode(votedModeIdx)
 
-    if (g_currentRoundModeIdx == -1)
+    if (g_currentRoundModeIdx == RoundMode_NotSet)
         return
 
-    if (!GetModeInfo(g_currentRoundModeIdx))
+    if (!RoundModes_GetModeInfo(g_currentRoundModeIdx))
         return
 
     ApplyMode(g_currentRoundModeIdx)
 
     for (new p = 1; p <= MaxClients; p++) {
-        EquipManager_PlayerResetEquip(p)
+        EquipManager_Reset(p)
     }
 }
 
 RoundModes_OnSpawnEquip(const player) {
-    if (g_currentRoundModeIdx == -1)
+    if (g_currentRoundModeIdx == RoundMode_NotSet)
         return
 
     set_task(0.3, "RoundInfoMessage", player)
@@ -92,7 +93,7 @@ RoundModes_OnSpawnEquip(const player) {
 
 public RoundInfoMessage(const player) {
     new modeName[32]
-    GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName))
+    RoundModes_GetModeInfo(g_currentRoundModeIdx, modeName, charsmax(modeName))
 
     set_dhudmessage(
         .red = 200,
@@ -112,7 +113,17 @@ public RoundInfoMessage(const player) {
     )
 }
 
-JSON: GetModesArr(& count = 0) {
+/**
+ * Retrieves the JSON array containing game modes from the current configuration.
+ *
+ * This function retrieves the JSON array named "modes" from the current configuration. 
+ * It is often used to access and iterate over the game modes defined in the configuration.
+ *
+ * @param count The number of game modes in the JSON array.
+ * 
+ * @return A reference to the JSON array containing game modes, or `Invalid_JSON` if not found.
+ */
+static JSON: GetModesArr(& count = 0) {
     if (!json_object_has_value(Config_GetCurrent(), "modes"))
         return Invalid_JSON
 
@@ -128,19 +139,28 @@ JSON: GetModesArr(& count = 0) {
     return arrModes
 }
 
-bool: GetModeInfo(const index, name[] = "", len = 0) {
+/**
+ * Retrieves information about a specific game mode.
+ *
+ * @param modeIdx The index of the game mode.
+ * @param name The name of the game mode (output).
+ * @param len The length of the output buffer.
+ * 
+ * @return Whether the operation was successful.
+ */
+bool: RoundModes_GetModeInfo(const modeIdx, name[] = "", len = 0) {
     new count
     new JSON: arrModes = GetModesArr(count)
     if (arrModes == Invalid_JSON)
         return false
 
-    if (index < 0 || index >= count) {
+    if (modeIdx < 0 || modeIdx >= count) {
         json_free(arrModes)
 
         return false
     }
 
-    new JSON: objMode = json_array_get_value(arrModes, index)
+    new JSON: objMode = json_array_get_value(arrModes, modeIdx)
     json_object_get_string(objMode, "name", name, len)
 
     json_free(arrModes)
@@ -153,9 +173,9 @@ static GetNextMode() {
     new count
     new JSON: arrModes = GetModesArr(count)
     if (arrModes == Invalid_JSON)
-        return -1
+        return RoundMode_NotSet
 
-    if (IsModeForced()) {
+    if (RoundModes_IsModeForced()) {
         json_free(arrModes)
 
         return g_forcedModeIdx
@@ -175,25 +195,24 @@ static GetNextMode() {
     return currentIdx
 }
 
-
-bool: ApplyMode(const index) {
+static bool: ApplyMode(const modeIdx) {
     if (!IsActive())
         return false
 
-    if (index < 0)
+    if (modeIdx < 0)
         return false
 
-    ReloadConfig()
+    Config_Reload()
 
     new JSON: arrModes = GetModesArr()
     if (arrModes == Invalid_JSON)
         return false
 
-    new JSON: objMode = json_array_get_value(arrModes, index)
+    new JSON: objMode = json_array_get_value(arrModes, modeIdx)
     if (json_object_has_value(objMode, "cvars")) {
         new JSON: objCvars = json_object_get_value(objMode, "cvars")
 
-        CvarsHandler_LoadCvars(objCvars)
+        CvarsHandler_ApplyCvars(objCvars)
 
         json_free(objCvars)
     }
@@ -204,23 +223,45 @@ bool: ApplyMode(const index) {
     return true
 }
 
+/**
+ * Retrieves the current round mode index.
+ */
 RoundModes_GetCurrentMode() {
-    return g_forcedModeIdx > -1 ? g_forcedModeIdx : g_currentRoundModeIdx    
+    if (g_forcedModeIdx > RoundMode_NotSet)
+        return g_forcedModeIdx
+
+    return g_currentRoundModeIdx
 }
 
-RoundModes_SetForcedMode(const modeIdx = -1) {
-    g_forcedModeIdx = modeIdx
+/**
+ * Sets a forced round mode index.
+ *
+ * @param modeIdx The index of the forced round mode.
+ */
+RoundModes_SetForcedMode(const modeIdx = RoundMode_NotSet) {
+    return (g_forcedModeIdx = modeIdx)
 }
 
+static SetCurrentMode(const modeIdx = RoundMode_NotSet) {
+    return (g_currentRoundModeIdx = modeIdx)
+}
+
+/**
+ * Resets the current round mode to the default state.
+ *
+ * @return Always returns `RoundMode_NotSet` to indicate that the current round mode has been reset.
+ */
 RoundModes_ResetCurrentMode() {
-    g_currentRoundModeIdx = -1    
+    return (g_currentRoundModeIdx = RoundMode_NotSet)
 }
 
-bool: IsModeForced() {
+/**
+ * Checks if a round mode is forced.
+ *
+ * @return  If a mode is
+ *         forced, it returns `true`; otherwise, it returns `false`.
+ */
+bool: RoundModes_IsModeForced() {
     // TODO: find better
-    return g_forcedModeIdx > -1
-}
-
-Float: CHalfLifeMultiplay__GetRoundRestartDelay() {
-	return get_cvar_float("mp_round_restart_delay")
+    return g_forcedModeIdx > RoundMode_NotSet
 }

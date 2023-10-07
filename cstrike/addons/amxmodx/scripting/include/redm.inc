@@ -180,6 +180,33 @@ stock UTIL_ReloadWeapons(const player, bool: currentWeapon = false) {
 }
 
 /**
+ * Sends a death message to a player or set of players.
+ *
+ * This function sends a death message to a specific player or set of players. A death message
+ * typically includes information about the killer, victim, whether it was a headshot, and the
+ * weapon used.
+ *
+ * @param dest       The destination of the death message (one or more players).
+ * @param receiver   The receiver of the message (typically the player(s) who see the death message).
+ * @param killer     The ID of the killer player (attacker).
+ * @param victim     The ID of the victim player (the one who died).
+ * @param headshot   A flag indicating whether the death was a headshot (1 for headshot, 0 for not).
+ * @param weaponName The name of the weapon used in the kill.
+ */
+stock UTIL_DeathMsg(const dest, const receiver, const killer, const victim, const headshot, const weaponName[]) {
+    static msg_deathMsg
+    if (!msg_deathMsg)
+        msg_deathMsg = get_user_msgid("DeathMsg")
+
+    message_begin(dest, msg_deathMsg, _, receiver)
+    write_byte(killer)
+    write_byte(victim)
+    write_byte(headshot)
+    write_string(weaponName)
+    message_end()
+}
+
+/**
  * Checks if a player is blinded.
  *
  * This function checks if a player is blinded based on the current game time.
@@ -189,6 +216,25 @@ stock UTIL_ReloadWeapons(const player, bool: currentWeapon = false) {
  */
 stock bool: CBasePlayer_IsBlind(const player) {
     return Float: get_member(player, m_blindUntilTime) > get_gametime()
+}
+
+/**
+ * Retrieves the round restart delay duration from a game mode CVAR.
+ *
+ * This function is used to retrieve the round restart delay duration from a game mode CVAR
+ * (ConVar). It checks if the CVAR exists and returns its value as a floating-point number.
+ * If the CVAR doesn't exist or cannot be retrieved, it returns a default value for the round
+ * restart delay.
+ *
+ * @return The duration of the round restart delay as a floating-point number.
+ */
+stock Float: CHalfLifeMultiplay_GetRoundRestartDelay() {
+    static pointer
+    if (!pointer)
+        pointer = get_cvar_pointer("mp_round_restart_delay")
+
+    const Float: ROUND_BEGIN_DELAY = 5.0    // delay before beginning new round
+    return pointer ? get_pcvar_float(pointer) : ROUND_BEGIN_DELAY
 }
 
 /**

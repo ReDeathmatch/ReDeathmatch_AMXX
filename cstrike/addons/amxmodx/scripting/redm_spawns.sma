@@ -126,10 +126,10 @@ public client_putinserver(player) {
     Editor_ResetProps(player)
 }
 
-public ConCmd_EditSpawns(const player, const level, const cid) {
+public ConCmd_EditSpawns(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
 
-    if (!cmd_access(player, level, cid, 1))
+    if (!cmd_access(player, level, commandId, 1))
         return PLUGIN_HANDLED
 
     g_editorEnabled = !g_editorEnabled
@@ -147,10 +147,10 @@ public ConCmd_EditSpawns(const player, const level, const cid) {
     return PLUGIN_HANDLED
 }
 
-public ConCmd_ConvertOldSpawns(const player, const level, const cid) {
+public ConCmd_ConvertOldSpawns(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
 
-    if (!cmd_access(player, level, cid, 1))
+    if (!cmd_access(player, level, commandId, 1))
         return PLUGIN_HANDLED
 
     Editor_ConvertSpawns()
@@ -395,8 +395,8 @@ public MenuHandler_Editor(const player, const menu, const item) {
     return PLUGIN_HANDLED
 }
 
-public ClCmd_EnterSpawnGroup(const player, const level, const cid) {
-    if (!cmd_access(player, level, cid, 1))
+public ClCmd_EnterSpawnGroup(const player, const level, const commandId) {
+    if (!cmd_access(player, level, commandId, 1))
         return PLUGIN_HANDLED
 
     static spawnGroup[32]

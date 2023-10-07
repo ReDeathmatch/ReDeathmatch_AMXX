@@ -11,8 +11,8 @@ ModesMenus_Init() {
     register_clcmd("say /modes", "ClCmd_redm_modes_menu", .flags = MENU_FLAG)
 }
 
-public ClCmd_redm_modes_menu(const player, const level, const cid) {
-    if (!cmd_access(player, level, cid, 1))
+public ClCmd_redm_modes_menu(const player, const level, const commandId) {
+    if (!cmd_access(player, level, commandId, 1))
         return PLUGIN_HANDLED
     
     if (!IsActive())
@@ -43,7 +43,7 @@ static bool: Menu_Modes(const player) {
     SetGlobalTransTarget(player)
     new menu = menu_create(fmt("%l", "Modes"), "MenuHandler_Modes")
 
-    if (!IsModeForced()) {
+    if (!RoundModes_IsModeForced()) {
         menu_additem(
             menu,
             fmt(
@@ -54,7 +54,7 @@ static bool: Menu_Modes(const player) {
         )
     } else {
         new modeName[64]
-        GetModeInfo(RoundModes_GetCurrentMode(), modeName, charsmax(modeName))
+        RoundModes_GetModeInfo(RoundModes_GetCurrentMode(), modeName, charsmax(modeName))
 
         menu_additem(
             menu,
@@ -96,7 +96,7 @@ public MenuCallback_Modes(const player, const menu, const item) {
     if (item != 0)
         return ITEM_IGNORE
 
-    return IsModeForced() ? ITEM_IGNORE : ITEM_DISABLED
+    return RoundModes_IsModeForced() ? ITEM_IGNORE : ITEM_DISABLED
 }
 
 public MenuHandler_Modes(const player, const menu, const item) {
@@ -116,7 +116,7 @@ public MenuHandler_Modes(const player, const menu, const item) {
     RoundModes_SetForcedMode(modeIdx)
 
     rg_round_end(
-        CHalfLifeMultiplay__GetRoundRestartDelay(),
+        CHalfLifeMultiplay_GetRoundRestartDelay(),
         WINSTATUS_DRAW,
         ROUND_END_DRAW,
         fmt("%L", LANG_SERVER, "ModeChanges"),

@@ -1,26 +1,55 @@
+/**
+ * Enumeration representing equipment types.
+ */
 enum EquipType_e {
-    et_Primary,
-    et_Secondary,
+    et_Primary,     /**< Primary equipment. */
+    et_Secondary,   /**< Secondary equipment. */
 }
+
+/**
+ * Arrays containing equipment section names.
+ */
 static const g_equipSections[EquipType_e][] = {
     "primary",
     "secondary"
 }
 
+/**
+ * Represents an invalid equipment choice.
+ *
+ * This constant is used to indicate that no equipment choice has been made or that the choice is invalid.
+ * It is typically used to initialize equipment choices for players or to indicate that a player has not chosen equipment.
+ */
 enum {
-    EQUIP_NOT_CHOOSEN = -1,
+    EQUIP_NOT_CHOOSEN = -1, /**< Represents an invalid or unset equipment choice. */
 }
 
+/**
+ * Arrays to store player equipment choices.
+ */
 static g_equip[EquipType_e]
-static g_playerWeapons[MAX_PLAYERS + 1][EquipType_e] // = []{ EQUIP_NOT_CHOOSEN, ... }
+static g_playerWeapons[MAX_PLAYERS + 1][EquipType_e]
 
+/**
+ * Array to store the last weapon slot chosen by players.
+ */
 static InventorySlotType: g_lastWeaponSlot[MAX_PLAYERS + 1] = { PRIMARY_WEAPON_SLOT, ... }
+
 static bool: g_playerRandomWeapons[MAX_PLAYERS + 1] = { false, ... }
+
+/**
+ * Array to store the weapon state of players.
+ */
 static WeaponState: g_weaponState[MAX_PLAYERS + 1]
+
+/**
+ * Array to store whether players are in the equipment menu.
+ */
 static bool: g_inEquipMenu[MAX_PLAYERS + 1]
 
-static redm_keep_weapon_slot = 1
-static bool: redm_open_equip_menu = false
+static redm_keep_weapon_slot
+static bool: redm_open_equip_menu
+
 
 EquipManager_Init() {
     RegisterHookChain(RG_CBasePlayer_OnSpawnEquip, "CBasePlayer_OnSpawnEquip", .post = false)
@@ -60,8 +89,13 @@ EquipManager_Init() {
     register_clcmd("cl_autobuy", "ClCmd_cl_autobuy", .FlagManager = false)
 }
 
+/**
+ * Puts a player into the server.
+ *
+ * @param player The player to put into the server.
+ */
 EquipManager_PutInServer(const player) {
-    EquipManager_PlayerResetEquip(player)
+    EquipManager_Reset(player)
     g_lastWeaponSlot[player] = PRIMARY_WEAPON_SLOT
 
     if (is_user_bot(player) || is_user_hltv(player))
@@ -70,6 +104,11 @@ EquipManager_PutInServer(const player) {
     set_task(5.0, "Message_YouCanChooseEquip", player)
 }
 
+/**
+ * Loads equipment configurations from a JSON object.
+ *
+ * @param objEquip JSON handle containing the equipment configurations.
+ */
 EquipManager_LoadConfig(const JSON: objEquip) {
     for (new EquipType_e: section; section < EquipType_e; section++) {
         LoadConfigEquip(objEquip, section)
@@ -124,6 +163,11 @@ static LoadConfigEquip(const JSON: objEquip, const EquipType_e: section) {
     json_free(equipWeapons)
 }
 
+/**
+ * Handles the "cl_autobuy" client command (key F1).
+ *
+ * @param player The player who issued the command.
+ */
 public ClCmd_cl_autobuy(const player) {
     if (!IsActive())
         return PLUGIN_CONTINUE
@@ -133,6 +177,11 @@ public ClCmd_cl_autobuy(const player) {
     return PLUGIN_HANDLED
 }
 
+/**
+ * Handles the "/guns" client command.
+ *
+ * @param player The player who issued the command.
+ */
 public ClCmd_Guns(const player) {
     if (!IsActive())
         return PLUGIN_CONTINUE
@@ -142,6 +191,18 @@ public ClCmd_Guns(const player) {
     return PLUGIN_HANDLED
 }
 
+/**
+ * Toggles random weapons mode for a player.
+ *
+ * This function allows a player to toggle between having random weapons assigned to them
+ * or using a predefined equipment set. When random weapons mode is enabled, the player
+ * will receive random weapons from the available pool of weapons. When disabled, the
+ * player's equipment will be reset to the predefined set.
+ *
+ * @param player The player for whom to toggle random weapons mode.
+ *
+ * @return Returns true if random weapons mode is enabled after toggling, false otherwise.
+ */
 static bool: Player_SwitchRandomWeapons(const player) {
     if (!IsActive())
         return false
@@ -151,7 +212,7 @@ static bool: Player_SwitchRandomWeapons(const player) {
     g_playerRandomWeapons[player] = !g_playerRandomWeapons[player]
 
     if (!g_playerRandomWeapons[player]) {
-        EquipManager_PlayerResetEquip(player)
+        EquipManager_Reset(player)
     }
 
     UTIL_PlaySoundEffect(player, "buttons/button9.wav", .pitch = g_playerRandomWeapons[player] ? PITCH_HIGH : PITCH_LOW)
@@ -163,6 +224,7 @@ static bool: Player_SwitchRandomWeapons(const player) {
 
     return g_playerRandomWeapons[player]
 }
+
 
 static bool: Player_CallEquipMenu(const player) {
     if (!IsActive())
@@ -183,7 +245,7 @@ static bool: Player_CallEquipMenu(const player) {
     }
     
     if (Player_HasChosenEquip(player)) {
-        EquipManager_PlayerResetEquip(player)
+        EquipManager_Reset(player)
     }
 
     for (new EquipType_e: section; section < EquipType_e; section++) {
@@ -357,6 +419,12 @@ public CBasePlayer_AddPlayerItem(const player, const item) {
     set_member(item, m_Weapon_iWeaponState, g_weaponState[player])
 }
 
+/**
+ * Gets the weapon slot of a given weapon.
+ *
+ * @param weaponId The ID of the weapon.
+ * @return         The weapon slot type.
+ */
 static stock InventorySlotType: GetWeaponSlot(const weaponId) {
     // TODO: ReAPI update
     static const weaponSlotInfo[] = {0,2,0,1,4,1,5,1,1,4,2,2,1,1,1,1,2,2,1,1,1,1,1,1,1,4,2,1,1,3,1}
@@ -424,6 +492,13 @@ public Player_ForceSlotChoose(const player) {
     rg_internal_cmd(player, weaponName)
 }
 
+/**
+ * Gives a player a specific type of equipment.
+ *
+ * @param player  The player to receive the equipment.
+ * @param section The type of equipment (primary or secondary).
+ * @return        True if equipment was given, false otherwise.
+ */
 static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
     if (g_playerWeapons[player][section] == EQUIP_NOT_CHOOSEN)
         return false
@@ -450,22 +525,50 @@ static bool: Player_HasChosenEquip(const player) {
     return false
 }
 
-EquipManager_PlayerResetEquip(const player) {
+/**
+ * Resets a player's equipment choices to the default state.
+ *
+ * This function resets a player's equipment choices for both primary and secondary weapons
+ * to the default state, allowing them to choose their equipment again.
+ *
+ * @param player The player for whom to reset equipment choices.
+ */
+EquipManager_Reset(const player) {
     for (new EquipType_e: section; section < EquipType_e; section++) {
         g_playerWeapons[player][section] = EQUIP_NOT_CHOOSEN
     }
 }
 
+/**
+ * Checks if a given equipment type section has available items.
+ *
+ * This function checks if a specific equipment type section (primary or secondary) has any
+ * available items in its equipment list.
+ *
+ * @param section The equipment type section to check (et_Primary or et_Secondary).
+ *
+ * @return Returns true if the specified section has available items, false otherwise.
+ */
 static bool: HasEquipItems(const EquipType_e: section) {
     return ArraySize(Array: g_equip[section]) != 0
 }
 
-public ConCmd_redm_dump_equip(const player) {
+public ConCmd_redm_dump_equip(const player, const level, const commandId) {
     DumpEquip(player)
 
     return PLUGIN_HANDLED
 }
 
+/**
+ * Dumps the current equipment set to the console.
+ *
+ * This function displays the current equipment set, including primary and secondary weapons,
+ * in a tabular format in the player's console.
+ *
+ * @param player The player for whom to display the equipment set. If set to 0, it will be displayed in the server console.
+ *
+ * @remark This function is typically used for debugging and informational purposes.
+ */
 static DumpEquip(const player = 0) {
     if (Array: g_equip[et_Primary] == Invalid_Array && Array: g_equip[et_Secondary] == Invalid_Array) {
         console_print(player, "DumpEquip(): WARNING! Equip not itinialized!")
@@ -505,6 +608,14 @@ static DumpEquip(const player = 0) {
     console_print(player, "^n")
 }
 
+/**
+ * Sends a message to a player indicating they can choose their equipment.
+ *
+ * This function sends a message to a player indicating that they can choose their equipment.
+ * It typically notifies players when they are allowed to select their primary and secondary weapons.
+ *
+ * @param player The player to whom the message should be sent.
+ */
 public Message_YouCanChooseEquip(const player) {
     SetGlobalTransTarget(player)
 
