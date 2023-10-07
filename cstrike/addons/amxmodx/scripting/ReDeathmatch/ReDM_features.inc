@@ -367,11 +367,14 @@ public CBasePlayer_TakeDamage_Post(const victim, const inflictor, const attacker
     }
 }
 
-public Features_PlayerKilled(const victim, const killer) {
+Features_PlayerKilled(const victim, const killer) {
     if (redm_healer + redm_healer_hs > 0.0) {
         new bool: isHeadshot = bool: get_member(victim, m_bHeadshotKilled)
         ExecuteHamB(Ham_TakeHealth, killer, isHeadshot ? redm_healer_hs : redm_healer, DMG_GENERIC)
     }
+
+    if (!is_user_connected(killer))
+        return
 
     if (redm_refill_ammo) {
         UTIL_ReloadWeapons(killer, .currentWeapon = (redm_refill_ammo == 1))
