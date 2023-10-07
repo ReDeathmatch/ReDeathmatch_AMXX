@@ -97,7 +97,7 @@ static CWorld_GetCenter(Float: out[3], &longerAxis) {
 
     longerAxis = floatabs(out[XS_X] - start[XS_X]) < floatabs(out[XS_Y] - start[XS_Y])
 
-    set_pev(0, pev_origin, out, sizeof(out)) // TODO: hacky ?!
+    // engfunc(EngFunc_SetOrigin, 0, out) // TODO: hacky ?!
 }
 
 static CBarrier_Spawn(const Float: origin[3], const Float: mins[3], const Float: maxs[3], const Float: pushForce = 2.0) {
