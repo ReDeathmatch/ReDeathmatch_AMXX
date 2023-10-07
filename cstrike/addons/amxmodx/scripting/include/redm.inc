@@ -218,6 +218,10 @@ stock bool: CBasePlayer_IsBlind(const player) {
     return Float: get_member(player, m_blindUntilTime) > get_gametime()
 }
 
+stock bool: SV_IsPlayerIndex(const index) {
+    return (index >= 1 && index <= MaxClients)
+}
+
 /**
  * Retrieves the round restart delay duration from a game mode CVAR.
  *

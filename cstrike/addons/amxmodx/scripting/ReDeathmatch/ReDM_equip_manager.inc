@@ -456,7 +456,7 @@ public CBasePlayer_GiveNamedItem(const player, const weaponName[]) {
     */
 }
 
-public EquipManager_PlayerKilled(const victim, const killer) {
+EquipManager_PlayerKilled(const victim) {
     new item = get_member(victim, m_pActiveItem)
     if (!is_entity(item))
         return
