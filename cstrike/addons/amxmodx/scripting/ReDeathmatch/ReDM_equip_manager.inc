@@ -397,6 +397,9 @@ public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame)
 }
 
 public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equipGame) {
+    if (!IsActive())
+        return
+
     for (new EquipType_e: section; section < EquipType_e; section++) {
         if (g_playerWeapons[player][section] != EQUIP_NOT_CHOOSEN) {
             Player_GiveWeapon(player, section)
