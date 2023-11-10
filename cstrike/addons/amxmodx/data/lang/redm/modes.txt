@@ -9,3 +9,9 @@ ALL_WEAPONS = Все оружия
 ALL_WEAPONS_HS_ONLY = Все оружия (только HS)
 PISTOLS_ONLY_HS = Пистолеты (только HS)
 SECOND_ROUND_WEAPONS = Оружия 2-го раунда
+
+[cn]
+ALL_WEAPONS = 全部武器
+ALL_WEAPONS_HS_ONLY = 全部武器 （只有 HS）
+PISTOLS_ONLY_HS = 手枪 （只有HS）
+SECOND_ROUND_WEAPONS = 第二轮武器

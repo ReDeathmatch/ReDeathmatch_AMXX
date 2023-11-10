@@ -40,3 +40,24 @@ NextGameMode = следующий игровой режим
 Choose = Выберите
 Selecting = Выбор
 Extend = продлить
+
+[cn]
+Currently = 当前
+Already = 已经
+
+RandomWeapons = 随机武器
+Enabled = 启用
+Disabled = 禁用
+PrimaryEquip = 主要武器
+SecondaryEquip = 次要武器
+ToClosePressG = \w关闭菜单 - 请按 `\yG\w`
+CurrentMode = 当前模式：
+NextMode = 下一个模式 - 
+YouCanChooseEquip = 你可以选择装备，通过按 `^3G^1` (或输入 \3/guns^1).
+ModeChanges = 游戏模式改变。
+Modes = 游戏模式
+DisableForceMode = 禁用强制模式
+NextGameMode = 下一个游戏模式
+Choose = 选择
+Selecting = 选中
+Extend = 扩展
