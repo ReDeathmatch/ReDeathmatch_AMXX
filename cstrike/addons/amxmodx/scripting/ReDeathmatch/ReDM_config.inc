@@ -55,7 +55,7 @@ static bool: FindConfigFile(filePath[], len = PLATFORM_MAX_PATH) {
         }
     }
 
-    LogMessageEx(Warning, "FindConfigFile: Can't find any config file!")
+    LogMessageEx(Fatal, "^n    Can't find any config file in `%s/%s/**/*.json`!", configsDir, g_mainDir)
 
     return false
 }
@@ -108,7 +108,7 @@ static bool: ParseConfig(const file[] = "") {
 
     new JSON: config = json_parse(configFile, .is_file = true, .with_comments = true)
     if (config == Invalid_JSON) {
-        LogMessageEx(Warning, "ParseConfig: Can't parse JSON from `%s` file!", configFile)
+        LogMessageEx(Fatal, "ParseConfig: Can't parse JSON from `%s` file!", configFile)
 
         return false
     }
