@@ -64,6 +64,11 @@ public plugin_init() {
     register_plugin("ReDM: Spawns manager", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("common.txt")
 
+    if (!is_regamedll()) {
+        LogMessageEx(Fatal, "^n    ReGameDLL not found!")
+        return
+    }
+
     rh_get_mapname(g_mapName, charsmax(g_mapName))
     GameDLLSpawnsCountFix()
 
