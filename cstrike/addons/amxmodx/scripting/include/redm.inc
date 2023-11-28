@@ -126,15 +126,20 @@ enum LogLevel { Trace, Debug, Info, Warning, Error, Fatal }
  * @param ...       Additional parameters for message formatting.
  */
 stock LogMessageEx(const LogLevel: level = Info, const message[], any: ...) {
-	static const logLevelString[LogLevel][] = { "TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL" }
-	static buffer[4096]
-	vformat(buffer, sizeof buffer, message, 3)
-	format(buffer, sizeof buffer,"[%.2f][%s] %s", get_gametime(), logLevelString[level], buffer)
+    static buffer[4096]
+    vformat(buffer, sizeof buffer, message, 3)
 
-	if (level == Fatal)
-		set_fail_state("%s", buffer)
+    if (level == Fatal) {
+        format(buffer, sizeof buffer, "%s", buffer)
+        set_fail_state("%s", buffer)
 
-	server_print("%s", buffer)
+        return
+    }
+
+    static const logLevelString[LogLevel][] = { "TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL" }
+    format(buffer, sizeof buffer, "[%.2f][%s] %s", get_gametime(), logLevelString[level], buffer)
+
+    server_print("%s", buffer)
 }
 
 /**
