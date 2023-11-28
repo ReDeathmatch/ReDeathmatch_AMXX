@@ -24,17 +24,10 @@ public ClCmd_redm_modes_menu(const player, const level, const commandId) {
 }
 
 static bool: Menu_Modes(const player) {
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+    new count
+    new JSON: arrModes = RoundModes_GetModesArr(count)
+    if (!count)
         return false
-
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-
-    new count = json_array_get_count(arrModes)
-    if (!count) {
-        json_free(arrModes)
-
-        return false
-    }
 
     new callback
     if (!callback)
@@ -78,8 +71,6 @@ static bool: Menu_Modes(const player) {
 
         json_free(objMode)
     }
-
-    json_free(arrModes)
     
     menu_setprop(menu, MPROP_BACKNAME, fmt("%l", "BACK"))
     menu_setprop(menu, MPROP_NEXTNAME, fmt("%l", "MORE"))
@@ -129,27 +120,17 @@ public MenuHandler_Modes(const player, const menu, const item) {
 }
 
 Menu_GetVoteItemsCount() {
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
-        return false
-
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-    new count = json_array_get_count(arrModes)
-    json_free(arrModes)
+    new count
+    RoundModes_GetModesArr(count)
 
     return count
 }
 
 bool: Menu_VoteMode(const player = 0) {
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+    new count
+    new JSON: arrModes = RoundModes_GetModesArr(count)
+    if (!count)
         return false
-
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-
-    new count = json_array_get_count(arrModes)
-    if (!count) {
-        json_free(arrModes)
-        return false
-    }
 
     new menu = menu_create("Choose", "MenuHandler_ChooseNextMode")
 

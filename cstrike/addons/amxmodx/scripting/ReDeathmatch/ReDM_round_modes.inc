@@ -5,6 +5,8 @@ enum {
     RoundMode_NotSet = -1, /**< Round game-mode is not set */
 }
 
+static JSON: g_arrModes = Invalid_JSON
+
 static g_currentRoundModeIdx = RoundMode_NotSet
 static g_forcedModeIdx = RoundMode_NotSet
 
@@ -27,22 +29,41 @@ RoundModes_Init() {
 
     ModesMenus_Init()
     ModeVote_Init()
+
+    RoundModes_ReadModes()
+}
+
+RoundModes_ReadModes() {
+    if (g_arrModes != Invalid_JSON)
+        json_free(g_arrModes)
+
+    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+        return
+
+    g_arrModes = json_object_get_value(Config_GetCurrent(), "modes")
 }
 
 /**
  * Handles mode voting and mode switching.
  */
 RoundModes_RoundEnd() {
-    new bool: voteStarted = ModeVote_RoundEnd_Post()
+    if (strcmp(redm_modes_switch, "disable") == 0)
+        return
 
+    new count
+    RoundModes_GetModesArr(count)
+    if (!count) {
+        LogMessageEx(Warning, "RoundModes_RoundEnd(): Can't load modes list from config!")
+
+        return
+    }
+
+    new bool: voteStarted = ModeVote_RoundEnd_Post()
     if (voteStarted) {
         client_print(0, print_center, "%l %l.", "Selecting", "NextGameMode")
 
         return
     }
-
-    if (strcmp(redm_modes_switch, "disable") == 0)
-        return
 
     new nextModeIdx = GetNextMode()
     if (nextModeIdx == RoundMode_NotSet)
@@ -123,20 +144,15 @@ public RoundInfoMessage(const player) {
  * 
  * @return A reference to the JSON array containing game modes, or `Invalid_JSON` if not found.
  */
-static JSON: GetModesArr(& count = 0) {
-    if (!json_object_has_value(Config_GetCurrent(), "modes"))
+JSON: RoundModes_GetModesArr(& count = 0) {
+    if (g_arrModes == Invalid_JSON)
         return Invalid_JSON
 
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-
-    count = json_array_get_count(arrModes)
-    if (!count) {
-        json_free(arrModes)
-
+    count = json_array_get_count(g_arrModes)
+    if (!count)
         return Invalid_JSON
-    }
-    
-    return arrModes
+
+    return g_arrModes
 }
 
 /**
@@ -150,20 +166,16 @@ static JSON: GetModesArr(& count = 0) {
  */
 bool: RoundModes_GetModeInfo(const modeIdx, name[] = "", len = 0) {
     new count
-    new JSON: arrModes = GetModesArr(count)
-    if (arrModes == Invalid_JSON)
+    new JSON: arrModes = RoundModes_GetModesArr(count)
+    if (!count)
         return false
 
-    if (modeIdx < 0 || modeIdx >= count) {
-        json_free(arrModes)
-
+    if (modeIdx < 0 || modeIdx >= count)
         return false
-    }
 
     new JSON: objMode = json_array_get_value(arrModes, modeIdx)
     json_object_get_string(objMode, "name", name, len)
 
-    json_free(arrModes)
     json_free(objMode)
 
     return true
@@ -171,15 +183,13 @@ bool: RoundModes_GetModeInfo(const modeIdx, name[] = "", len = 0) {
 
 static GetNextMode() {
     new count
-    new JSON: arrModes = GetModesArr(count)
-    if (arrModes == Invalid_JSON)
+    RoundModes_GetModesArr(count)
+
+    if (!count)
         return RoundMode_NotSet
 
-    if (RoundModes_IsModeForced()) {
-        json_free(arrModes)
-
+    if (RoundModes_IsModeForced())
         return g_forcedModeIdx
-    }
 
     new currentIdx = g_currentRoundModeIdx
 
@@ -204,7 +214,7 @@ static bool: ApplyMode(const modeIdx) {
 
     Config_Reload()
 
-    new JSON: arrModes = GetModesArr()
+    new JSON: arrModes = RoundModes_GetModesArr()
     if (arrModes == Invalid_JSON)
         return false
 
@@ -218,7 +228,6 @@ static bool: ApplyMode(const modeIdx) {
     }
 
     json_free(objMode)
-    json_free(arrModes)
 
     return true
 }

@@ -128,6 +128,7 @@ Config_Reload() {
         equipConfig = Config_GetMainEquip()
 
     EquipManager_LoadConfig(equipConfig)
+    RoundModes_ReadModes()
 
     json_free(equipConfig)
 }
@@ -206,30 +207,18 @@ JSON: Config_GetCurrent() {
  * @return              The equipment configuration for the current game mode as a JSON object.
  */
 JSON: Config_GetModeEquip() {
-    if (!json_object_has_value(Config_GetCurrent(), "modes")) {
+    new count
+    new JSON: arrModes = RoundModes_GetModesArr()
+    if (!count)
         return Invalid_JSON
-    }
-
-    new JSON: arrModes = json_object_get_value(Config_GetCurrent(), "modes")
-    new count = json_array_get_count(arrModes)
-    if (!count) {
-        json_free(arrModes)
-
-        return Invalid_JSON
-    }
 
     new currentModeIdx = RoundModes_GetCurrentMode()
-    if (currentModeIdx < 0) {
-        json_free(arrModes)
-
+    if (currentModeIdx < 0)
         return Invalid_JSON
-    }
-
 
     new JSON: objMode = json_array_get_value(arrModes, currentModeIdx)
     if (!json_object_has_value(objMode, "equip")) {
         json_free(objMode)
-        json_free(arrModes)
 
         return Invalid_JSON
     }
@@ -239,7 +228,6 @@ JSON: Config_GetModeEquip() {
 
     json_free(objEquip)
     json_free(objMode)
-    json_free(arrModes)
 
     return obj
 }
