@@ -152,14 +152,15 @@ stock LogMessageEx(const LogLevel: level = Info, const message[], any: ...) {
  * @param vol       The volume of the sound (default is 0.7).
  * @param pitch     The pitch of the sound (default is PITCH_NORM).
  */
-stock UTIL_PlaySoundEffect(const player, const sound[], const Float: vol = 0.7, const pitch = PITCH_NORM) {
-    rh_emit_sound2(
-        player,
+stock UTIL_PlaySoundEffect(const player, const sound[], const Float: vol = 0.7, const pitch = PITCH_NORM, const Float: attn = ATTN_NORM, const flags = 0) {
+    emit_sound(
         player,
         CHAN_VOICE,
         sound,
         .vol = vol,
-        .pitch = pitch
+        .pitch = pitch,
+        .att = attn,
+        .flags = flags
     )
 }
 

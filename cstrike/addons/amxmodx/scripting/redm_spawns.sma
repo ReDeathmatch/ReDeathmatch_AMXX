@@ -69,7 +69,7 @@ public plugin_init() {
         return
     }
 
-    rh_get_mapname(g_mapName, charsmax(g_mapName))
+    get_mapname(g_mapName, charsmax(g_mapName))
     GameDLLSpawnsCountFix()
 
     register_clcmd("enter_spawnGroup", "ClCmd_EnterSpawnGroup")
