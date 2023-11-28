@@ -72,9 +72,9 @@ public plugin_cfg() {
         CvarsHandler_Init()
         Features_Init()
         SpawnManager_Init()
-        RoundModes_Init()
         EquipManager_Init()
         Config_Init()
+        RoundModes_Init()
 
         SetActive(redm_active)
     }
