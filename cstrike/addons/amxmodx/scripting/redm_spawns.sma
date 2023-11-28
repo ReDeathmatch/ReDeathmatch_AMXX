@@ -64,7 +64,12 @@ public plugin_init() {
     register_plugin("ReDM: Spawns manager", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("common.txt")
 
-    rh_get_mapname(g_mapName, charsmax(g_mapName))
+    if (!is_regamedll()) {
+        LogMessageEx(Fatal, "^n    ReGameDLL not found!")
+        return
+    }
+
+    get_mapname(g_mapName, charsmax(g_mapName))
     GameDLLSpawnsCountFix()
 
     register_clcmd("enter_spawnGroup", "ClCmd_EnterSpawnGroup")

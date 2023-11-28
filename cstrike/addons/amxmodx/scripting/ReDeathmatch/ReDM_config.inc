@@ -33,7 +33,7 @@ static bool: FindConfigFile(filePath[], len = PLATFORM_MAX_PATH) {
     get_configsdir(configsDir, charsmax(configsDir))
 
     new mapName[MAX_MAPNAME_LENGTH]
-    rh_get_mapname(mapName, charsmax(mapName))
+    get_mapname(mapName, charsmax(mapName))
 
     new mapPrefix[32]
     copyc(mapPrefix, charsmax(mapPrefix), mapName, '_')

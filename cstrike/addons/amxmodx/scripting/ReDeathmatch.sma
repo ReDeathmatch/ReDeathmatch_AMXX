@@ -33,11 +33,16 @@ public plugin_init() {
     register_plugin("ReDeathmatch", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("redm/redm.txt")
 
+    create_cvar("redm_version", REDM_VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
+
+    if (!is_regamedll()) {
+        LogMessageEx(Fatal, "^n    ReGameDLL not found!")
+        return
+    }
+
     RegisterHookChain(RG_RoundEnd, "RoundEnd_Post", .post = true)
     RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
     RegisterHookChain(RG_CSGameRules_PlayerKilled, "CSGameRules_PlayerKilled_Post", .post = true)
-
-    create_cvar("redm_version", REDM_VERSION, (FCVAR_SERVER|FCVAR_SPONLY))
 
     bind_pcvar_num(
         create_cvar(
