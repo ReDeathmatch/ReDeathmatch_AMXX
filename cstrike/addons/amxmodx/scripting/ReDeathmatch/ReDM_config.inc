@@ -208,7 +208,7 @@ JSON: Config_GetCurrent() {
  */
 JSON: Config_GetModeEquip() {
     new count
-    new JSON: arrModes = RoundModes_GetModesArr()
+    new JSON: arrModes = RoundModes_GetModesArr(count)
     if (!count)
         return Invalid_JSON
 

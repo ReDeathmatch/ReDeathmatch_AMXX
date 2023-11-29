@@ -214,8 +214,9 @@ static bool: ApplyMode(const modeIdx) {
 
     Config_Reload()
 
-    new JSON: arrModes = RoundModes_GetModesArr()
-    if (arrModes == Invalid_JSON)
+    new count
+    new JSON: arrModes = RoundModes_GetModesArr(count)
+    if (!count)
         return false
 
     new JSON: objMode = json_array_get_value(arrModes, modeIdx)
