@@ -139,11 +139,7 @@ public ConCmd_EditSpawns(const player, const level, const commandId) {
 
     g_editorEnabled = !g_editorEnabled
 
-    if (!g_editorEnabled) {
-        Editor_Disable(player)
-    } else {
-        Editor_Enable(player)
-    }
+    Editor_SetStatus(player, g_editorEnabled)
 
     console_print(player, " * Spawns editor `%s`",
         g_editorEnabled ? "enabled" : "disabled"
@@ -163,23 +159,22 @@ public ConCmd_ConvertOldSpawns(const player, const level, const commandId) {
     return PLUGIN_HANDLED
 }
 
+static Editor_SetStatus(const player, const bool: enable) {
+    if (enable) {
+        if (g_arrSpawns != Invalid_JSON)
+            Editor_AddViewSpawns(g_arrSpawns)
 
-static Editor_Enable(const player) {
-    if (g_arrSpawns != Invalid_JSON)
-        Editor_AddViewSpawns(g_arrSpawns)
+        Menu_Editor(player)
+    } else {
+        reset_menu(player)
 
-    Menu_Editor(player)
-}
+        Editor_ResetProps(player)
 
-static Editor_Disable(const player) {
-    reset_menu(player)
+        Editor_SaveSpawns()
+        Editor_RemoveViewSpawns()
 
-    Editor_ResetProps(player)
-
-    Editor_SaveSpawns()
-    Editor_RemoveViewSpawns()
-
-    Editor_ReloadSpawns()
+        Editor_ReloadSpawns()
+    }
 }
 
 static Editor_ReloadSpawns() {
