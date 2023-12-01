@@ -263,13 +263,13 @@ static bool: Player_CallEquipMenu(const player) {
 static Menu_ChooseEquip(const player, const EquipType_e: section) {
     SetGlobalTransTarget(player)
 
-    new menu = menu_create(
-        fmt("%l^n%l",
-            section == et_Primary ? "PrimaryEquip" : "SecondaryEquip",
-            "ToClosePressG"
-        ),
-        "MenuHandler_ChooseEquip"
-    )
+    new menuTitle[128]
+    formatex(menuTitle, charsmax(menuTitle), "%l", section == et_Primary ? "PrimaryEquip" : "SecondaryEquip")
+
+    if (get_cvar_num("redm_open_equip_menu_by_g"))
+        strcat(menuTitle, fmt("^n%l", "ToClosePressG"), charsmax(menuTitle))
+
+    new menu = menu_create(menuTitle, "MenuHandler_ChooseEquip")
 
     static callback
     if(!callback)
