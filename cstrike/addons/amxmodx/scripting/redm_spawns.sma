@@ -575,7 +575,7 @@ static Editor_AddViewSpawns(const JSON: arrSpawns) {
         }
 
         if (!Add(origin, angle, vAngle, team, group)) {
-            LogMessageEx(Warning, "Editor_AddViewSpawns: Can't add spawn `%i`!")
+            LogMessageEx(Warning, "Editor_AddViewSpawns: Can't add spawn `%i`!", idx)
         }
 
         json_free(arrOrigin)
