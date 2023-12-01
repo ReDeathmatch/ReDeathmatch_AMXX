@@ -7,6 +7,7 @@
 #include <reapi>
 #include <redm>
 
+static MENU_FLAG = ADMIN_MAP
 
 static g_mapName[MAX_MAPNAME_LENGTH]
 
@@ -115,12 +116,12 @@ public plugin_cfg() {
     RegisterHookChain(RG_CBasePlayer_UseEmpty, "CBasePlayer_UseEmpty", .post = false)
 
     register_concmd("redm_edit_spawns", "ConCmd_EditSpawns",
-        ADMIN_MAP,
+        MENU_FLAG,
         "Edits spawn configuration"
     )
     
     register_concmd("redm_convert_spawns", "ConCmd_ConvertOldSpawns",
-        ADMIN_MAP,
+        MENU_FLAG,
         "Convert old spawns to new format"
     )
 
@@ -193,6 +194,9 @@ static Editor_ResetProps(const player) {
 
 public CBasePlayer_UseEmpty(const player) {
     if (!g_editorEnabled)
+        return HC_CONTINUE
+
+    if (!checkAccess(player, MENU_FLAG))
         return HC_CONTINUE
 
     Editor_Focus(player)
@@ -292,11 +296,14 @@ static Menu_Editor(const player/* , const level */) {
     if (!is_user_alive(player))
         return
 
+    if (!checkAccess(player, MENU_FLAG))
+        return
+
     static callback
     if (!callback)
         callback = menu_makecallback("MenuCallback_Editor")
 
-    new menu = menu_create("Spawns manager", "MenuHandler_Editor")
+    new menu = menu_create("Spawns manager^n\d(press `E` for spawn focus)\y", "MenuHandler_Editor")
 
     menu_additem(
         menu,
@@ -975,4 +982,20 @@ static stock GetPlayersOrigin(const startPlayer, Float: playersOrigin[MAX_PLAYER
 
         xs_vec_add(playersOrigin[i], origin, view_ofs)
     }
+}
+
+static stock bool: checkAccess(const player, const level) {
+    if (player == (is_dedicated_server() ? 0 : 1))
+        return true
+
+    if (level == ADMIN_ADMIN && is_user_admin(player))
+        return true
+
+    if (get_user_flags(player) & level)
+        return true
+
+    if (level == ADMIN_ALL)
+        return true
+    
+    return false
 }
