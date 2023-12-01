@@ -7,6 +7,7 @@
 #include <reapi>
 #include <redm>
 
+static MENU_FLAG = ADMIN_MAP
 
 static g_mapName[MAX_MAPNAME_LENGTH]
 
@@ -115,12 +116,12 @@ public plugin_cfg() {
     RegisterHookChain(RG_CBasePlayer_UseEmpty, "CBasePlayer_UseEmpty", .post = false)
 
     register_concmd("redm_edit_spawns", "ConCmd_EditSpawns",
-        ADMIN_MAP,
+        MENU_FLAG,
         "Edits spawn configuration"
     )
     
     register_concmd("redm_convert_spawns", "ConCmd_ConvertOldSpawns",
-        ADMIN_MAP,
+        MENU_FLAG,
         "Convert old spawns to new format"
     )
 
@@ -139,11 +140,7 @@ public ConCmd_EditSpawns(const player, const level, const commandId) {
 
     g_editorEnabled = !g_editorEnabled
 
-    if (!g_editorEnabled) {
-        Editor_Disable(player)
-    } else {
-        Editor_Enable(player)
-    }
+    Editor_SetStatus(player, g_editorEnabled)
 
     console_print(player, " * Spawns editor `%s`",
         g_editorEnabled ? "enabled" : "disabled"
@@ -163,23 +160,22 @@ public ConCmd_ConvertOldSpawns(const player, const level, const commandId) {
     return PLUGIN_HANDLED
 }
 
+static Editor_SetStatus(const player, const bool: enable) {
+    if (enable) {
+        if (g_arrSpawns != Invalid_JSON)
+            Editor_AddViewSpawns(g_arrSpawns)
 
-static Editor_Enable(const player) {
-    if (g_arrSpawns != Invalid_JSON)
-        Editor_AddViewSpawns(g_arrSpawns)
+        Menu_Editor(player)
+    } else {
+        reset_menu(player)
 
-    Menu_Editor(player)
-}
+        Editor_ResetProps(player)
 
-static Editor_Disable(const player) {
-    reset_menu(player)
+        Editor_SaveSpawns()
+        Editor_RemoveViewSpawns()
 
-    Editor_ResetProps(player)
-
-    Editor_SaveSpawns()
-    Editor_RemoveViewSpawns()
-
-    Editor_ReloadSpawns()
+        Editor_ReloadSpawns()
+    }
 }
 
 static Editor_ReloadSpawns() {
@@ -198,6 +194,9 @@ static Editor_ResetProps(const player) {
 
 public CBasePlayer_UseEmpty(const player) {
     if (!g_editorEnabled)
+        return HC_CONTINUE
+
+    if (!checkAccess(player, MENU_FLAG))
         return HC_CONTINUE
 
     Editor_Focus(player)
@@ -297,11 +296,14 @@ static Menu_Editor(const player/* , const level */) {
     if (!is_user_alive(player))
         return
 
+    if (!checkAccess(player, MENU_FLAG))
+        return
+
     static callback
     if (!callback)
         callback = menu_makecallback("MenuCallback_Editor")
 
-    new menu = menu_create("Spawns manager", "MenuHandler_Editor")
+    new menu = menu_create("Spawns manager^n\d(press `E` for spawn focus)\y", "MenuHandler_Editor")
 
     menu_additem(
         menu,
@@ -580,7 +582,7 @@ static Editor_AddViewSpawns(const JSON: arrSpawns) {
         }
 
         if (!Add(origin, angle, vAngle, team, group)) {
-            LogMessageEx(Warning, "Editor_AddViewSpawns: Can't add spawn `%i`!")
+            LogMessageEx(Warning, "Editor_AddViewSpawns: Can't add spawn `%i`!", idx)
         }
 
         json_free(arrOrigin)
@@ -980,4 +982,20 @@ static stock GetPlayersOrigin(const startPlayer, Float: playersOrigin[MAX_PLAYER
 
         xs_vec_add(playersOrigin[i], origin, view_ofs)
     }
+}
+
+static stock bool: checkAccess(const player, const level) {
+    if (player == (is_dedicated_server() ? 0 : 1))
+        return true
+
+    if (level == ADMIN_ADMIN && is_user_admin(player))
+        return true
+
+    if (get_user_flags(player) & level)
+        return true
+
+    if (level == ADMIN_ALL)
+        return true
+    
+    return false
 }
