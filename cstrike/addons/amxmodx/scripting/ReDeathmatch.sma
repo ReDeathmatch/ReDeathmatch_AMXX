@@ -59,7 +59,7 @@ public plugin_init() {
     register_concmd("redm_enable", "ConCmd_redm_enable", ADMIN_MAP, "Enables Re:DM.")
     register_concmd("redm_disable", "ConCmd_redm_disable", ADMIN_MAP, "Disables Re:DM.")
     register_concmd("redm_status", "ConCmd_redm_status", ADMIN_MAP, "Get Re:DM status.")
-    register_concmd("redm", "ConCmd_redm", ADMIN_ALL, "Get info.")
+    register_concmd("redm", "ConCmd_redm", ADMIN_ALL, "Get info.", .FlagManager = false)
 
     ApiInit_Forwards()
 }
