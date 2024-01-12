@@ -17,26 +17,22 @@
         <img
             src="https://img.shields.io/github/downloads/wopox1337/ReDeathmatch/total?label=Download%40latest&style=flat-square&logo=github&logoColor=white"
             alt="Build status"
-        >
-    </a>
+        ></a>
     <a href="https://github.com/wopox1337/ReDeathmatch/actions">
         <img
             src="https://img.shields.io/github/actions/workflow/status/wopox1337/ReDeathmatch/CI.yml?branch=master&style=flat-square&logo=github&logoColor=white"
             alt="Build status"
-        >
-    </a>
+        ></a>
     <a href="https://github.com/wopox1337/ReDeathmatch/releases">
         <img
             src="https://img.shields.io/github/v/release/wopox1337/ReDeathmatch?include_prereleases&style=flat-square&logo=github&logoColor=white"
             alt="Release"
-        >
-    </a>
+        ></a>
     <a href="https://www.amxmodx.org/downloads-new.php">
         <img
             src="https://img.shields.io/badge/AMXModX-%3E%3D1.9.0-blue?style=flat-square"
             alt="AMXModX dependency"
-        >
-        </a>
+        ></a>
 </p>
 
 ## About
