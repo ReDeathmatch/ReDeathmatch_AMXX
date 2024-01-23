@@ -685,7 +685,7 @@ static JSON: Editor_LoadSpawns() {
     return arrSpawns
 }
 
-static Editor_ConvertSpawns() {
+static bool: Editor_ConvertSpawns() {
     new configsDir[PLATFORM_MAX_PATH]
     get_configsdir(configsDir, charsmax(configsDir))
 
@@ -709,24 +709,40 @@ static Editor_ConvertSpawns() {
         return false
     }
 
-    new count
+    new filesCount
     while (next_file(dir, fileName, charsmax(fileName))) {
         new bool: isSpawnsFile = contain(fileName, ".spawns.cfg") != -1
         if (!isSpawnsFile)
             continue
 
-        ConvertOldSpawnsFile(fmt("%s/%s", csdmSpawnsDir, fileName))
-        ++count
+        new spawnsCount = ConvertOldSpawnsFile(fmt("%s/%s", csdmSpawnsDir, fileName))
+        if (spawnsCount == 0) {
+            LogMessageEx(Warning, "Editor_ConvertSpawns: File `%s/%s` skipped! Not found valid spawns.",
+                csdmSpawnsDir, fileName
+            )
+
+            continue
+        }
+
+        ++filesCount
     }
 
-    LogMessageEx(Info, "Editor_ConvertSpawns: Succefully convert `%i` old spawn files.", count)
-
     close_dir(dir)
+
+    if (!filesCount) {
+        LogMessageEx(Warning, "Editor_ConvertSpawns: Can't find old spawn files! Check `%s` folder!",
+            csdmSpawnsDir
+        )
+
+        return false
+    }
+
+    LogMessageEx(Info, "Editor_ConvertSpawns: Succefully convert `%i` old spawn files.", filesCount)
 
     return true
 }
 
-static bool: ConvertOldSpawnsFile(const file[]) {
+static ConvertOldSpawnsFile(const file[]) {
     new fileName[PLATFORM_MAX_PATH]
     remove_filepath(file, fileName, charsmax(fileName))
 
@@ -737,7 +753,7 @@ static bool: ConvertOldSpawnsFile(const file[]) {
     if (!f) {
         LogMessageEx(Info, "ConvertOldSpawnsFile: Can't open file `%s`.", file)
 
-        return false
+        return 0
     }
 
     new JSON: arrSpawns = json_init_array()
@@ -745,6 +761,13 @@ static bool: ConvertOldSpawnsFile(const file[]) {
         new data[1024]
         fgets(f, data, charsmax(data))
         trim(data)
+
+        if (!strlen(data))
+            continue
+        
+        #define IsCommentLine(%1) (%1[0] == ';' || %1[0] == '#' || (%1[0] == '/' && %1[1] == '/'))
+        if (IsCommentLine(data))
+            continue
 
         new strOrigin[3][8], strAngles[3][8], strTeam[3], strVAngles[3][8]
         new argC = parse(
@@ -761,8 +784,15 @@ static bool: ConvertOldSpawnsFile(const file[]) {
             strVAngles[2], charsmax(strVAngles[])
         )
 
-        if (argC != 10)
+        if (argC != 10 && argC != 6 && argC != 3) {
+            LogMessageEx(Warning, "ConvertOldSpawnsFile: File:`%s`, spawnIdx:#%i: Invalid arguments count: %i.",
+                file,
+                json_array_get_count(arrSpawns) + 1,
+                argC
+            )
+
             continue
+        }
         
         {
             new JSON: spawn = json_init_object()
@@ -797,6 +827,10 @@ static bool: ConvertOldSpawnsFile(const file[]) {
 
     fclose(f)
 
+    new spawnsCount = json_array_get_count(arrSpawns)
+    if (spawnsCount == 0)
+        return 0
+
     new JSON: objSpawns = json_init_object()
     json_object_set_value(objSpawns, "spawns", arrSpawns)
     json_free(arrSpawns)
@@ -816,7 +850,7 @@ static bool: ConvertOldSpawnsFile(const file[]) {
         set_fail_state("Can't create file `%s`", filePath)
 
     json_free(objSpawns)
-    return true
+    return spawnsCount
 }
 
 static GameDLLSpawnsCountFix() {
