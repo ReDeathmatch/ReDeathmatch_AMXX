@@ -303,11 +303,21 @@ static Menu_Editor(const player/* , const level */) {
     if (!callback)
         callback = menu_makecallback("MenuCallback_Editor")
 
-    new menu = menu_create("Spawns manager^n\d(press `E` for spawn focus)\y", "MenuHandler_Editor")
+    new focusEntity = g_editorProps[player][ep_focusEntity] 
+
+    new spawnIndex = -1
+    if (focusEntity != FM_NULLENT)
+        spawnIndex = GetSpawnIndexByViewEntityIndex(focusEntity)
+
+    new buffer[192]
+    formatex(buffer, charsmax(buffer), "Spawns manager^n\d(press `E` for spawn focus)\y^n%s",
+        (focusEntity != FM_NULLENT) ? fmt("\wSpawn index: #%i\y", spawnIndex) : ""
+    )
+    new menu = menu_create(buffer, "MenuHandler_Editor")
 
     menu_additem(
         menu,
-        (g_editorProps[player][ep_focusEntity] != FM_NULLENT) ? "Update" : "Add",
+        (focusEntity != FM_NULLENT) ? "Update" : "Add",
         .callback = callback
     )
 
@@ -1032,4 +1042,17 @@ static stock bool: checkAccess(const player, const level) {
         return true
     
     return false
+}
+
+static stock GetSpawnIndexByViewEntityIndex(const entityIndex) {
+    new entity = MaxClients
+    new spawnIndex
+    while ((entity = fm_find_ent_by_class(entity, g_spawnClassname))) {
+        ++spawnIndex
+
+        if (entity == entityIndex)
+            return spawnIndex
+    }
+
+    return -1
 }
