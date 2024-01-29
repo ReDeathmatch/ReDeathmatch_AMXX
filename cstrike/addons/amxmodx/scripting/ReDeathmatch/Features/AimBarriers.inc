@@ -4,7 +4,14 @@ static g_spriteLaserbeam
 static g_spriteBubble
 
 static bool: redm_aim_barrier
-static redm_aim_barrier_always_show
+
+enum BarrierState_s {
+    BARRIER_DISABLED,
+    BARRIER_ALWAYS_VISIBLE,
+    BARRIER_VISIBLE_ON_TOUCH,
+}
+
+static BarrierState_s: redm_aim_barrier_always_show
 
 AimBarriers_Precache() {
     g_spriteLaserbeam = precache_model("sprites/laserbeam.spr")
@@ -130,15 +137,15 @@ static CBarrier_Touch(const entity, const other) {
 
     set_pev(entity, pev_movedir, velocity)
 
-    if (redm_aim_barrier_always_show == 2) {
+    if (redm_aim_barrier_always_show == BARRIER_VISIBLE_ON_TOUCH) {
         new Float: gameTime = get_gametime()
 
-        static Float: nextEffctsTime
-        if (nextEffctsTime > gameTime)
+        static Float: nextEffectsTime
+        if (nextEffectsTime > gameTime)
             return HAM_IGNORED
         
         const Float: drawDelay = 0.5
-        nextEffctsTime = gameTime + drawDelay
+        nextEffectsTime = gameTime + drawDelay
 
         CBarrier_Draw(entity, other, drawDelay)
     }
@@ -179,7 +186,7 @@ static CBarrier_Draw(const entity, const toucher, const Float: drawDelay) {
     FVecIVec(start, s)
     FVecIVec(end, e)
 
-    new Float: overlap = 0.0 // -0.8
+    const Float: overlap = 0.0 // -0.8
     new lifeTime = floatround((drawDelay + overlap) * 10, floatround_ceil)
     te_create_beam_between_points(
         s, e,
@@ -200,7 +207,7 @@ public BarrierRedraw(const entity) {
     if (!IsActive())
         return
 
-    if (redm_aim_barrier_always_show != 1)
+    if (redm_aim_barrier_always_show != BARRIER_ALWAYS_VISIBLE)
         return
 
     CBarrier_Draw(entity, 0, BARRIER_REDRAW_TIME)
