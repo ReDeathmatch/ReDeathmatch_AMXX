@@ -590,3 +590,10 @@ stock _xs_vec_to_string(const Float: vec[], output[], const len, const precision
 stock const XS_X = 0;
 stock const XS_Y = 1;
 stock const XS_Z = 2;
+
+// Extend ConVar flags.
+enum _: ConVar_ExtendedFlags (<<= 1) {
+    _FCVAR_BOOLEAN = (FCVAR_NOEXTRAWHITEPACE << 1), /**< Can contain boolean value */
+    _FCVAR_STRING,                                  /**< Can contain string value */
+    _FCVAR_FLOAT,                                   /**< Can contain float value */
+}
