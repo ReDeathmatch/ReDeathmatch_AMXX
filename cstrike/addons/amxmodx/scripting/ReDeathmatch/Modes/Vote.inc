@@ -32,6 +32,7 @@ ModeVote_Init() {
             "redm_mode_vote_enable", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Enable voting for the next game mode."
         ),
         redm_mode_vote_enable

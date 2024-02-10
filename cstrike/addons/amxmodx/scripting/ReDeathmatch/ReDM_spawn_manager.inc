@@ -11,7 +11,11 @@ static redm_spawn_preset[32]
 
 SpawnManager_Init() {
     bind_pcvar_string(
-        create_cvar("redm_spawn_preset", "preset"),
+        create_cvar(
+            "redm_spawn_preset",
+            "preset",
+            .flags = _FCVAR_STRING
+        ),
         redm_spawn_preset,
         charsmax(redm_spawn_preset)
     )

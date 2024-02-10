@@ -24,6 +24,7 @@ AimBarriers_Init() {
             "redm_aim_barrier", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Enable a barrier in the middle of the map (`anti-rush' system). \
                 It does not work on `de_`, `cs_` `css_` maps."
         ),
