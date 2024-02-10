@@ -48,9 +48,9 @@ static Float: g_gravityValues[] = {
     1.0, 0.5, 0.25, 0.05
 } 
 
-static mp_randomspawn
-static mp_randomspawn_los
-static Float: mp_randomspawn_dist
+static redm_randomspawn
+static redm_randomspawn_los
+static Float: redm_randomspawn_dist
 
 static bool: mp_freeforall
 
@@ -84,7 +84,7 @@ public plugin_cfg() {
 
     bind_pcvar_num(
         create_cvar(
-            "mp_randomspawn", "1",
+            "redm_randomspawn", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 3.0,
             .description = "Enables the system of selecting spawns. \
@@ -93,24 +93,24 @@ public plugin_cfg() {
                 `2` - only for T, \
                 `3` - only for CT"
             ),
-        mp_randomspawn
+        redm_randomspawn
     )
     bind_pcvar_num(
         create_cvar(
-            "mp_randomspawn_los", "1",
+            "redm_randomspawn_los", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
             .description = "Check the spawn point for visibility by enemies (line of sight)."
         ),
-        mp_randomspawn_los
+        redm_randomspawn_los
     )
     bind_pcvar_float(
         create_cvar(
-            "mp_randomspawn_dist", "1500.0",
+            "redm_randomspawn_dist", "1500.0",
             .has_min = true, .min_val = 0.0,
             .description = "Minimum distance to the enemy to enable spawn checks."
         ),
-        mp_randomspawn_dist
+        redm_randomspawn_dist
     )
     
     RegisterHookChain(RG_CBasePlayer_UseEmpty, "CBasePlayer_UseEmpty", .post = false)
@@ -878,7 +878,7 @@ public bool: SpawnPreset_DefaultPreset(const player) {
         return false
 
     new team = get_member(player, m_iTeam)
-    switch(mp_randomspawn) {
+    switch(redm_randomspawn) {
         case 0:
             return false
         case 2: {
@@ -968,7 +968,7 @@ static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnId
         pev(i, pev_origin, enemyOrigin)
 
         new Float: disatanceToEnemy = get_distance_f(spawnOrigin, enemyOrigin)
-        new Float: searchDistance = mp_randomspawn_dist / (attempt + 1)
+        new Float: searchDistance = redm_randomspawn_dist / (attempt + 1)
 
         if (disatanceToEnemy < 200.0)
             return false
@@ -980,7 +980,7 @@ static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnId
         spawnHeadOrigin = spawnOrigin
         spawnHeadOrigin[2] + 17.0 // check the head
 
-        if (mp_randomspawn_los) {
+        if (redm_randomspawn_los) {
             if (/* fm_is_in_viewcone(i, spawnOrigin) && */ fm_is_visible(i, spawnHeadOrigin, true)) {
                 return false
             }

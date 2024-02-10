@@ -36,15 +36,15 @@
         1 - for all
         2 - only for T
         3 - only for CT */
-        "mp_randomspawn": "1",
+        "redm_randomspawn": "1",
 
         /* Check the spawn point for visibility by enemies (line of sight).
         0 - disable
         1 - enable */
-        "mp_randomspawn_los": "1",
+        "redm_randomspawn_los": "1",
 
         // Minimum distance to the enemy to enable spawn checks.
-        "mp_randomspawn_dist": "1500",
+        "redm_randomspawn_dist": "1500",
 
         // Name of the spawn manager
         "redm_spawn_preset": "preset",
