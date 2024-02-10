@@ -152,7 +152,8 @@
         "mp_scoreboard_showmoney": "0",
         "mp_show_radioicon": "0",
         "mp_timelimit": "30",
-        "mp_weapons_allow_map_placed": "0"
+        "mp_weapons_allow_map_placed": "0",
+        "mp_roundrespawn_time": "9999999"
     },
     "modes": [
         {
