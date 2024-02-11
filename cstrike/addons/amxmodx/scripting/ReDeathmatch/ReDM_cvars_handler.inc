@@ -2,6 +2,7 @@ static Trie: g_cvarValues = Invalid_Trie
 
 CvarsHandler_Init() {
     register_concmd("redm_dump_cvars", "ConCmd_redm_dump_cvars", ADMIN_MAP, "Dump changed CVar to table.")
+    register_concmd("redm_dump_settings", "ConCmd_redm_dump_settings", ADMIN_MAP, "Dump mode settings")
 }
 
 /**
@@ -17,6 +18,23 @@ public ConCmd_redm_dump_cvars(const player, const level, const commandId) {
         return PLUGIN_HANDLED
 
     DumpAllSavedCvars(player)
+
+    return PLUGIN_HANDLED
+}
+
+/**
+ * Displays mode settings to the specified player.
+ *
+ * @param player        The player to whom the CVAR values should be displayed.
+ * @param level         The access level of the player executing the command.
+ * @param commandId     The ID of the command.
+ * @return              Returns PLUGIN_HANDLED.
+ */
+public ConCmd_redm_dump_settings(const player, const level, const commandId) {
+    if (!cmd_access(player, level, commandId, 1))
+        return PLUGIN_HANDLED
+
+    DumpAllSettings(player)
 
     return PLUGIN_HANDLED
 }
@@ -193,4 +211,82 @@ stock DumpAllSavedCvars(const player = 0) {
     }
 
     TrieIterDestroy(iter)
+}
+
+DumpAllSettings(const player = 0, const prefix[] = "redm_") {
+    new const template[] = "| %-2i | %-32.32s | %-7s | %-16s | %10s |"
+    console_print(player, "| %-2s | %-32.32s | %-7s | %-16s | %10s |",
+        "#", "ConVar name", "type", "value", "bounds"
+    )
+    console_print(player,
+        "| -- | -------------------------------- | ------- | ---------------- | ---------- |"
+    )
+
+    for (new cvarIndex, idx; cvarIndex < 100; cvarIndex++) {
+        new name[32]
+        new flags
+        new pluginId
+        new cvarHandle
+        new description[192]
+
+        new bool: found = get_plugins_cvar(
+            cvarIndex,
+            name, charsmax(name),
+            flags,
+            pluginId,
+            cvarHandle,
+            description, charsmax(description)
+        ) != 0
+
+        if (!found)
+            continue
+
+        if (flags & FCVAR_PROTECTED)
+            continue
+
+        #if 0
+        // TODO: Does it need to be?
+        static currentPluginId = -1
+        if (currentPluginId == -1)
+            currentPluginId = get_plugin(-1)
+
+        if (pluginId != currentPluginId)
+            continue
+        #endif
+
+        if (strncmp(name, prefix, strlen(prefix), .ignorecase = true) != 0)
+            continue
+
+        new valueStr[32]
+        if (flags & _FCVAR_FLOAT)
+            formatex(valueStr, charsmax(valueStr), "%.2f", get_pcvar_float(cvarHandle))
+        else 
+            get_pcvar_string(cvarHandle, valueStr, charsmax(valueStr))
+
+        enum Bounds_s {
+            bool: hasBound,
+            Float: value
+        }
+        new bounds[CvarBounds][Bounds_s]
+
+        for (new CvarBounds: boundType; boundType < CvarBounds; boundType++) {
+            bounds[boundType][hasBound] = get_pcvar_bounds(cvarHandle, boundType, bounds[boundType][value])
+        }
+
+        new boundsBuffer[32]
+        if (bounds[CvarBound_Lower][hasBound] || bounds[CvarBound_Upper][hasBound]) {
+            formatex(boundsBuffer, charsmax(boundsBuffer), "%s .. %s",
+                bounds[CvarBound_Lower][hasBound] ? fmt("%.1f", bounds[CvarBound_Lower][value]) : " - ",
+                bounds[CvarBound_Upper][hasBound] ? fmt("%.1f", bounds[CvarBound_Upper][value]) : " - "
+            )
+        }
+
+        console_print(player, template,
+            ++idx,
+            name,
+            GetCvarTypeStr(flags),
+            valueStr,
+            boundsBuffer
+        )
+    }
 }

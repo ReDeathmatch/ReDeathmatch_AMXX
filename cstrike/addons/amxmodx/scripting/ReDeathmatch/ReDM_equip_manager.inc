@@ -62,6 +62,7 @@ EquipManager_Init() {
             "redm_keep_weapon_slot", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Restore weapon slot on respawn."
         ),
         redm_keep_weapon_slot
@@ -71,6 +72,7 @@ EquipManager_Init() {
             "redm_open_equip_menu", "0",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Open weapon equip menu on spawn."
         ),
         redm_open_equip_menu

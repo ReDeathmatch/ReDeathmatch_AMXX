@@ -51,6 +51,7 @@ Features_Init() {
             "redm_open_equip_menu_by_g", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Open equip menu by pressing `G` (drop command)."
         ),
         redm_open_equip_menu_by_g
@@ -60,6 +61,7 @@ Features_Init() {
             "redm_block_drop_weapon", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Block the ability to drop the weapon."
         ),
         redm_block_drop_weapon
@@ -68,6 +70,7 @@ Features_Init() {
         create_cvar(
             "redm_healer", "10.0",
             .has_min = true, .min_val = 0.0,
+            .flags = _FCVAR_FLOAT,
             .description = "How much to restore HP when killing an enemy."
         ),
         redm_healer
@@ -76,6 +79,7 @@ Features_Init() {
         create_cvar(
             "redm_healer_hs", "20.0",
             .has_min = true, .min_val = 0.0,
+            .flags = _FCVAR_FLOAT,
             .description = "How much to restore HP when killing with HS an enemy."
         ),
         redm_healer_hs
@@ -84,6 +88,7 @@ Features_Init() {
         create_cvar(
             "redm_sounds_distance", "1500.0",
             .has_min = true, .min_val = 0.0,
+            .flags = _FCVAR_FLOAT,
             .description = "Mute the sounds of other players at a distance."
         ),
         redm_sounds_distance
@@ -93,6 +98,7 @@ Features_Init() {
             "redm_fade", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Highlight the display when you kill someone."
         ),
         redm_fade
@@ -100,6 +106,7 @@ Features_Init() {
     bind_pcvar_string(
         create_cvar(
             "redm_fade_colors", "0 200 0 50",
+            .flags = _FCVAR_STRING,
             .description = "Kill highlights color [RGBA]"
         ),
         redm_fade_colors, charsmax(redm_fade_colors)
@@ -109,6 +116,7 @@ Features_Init() {
             "redm_refill_ammo", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Refill ammo on kills."
         ),
         redm_refill_ammo
@@ -118,6 +126,7 @@ Features_Init() {
             "redm_hitsound", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Play a sound when an enemy is hit."
         ),
         redm_hitsound
@@ -127,6 +136,7 @@ Features_Init() {
             "mp_damage_headshot_only", "0",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Enable hits only in HS."
         ),
         mp_damage_headshot_only
@@ -136,6 +146,7 @@ Features_Init() {
             "redm_hide_other_deathnotice", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Hide other players' killfeed."
         ),
         redm_hide_other_deathnotice
@@ -143,6 +154,7 @@ Features_Init() {
     bind_pcvar_string(
         create_cvar(
             "redm_protection_color_t", "200 0 0 15",
+            .flags = _FCVAR_STRING,
             .description = "On spawn T protection colors [RGBA]"
         ),
         redm_protection_color_t, charsmax(redm_protection_color_t)
@@ -150,6 +162,7 @@ Features_Init() {
     bind_pcvar_string(
         create_cvar(
             "redm_protection_color_ct", "0 0 200 15",
+            .flags = _FCVAR_STRING,
             .description = "On spawn CT protection colors [RGBA]"
         ),
         redm_protection_color_ct, charsmax(redm_protection_color_ct)

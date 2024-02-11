@@ -49,6 +49,7 @@ public plugin_init() {
             "redm_active", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Controls the state of Re:DM. \
                 Don't use into ReDM configs!"
         ),

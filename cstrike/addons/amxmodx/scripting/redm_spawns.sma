@@ -100,6 +100,7 @@ public plugin_cfg() {
             "redm_randomspawn_los", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
             .description = "Check the spawn point for visibility by enemies (line of sight)."
         ),
         redm_randomspawn_los
@@ -108,6 +109,7 @@ public plugin_cfg() {
         create_cvar(
             "redm_randomspawn_dist", "1500.0",
             .has_min = true, .min_val = 0.0,
+            .flags = _FCVAR_FLOAT,
             .description = "Minimum distance to the enemy to enable spawn checks."
         ),
         redm_randomspawn_dist
