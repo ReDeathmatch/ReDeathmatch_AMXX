@@ -16,6 +16,7 @@
 #include "ReDeathmatch/ReDM_equip_manager.inc"
 #include "ReDeathmatch/ReDM_features.inc"
 #include "ReDeathmatch/ReDM_round_modes.inc"
+#include "ReDeathmatch/ReDM_settings_menu.inc"
 #include "ReDeathmatch/ReDM_api.inc"
 
 
@@ -50,7 +51,7 @@ public plugin_init() {
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_BOOLEAN,
-            .description = "Controls the state of Re:DM. \
+            .description = "Controls the state of Re:DM.^n\
                 Don't use into ReDM configs!"
         ),
         redm_active
@@ -81,6 +82,7 @@ public plugin_cfg() {
         EquipManager_Init()
         Config_Init()
         RoundModes_Init()
+        SettingsMenu_Init()
 
         SetActive(redm_active)
     }

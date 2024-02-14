@@ -19,9 +19,9 @@ RoundModes_Init() {
         create_cvar(
             "redm_modes_switch", "sequentially",
             .flags = (_FCVAR_STRING | _FCVAR_BOOLEAN),
-            .description = "Game mode change mode. \
-                `0`, `disable` - disable modes, \
-                `random` - random change, \
+            .description = "Game mode change mode. ^n\
+                `0`, `disable` - disable modes, ^n\
+                `random` - random change, ^n\
                 `sequentially` - sequential mode change."
         ),
         redm_modes_switch,

@@ -262,22 +262,18 @@ DumpAllSettings(const player = 0, const prefix[] = "redm_") {
             formatex(valueStr, charsmax(valueStr), "%.2f", get_pcvar_float(cvarHandle))
         else 
             get_pcvar_string(cvarHandle, valueStr, charsmax(valueStr))
-
-        enum Bounds_s {
-            bool: hasBound,
-            Float: value
-        }
+        
         new bounds[CvarBounds][Bounds_s]
 
         for (new CvarBounds: boundType; boundType < CvarBounds; boundType++) {
-            bounds[boundType][hasBound] = get_pcvar_bounds(cvarHandle, boundType, bounds[boundType][value])
+            bounds[boundType][b_hasBound] = get_pcvar_bounds(cvarHandle, boundType, bounds[boundType][b_value])
         }
 
         new boundsBuffer[32]
-        if (bounds[CvarBound_Lower][hasBound] || bounds[CvarBound_Upper][hasBound]) {
+        if (bounds[CvarBound_Lower][b_hasBound] || bounds[CvarBound_Upper][b_hasBound]) {
             formatex(boundsBuffer, charsmax(boundsBuffer), "%s .. %s",
-                bounds[CvarBound_Lower][hasBound] ? fmt("%.1f", bounds[CvarBound_Lower][value]) : " - ",
-                bounds[CvarBound_Upper][hasBound] ? fmt("%.1f", bounds[CvarBound_Upper][value]) : " - "
+                bounds[CvarBound_Lower][b_hasBound] ? fmt("%.1f", bounds[CvarBound_Lower][b_value]) : " - ",
+                bounds[CvarBound_Upper][b_hasBound] ? fmt("%.1f", bounds[CvarBound_Upper][b_value]) : " - "
             )
         }
 

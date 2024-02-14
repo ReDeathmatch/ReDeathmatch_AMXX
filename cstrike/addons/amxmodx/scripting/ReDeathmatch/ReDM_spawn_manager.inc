@@ -14,7 +14,8 @@ SpawnManager_Init() {
         create_cvar(
             "redm_spawn_preset",
             "preset",
-            .flags = _FCVAR_STRING
+            .flags = _FCVAR_STRING,
+            .description = "Method of work for the respawn manager."
         ),
         redm_spawn_preset,
         charsmax(redm_spawn_preset)
