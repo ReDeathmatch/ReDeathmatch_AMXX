@@ -87,6 +87,8 @@ public plugin_cfg() {
         SetActive(redm_active)
     }
     CallApi_Initialized()
+
+    server_cmd("redm_dump_commands")
 }
 
 public plugin_end() {

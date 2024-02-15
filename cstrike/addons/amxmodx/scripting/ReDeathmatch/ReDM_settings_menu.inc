@@ -30,6 +30,7 @@ public ConCmd_redm_settings_menu(const player, const level, const commandId) {
 }
 
 public ClCmd_ChangeSettingValue(const player, const level, const commandId) {
+    #if 0
     if (!cmd_access(player, level, commandId, 1))
         return PLUGIN_HANDLED
 
@@ -54,6 +55,8 @@ public ClCmd_ChangeSettingValue(const player, const level, const commandId) {
     // )
 
     Menu_ChangeSettingsItem(player, .cvarIndex = strtol(cvarIndexStr))
+    #endif
+
     return PLUGIN_HANDLED
 }
 static bool: Menu_Settings(const player) {
