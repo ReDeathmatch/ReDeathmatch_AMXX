@@ -504,7 +504,7 @@ static Spawn_EntityGetPosition(const entity, Float: origin[3], Float: angle[3], 
 }
 
 static bool: Spawn_EntitySetPosition(const entity, const Float: origin[3], const Float: angle[3], const Float: vAngle[3]) {
-    new HullVacant_s: res = CheckHullVacant(origin, .ignorePlayers = g_editorEnabled)
+    new HullVacant_s: res = CheckHullVacant(origin, .ignoreEnt = entity, .ignorePlayers = g_editorEnabled)
     if (res == hull_Invalid) {
         if (g_editorEnabled)
             client_print_color(is_user_connected(entity) ? entity : 0, print_team_red, "^3Invalid place!^1")
@@ -545,20 +545,22 @@ static stock fm_animate_entity(const entity, const Activity: sequence = ACT_IDLE
     set_pev(entity, pev_framerate, framerate)
 }
 
-stock HullVacant_s: CheckHullVacant(const Float: origin[3], const bool: ignorePlayers = false) {
+stock HullVacant_s: CheckHullVacant(const Float: origin[3], const ignoreEnt = 0, const bool: ignorePlayers = false) {
     static hulls[] = { HULL_HUMAN, HULL_HEAD }
 
-    new res
-    for (new i; i < sizeof(hulls); i++) {
-        engfunc(EngFunc_TraceHull, origin, origin, ignorePlayers ? IGNORE_MONSTERS : DONT_IGNORE_MONSTERS, hulls[i], 0, 0)
+    for (new hullType; hullType < sizeof(hulls); hullType++) {
+        new traceHullResult = fm_trace_hull(
+            origin,
+            hulls[hullType],
+            ignoreEnt,
+            ignorePlayers ? IGNORE_MONSTERS : DONT_IGNORE_MONSTERS
+        )
 
-        if (!get_tr2(0, TR_StartSolid) /*&& !get_tr2(0, TR_AllSolid) && get_tr2(0, TR_InOpen) */) {
-            return HullVacant_s: res
-        }
-        ++res
+        if (traceHullResult == 0)
+            return HullVacant_s: hullType
     }
 
-    return HullVacant_s: res
+    return hull_Invalid
 }
 
 static Editor_RemoveViewSpawns() {
@@ -907,14 +909,15 @@ static bool: Player_MoveToSpawn(const player, const count) {
         // Set random offset for starting search
         new maxSpawn = count - 1
         new potentialSpawnIdx = random_num(0, maxSpawn)
-        while(spawnsCount--) {
+        while (spawnsCount--) {
             // Reset iterator
             if (++potentialSpawnIdx > maxSpawn) {
                 potentialSpawnIdx = 0
             }
 
             // TODO: optimize that!
-            if (Spawn_CheckConditions(player, team, potentialSpawnIdx, attempt)) {
+            new spawnResult = Spawn_CheckConditions(player, team, potentialSpawnIdx, attempt)
+            if (spawnResult == 0) {
                 bestSpawnIdx = potentialSpawnIdx
                 break
             } else if (attempt == 2) {
@@ -944,17 +947,21 @@ static bool: Player_MoveToSpawn(const player, const count) {
     return res
 }
 
-static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnIdx, const attempt) {
+static Spawn_CheckConditions(const target, const targetTeam, const spawnIdx, const attempt) {
     new Float: spawnOrigin[3], Float: spawnAngle[3], Float: spawnVAngle[3], spawnTeam, spawnGroup[32]
     GetSpawnFromObject(spawnIdx, spawnOrigin, spawnAngle, spawnVAngle, spawnTeam, spawnGroup)
 
     // Doesn't match because of the spawn team
     if (targetTeam && spawnTeam && (spawnTeam != targetTeam))
-        return false
+        return 1
 
     // TODO: implement spawn group check
     // if (spawnGroup[0] != EOS && spawnGroup[0] == 'A')
     //     return false
+
+    new HullVacant_s: res = CheckHullVacant(spawnOrigin, .ignoreEnt = target, .ignorePlayers = false)
+    if (res == hull_Invalid)
+        return 2
 
     for (new i = 1; i <= MaxClients; i++) {
         if (target == i)
@@ -964,7 +971,7 @@ static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnId
             continue
 
         // Exclude teammates if need it
-        if (targetTeam && targetTeam == pev(i, pev_team)) 
+        if (targetTeam && targetTeam == get_member(i, m_iTeam))
             continue
 
         new Float: enemyOrigin[3]
@@ -974,7 +981,7 @@ static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnId
         new Float: searchDistance = redm_randomspawn_dist / (attempt + 1)
 
         if (disatanceToEnemy < 200.0)
-            return false
+            return 3
 
         if (disatanceToEnemy > searchDistance)
             continue
@@ -985,12 +992,12 @@ static bool: Spawn_CheckConditions(const target, const targetTeam, const spawnId
 
         if (redm_randomspawn_los) {
             if (/* fm_is_in_viewcone(i, spawnOrigin) && */ fm_is_visible(i, spawnHeadOrigin, true)) {
-                return false
+                return 4
             }
-        } 
+        }
     }
 
-    return true
+    return 0
 }
 
 static GetSpawnFromObject(const spawnIdx, Float: origin[3], Float: angle[3], Float: vAngle[3], &team = 0, spawnGroup[] = "") {
