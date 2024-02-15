@@ -174,7 +174,7 @@ public ClCmd_cl_autobuy(const player) {
     if (!IsActive())
         return PLUGIN_CONTINUE
 
-    Player_SwitchRandomWeapons(player)
+    Player_SwitchRandomWeapons(player, .newState = !g_playerRandomWeapons[player])
 
     return PLUGIN_HANDLED
 }
@@ -205,13 +205,13 @@ public ClCmd_Guns(const player) {
  *
  * @return Returns true if random weapons mode is enabled after toggling, false otherwise.
  */
-static bool: Player_SwitchRandomWeapons(const player) {
+static bool: Player_SwitchRandomWeapons(const player, const bool: newState) {
     if (!IsActive())
         return false
 
     SetGlobalTransTarget(player)
 
-    g_playerRandomWeapons[player] = !g_playerRandomWeapons[player]
+    g_playerRandomWeapons[player] = newState
 
     if (!g_playerRandomWeapons[player]) {
         EquipManager_Reset(player)
@@ -340,6 +340,9 @@ public MenuHandler_ChooseEquip(const player, const menu, const item) {
 
     new EquipType_e: section = EquipType_e: strtol(info)
     g_playerWeapons[player][section] = item
+
+    if (g_playerRandomWeapons[player])
+        Player_SwitchRandomWeapons(player, .newState = false)
 
     Player_GiveWeapon(player, section)
 
