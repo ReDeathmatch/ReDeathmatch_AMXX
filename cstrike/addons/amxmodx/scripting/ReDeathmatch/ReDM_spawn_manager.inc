@@ -29,6 +29,9 @@ public CSGameRules_GetPlayerSpawnSpot(const player) {
     if (!IsActive())
         return HC_CONTINUE
 
+    if (get_member(player, m_bJustConnected))
+        return HC_CONTINUE
+
     if (!SpawnManager_Spawn(player))
         return HC_CONTINUE
 
