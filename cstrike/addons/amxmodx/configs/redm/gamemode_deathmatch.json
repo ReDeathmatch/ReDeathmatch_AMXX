@@ -27,7 +27,18 @@
             "weapon_p228",
             "weapon_elite",
             "weapon_fiveseven"
-        ]
+        ],
+        "botEquip": {
+            "primary": [
+                "weapon_famas",
+                "weapon_galil"
+            ],
+            "secondary": [
+                "weapon_deagle",
+                "weapon_p228",
+                "weapon_elite"
+            ]
+        }
     },
     "cvars": {
     // ReDM: Spawns
