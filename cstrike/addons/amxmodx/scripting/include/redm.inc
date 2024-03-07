@@ -307,11 +307,13 @@ stock UTIL_ScreenFade(const player, const Float: fxTime = 0.2, const Float: hold
  * @param obj   The JSON object to dump.
  * @param msg   A message prefix to include in the log entry.
  */
-stock UTIL_DumpJSON(JSON: obj, msg[]) {
-    new buffer[1024]
-    json_serial_to_string(obj, buffer, charsmax(buffer))
+stock UTIL_DumpJSON(const JSON: obj, const bool: pretty = false) {
+    new buffer[8192]
+    json_serial_to_string(obj, buffer, charsmax(buffer), pretty)
 
-    server_print("%s:`%s`", msg, buffer)
+    for (new i, len = strlen(buffer); i < len; i+=255) {
+        server_print(fmt("%-255s", buffer[i]))
+    }
 }
 
 /**
