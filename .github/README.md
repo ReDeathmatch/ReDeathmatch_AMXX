@@ -77,3 +77,6 @@ Check the wiki [Installation](https://github.com/wopox1337/ReDeathmatch/wiki/Ins
 ## Downloads
 - [Release builds](https://github.com/wopox1337/ReDeathmatch/releases)
 - [Dev builds](https://github.com/wopox1337/ReDeathmatch/actions/workflows/build.yml)
+
+
+![Alt](https://repobeats.axiom.co/api/embed/f0ad70b77044302da541f84d7ca59b3dd305ea82.svg "Repobeats analytics image")
