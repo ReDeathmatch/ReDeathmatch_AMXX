@@ -424,17 +424,25 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
     if (!IsActive())
         return
 
+    new hasConfiguredEquip = false
     for (new EquipType_e: section; section < EquipType_e; section++) {
-        if (g_playerWeapons[player][section] != EQUIP_NOT_CHOOSEN) {
-            Player_GiveWeapon(player, section)
-
+        if (g_playerWeapons[player][section] == EQUIP_NOT_CHOOSEN)
             continue
-        }
 
-        if (redm_open_equip_menu)
-            Menu_ChooseEquip(player, section)
+        hasConfiguredEquip = true
+        Player_GiveWeapon(player, section)
+    }
 
+    if (hasConfiguredEquip)
         return
+
+    // TODO: smells like a shit. need to rework later
+    if (!hasConfiguredEquip && redm_open_equip_menu) {
+        if (!g_inEquipMenu[player]) {
+            new EquipType_e: section = (g_playerWeapons[player][et_Primary] == EQUIP_NOT_CHOOSEN) ? et_Primary : et_Secondary
+
+            Menu_ChooseEquip(player, section)
+        }
     }
 }
 
