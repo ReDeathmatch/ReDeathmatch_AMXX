@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://github.com/wopox1337/ReDeathmatch">
+    <a href="https://github.com/ReDeathmatch/ReDeathmatch_AMXX">
         <img
             width="500px"
             alt="Gun logo"
@@ -13,21 +13,21 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/wopox1337/ReDeathmatch/releases/latest">
+    <a href="https://github.com/ReDeathmatch/ReDeathmatch_AMXX/releases/latest">
         <img
-            src="https://img.shields.io/github/downloads/wopox1337/ReDeathmatch/total?label=Download%40latest&style=flat-square&logo=github&logoColor=white"
+            src="https://img.shields.io/github/downloads/ReDeathmatch/ReDeathmatch_AMXX/total?label=Download%40latest&style=flat-square&logo=github&logoColor=white"
             alt="Build status"
         >
     </a>
-    <a href="https://github.com/wopox1337/ReDeathmatch/actions">
+    <a href="https://github.com/ReDeathmatch/ReDeathmatch_AMXX/actions">
         <img
-            src="https://img.shields.io/github/actions/workflow/status/wopox1337/ReDeathmatch/CI.yml?branch=master&style=flat-square&logo=github&logoColor=white"
+            src="https://img.shields.io/github/actions/workflow/status/ReDeathmatch/ReDeathmatch_AMXX/CI.yml?branch=master&style=flat-square&logo=github&logoColor=white"
             alt="Build status"
         >
     </a>
-    <a href="https://github.com/wopox1337/ReDeathmatch/releases">
+    <a href="https://github.com/ReDeathmatch/ReDeathmatch_AMXX/releases">
         <img
-            src="https://img.shields.io/github/v/release/wopox1337/ReDeathmatch?include_prereleases&style=flat-square&logo=github&logoColor=white"
+            src="https://img.shields.io/github/v/release/ReDeathmatch/ReDeathmatch_AMXX?include_prereleases&style=flat-square&logo=github&logoColor=white"
             alt="Release"
         >
     </a>
@@ -73,7 +73,7 @@ Many features have long been built and optimized to work directly in ReGameDLL_C
 - Installed [ReAPI](https://github.com/s1lentq/reapi) amxx module; 
       
 ## Installation
-Check the wiki [Installation](https://github.com/wopox1337/ReDeathmatch/wiki/Installation)
+Check the wiki [Installation](https://github.com/ReDeathmatch/ReDeathmatch_AMXX/wiki/Installation)
 
 ## Updating
 - Put new plugins and lang-files (`plugins/*.amxx` & `data/lang/*.txt`) into `amxmodx/` folder on the HLDS server;
@@ -81,8 +81,8 @@ Check the wiki [Installation](https://github.com/wopox1337/ReDeathmatch/wiki/Ins
 - Make sure that the versions of the plugins are up to date with the command `amxx list`.
 
 ## Downloads
-- [Release builds](https://github.com/wopox1337/ReDeathmatch/releases)
-- [Dev builds](https://github.com/wopox1337/ReDeathmatch/actions/workflows/build.yml)
+- [Release builds](https://github.com/ReDeathmatch/ReDeathmatch_AMXX/releases)
+- [Dev builds](https://github.com/ReDeathmatch/ReDeathmatch_AMXX/actions/workflows/build.yml)
 
 
 ![Alt](https://repobeats.axiom.co/api/embed/f0ad70b77044302da541f84d7ca59b3dd305ea82.svg "Repobeats analytics image")
