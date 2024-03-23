@@ -87,10 +87,11 @@ public plugin_cfg() {
             "redm_randomspawn", "1",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 3.0,
-            .description = "Enables the system of selecting spawns. \
-                `0` - disable, \
-                `1` - for all, \
-                `2` - only for T, \
+            .flags = _FCVAR_INTEGER,
+            .description = "Enables the system of selecting spawns. ^n\
+                `0` - disable, ^n\
+                `1` - for all, ^n\
+                `2` - only for T, ^n\
                 `3` - only for CT"
             ),
         redm_randomspawn

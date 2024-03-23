@@ -52,7 +52,7 @@ public plugin_init() {
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_BOOLEAN,
-            .description = "Controls the state of Re:DM. \
+            .description = "Controls the state of Re:DM.^n\
                 Don't use into ReDM configs!"
         ),
         redm_active

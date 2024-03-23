@@ -598,11 +598,11 @@ enum _: ConVar_ExtendedFlags (<<= 1) {
     _FCVAR_BOOLEAN = (FCVAR_NOEXTRAWHITEPACE << 1), /**< Can contain boolean value */
     _FCVAR_STRING,                                  /**< Can contain string value */
     _FCVAR_FLOAT,                                   /**< Can contain float value */
+    _FCVAR_INTEGER,                                 /**< Can contain integer value */
 }
 
 stock GetCvarTypeStr(const /* ConVar_ExtendedFlags: */ flags) {
     new buffer[32]
-    copy(buffer, charsmax(buffer), "number")
 
     if (flags & _FCVAR_BOOLEAN)
         copy(buffer, charsmax(buffer), "boolean")
@@ -613,5 +613,13 @@ stock GetCvarTypeStr(const /* ConVar_ExtendedFlags: */ flags) {
     if (flags & _FCVAR_FLOAT)
         copy(buffer, charsmax(buffer), "float")
     
+    if (flags & _FCVAR_INTEGER)
+        copy(buffer, charsmax(buffer), "integer")
+    
     return buffer
+}
+
+enum Bounds_s {
+    bool: b_hasBound,
+    Float: b_value
 }

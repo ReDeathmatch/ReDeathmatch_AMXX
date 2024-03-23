@@ -41,6 +41,7 @@ ModeVote_Init() {
         create_cvar(
             "redm_mode_vote_time", "15",
             .has_min = true, .min_val = 0.0,
+            .flags = _FCVAR_INTEGER,
             .description = "Time to vote for the next mode (sec)."
         ),
         redm_mode_vote_time
@@ -49,6 +50,7 @@ ModeVote_Init() {
         create_cvar(
             "redm_mode_vote_extend_times", "1",
             .has_min = true, .min_val = 0.0,
+            .flags = _FCVAR_INTEGER,
             .description = "How many times can the game mode be extended."
         ),
         redm_mode_vote_extend_times

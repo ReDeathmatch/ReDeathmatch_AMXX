@@ -25,7 +25,7 @@ AimBarriers_Init() {
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_BOOLEAN,
-            .description = "Enable a barrier in the middle of the map (`anti-rush' system). \
+            .description = "Enable a barrier in the middle of the map (`anti-rush' system).^n\
                 It does not work on `de_`, `cs_` `css_` maps."
         ),
         redm_aim_barrier
@@ -35,10 +35,11 @@ AimBarriers_Init() {
             "redm_aim_barrier_always_show", "2",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 2.0,
-            .description = "Barrier display mode. \
-                `0` - disable, \
-                `1` - display permanently (beta), \
-                `2` - display only when touched."
+            .flags = _FCVAR_INTEGER,
+            .description = "Barrier display mode. ^n\
+                ^t`0` - disable, ^n\
+                ^t`1` - display permanently (beta), ^n\
+                ^t`2` - display only when touched."
         ),
         redm_aim_barrier_always_show
     )
