@@ -10,6 +10,8 @@
 
 #tryinclude <msgstocks>
 
+#pragma dynamic (8192 + 4096)
+
 #include "ReDeathmatch/ReDM_config.inc"
 #include "ReDeathmatch/ReDM_cvars_handler.inc"
 #include "ReDeathmatch/ReDM_spawn_manager.inc"
@@ -34,7 +36,7 @@ public plugin_init() {
     register_plugin("ReDeathmatch", REDM_VERSION, "Sergey Shorokhov")
     register_dictionary("redm/redm.txt")
 
-    create_cvar("redm_version", REDM_VERSION, (FCVAR_SERVER|FCVAR_SPONLY|FCVAR_PROTECTED))
+    create_cvar("redm_version", REDM_VERSION, FCVAR_SERVER)
 
     if (!is_regamedll()) {
         LogMessageEx(Fatal, "^n    ReGameDLL not found!")

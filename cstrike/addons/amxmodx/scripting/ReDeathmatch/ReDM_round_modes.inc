@@ -48,7 +48,7 @@ RoundModes_ReadModes() {
  * Handles mode voting and mode switching.
  */
 RoundModes_RoundEnd() {
-    if (strcmp(redm_modes_switch, "disable") == 0 || strtol(redm_modes_switch) == 0)
+    if (strcmp(redm_modes_switch, "disable") == 0 || strcmp(redm_modes_switch, "0") == 0)
         return
 
     new count

@@ -27,8 +27,10 @@ enum {
 /**
  * Arrays to store player equipment choices.
  */
-static g_equip[EquipType_e]
+static Array: g_equip[EquipType_e]
 static g_playerWeapons[MAX_PLAYERS + 1][EquipType_e]
+
+static Array: g_botWeapons[EquipType_e]
 
 /**
  * Array to store the last weapon slot chosen by players.
@@ -113,16 +115,16 @@ EquipManager_PutInServer(const player) {
  */
 EquipManager_LoadConfig(const JSON: objEquip) {
     for (new EquipType_e: section; section < EquipType_e; section++) {
-        LoadConfigEquip(objEquip, section)
+        LoadConfigEquip(objEquip, section, g_equip[section])
+        LoadConfigBotEquip(objEquip, section)
     }
 }
 
-static LoadConfigEquip(const JSON: objEquip, const EquipType_e: section) {
-    if (g_equip[section] == _: Invalid_Array) {
-        g_equip[section] = _: ArrayCreate(32)
-    } 
+static LoadConfigEquip(const JSON: objEquip, const EquipType_e: section, &Array: equipArray) {
+    if (equipArray == Invalid_Array)
+        equipArray = ArrayCreate(32)
 
-    ArrayClear(Array: g_equip[section])
+    ArrayClear(equipArray)
 
     if (!json_object_has_value(objEquip, g_equipSections[section]))
         return
@@ -151,7 +153,7 @@ static LoadConfigEquip(const JSON: objEquip, const EquipType_e: section) {
             continue
         }
 
-        if (ArrayFindString(Array: g_equip[section], weapon) != -1) {
+        if (ArrayFindString(equipArray, weapon) != -1) {
             LogMessageEx(Warning, "LoadConfigEquip(): WARNING! Weapon `%s` already in equip `%s` list. Skipped.", 
                 weapon, g_equipSections[section]
             )
@@ -159,8 +161,25 @@ static LoadConfigEquip(const JSON: objEquip, const EquipType_e: section) {
             continue
         }
 
-        ArrayPushString(Array: g_equip[section], weapon)
+        ArrayPushString(equipArray, weapon)
     }
+
+    json_free(equipWeapons)
+}
+
+static LoadConfigBotEquip(const JSON: objEquip, const EquipType_e: section) {
+    if (!json_object_has_value(objEquip, "botEquip"))
+        return
+
+    new JSON: equipWeapons = json_object_get_value(objEquip, "botEquip")
+    if (equipWeapons == Invalid_JSON)
+        set_fail_state("Can't read `%s` section from config", g_equipSections[section])
+
+    if (g_botWeapons[section] == Invalid_Array)
+        g_botWeapons[section] = ArrayCreate(32)
+
+    ArrayClear(g_botWeapons[section])
+    LoadConfigEquip(equipWeapons, section, g_botWeapons[section])
 
     json_free(equipWeapons)
 }
@@ -251,7 +270,7 @@ static bool: Player_CallEquipMenu(const player) {
     }
 
     for (new EquipType_e: section; section < EquipType_e; section++) {
-        if (!HasEquipItems(section))
+        if (!HasEquipItems(player, section))
             continue
 
         Menu_ChooseEquip(player, section)
@@ -357,7 +376,7 @@ public MenuHandler_ChooseEquip(const player, const menu, const item) {
         return PLUGIN_HANDLED
     }
     
-    if (!HasEquipItems(section))
+    if (!HasEquipItems(player, section))
         return PLUGIN_HANDLED
 
     Menu_ChooseEquip(player, section)
@@ -382,11 +401,11 @@ public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame)
 
     new bool: fullyEquipped = true
     for (new EquipType_e: section; section < EquipType_e; section++) {
-        if (!HasEquipItems(section))
+        if (!HasEquipItems(player, section))
             continue
 
         if (g_playerRandomWeapons[player])
-            g_playerWeapons[player][section] = random_num(0, ArraySize(Array: g_equip[section]) - 1)
+            g_playerWeapons[player][section] = random_num(0, ArraySize(GetEquipConfig(player, section)) - 1)
 
         if (g_playerWeapons[player][section] != EQUIP_NOT_CHOOSEN)
             continue
@@ -405,17 +424,25 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
     if (!IsActive())
         return
 
+    new hasConfiguredEquip = false
     for (new EquipType_e: section; section < EquipType_e; section++) {
-        if (g_playerWeapons[player][section] != EQUIP_NOT_CHOOSEN) {
-            Player_GiveWeapon(player, section)
-
+        if (g_playerWeapons[player][section] == EQUIP_NOT_CHOOSEN)
             continue
-        }
 
-        if (redm_open_equip_menu)
-            Menu_ChooseEquip(player, section)
+        hasConfiguredEquip = true
+        Player_GiveWeapon(player, section)
+    }
 
+    if (hasConfiguredEquip)
         return
+
+    // TODO: smells like a shit. need to rework later
+    if (!hasConfiguredEquip && redm_open_equip_menu) {
+        if (!g_inEquipMenu[player]) {
+            new EquipType_e: section = (g_playerWeapons[player][et_Primary] == EQUIP_NOT_CHOOSEN) ? et_Primary : et_Secondary
+
+            Menu_ChooseEquip(player, section)
+        }
     }
 }
 
@@ -513,7 +540,7 @@ static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
 
     new weaponName[32]
     ArrayGetString(
-        Array: g_equip[section],
+        GetEquipConfig(player, section),
         g_playerWeapons[player][section],
         weaponName,
         charsmax(weaponName)
@@ -545,6 +572,9 @@ EquipManager_Reset(const player) {
     for (new EquipType_e: section; section < EquipType_e; section++) {
         g_playerWeapons[player][section] = EQUIP_NOT_CHOOSEN
     }
+
+    if (is_user_bot(player))
+        g_playerRandomWeapons[player] = true
 }
 
 /**
@@ -557,8 +587,18 @@ EquipManager_Reset(const player) {
  *
  * @return Returns true if the specified section has available items, false otherwise.
  */
-static bool: HasEquipItems(const EquipType_e: section) {
-    return ArraySize(Array: g_equip[section]) != 0
+static bool: HasEquipItems(const player, const EquipType_e: section) {
+    return ArraySize(GetEquipConfig(player, section)) != 0
+}
+
+static Array: GetEquipConfig(const player, const EquipType_e: section) {
+    if (!is_user_bot(player))
+        return g_equip[section]
+
+    if (g_botWeapons[section] == Invalid_Array || ArraySize(g_botWeapons[section]) == 0)
+        return g_equip[section]
+
+    return g_botWeapons[section]
 }
 
 public ConCmd_redm_dump_equip(const player, const level, const commandId) {
