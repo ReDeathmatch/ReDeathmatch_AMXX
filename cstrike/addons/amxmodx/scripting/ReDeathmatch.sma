@@ -18,6 +18,7 @@
 #include "ReDeathmatch/ReDM_equip_manager.inc"
 #include "ReDeathmatch/ReDM_features.inc"
 #include "ReDeathmatch/ReDM_round_modes.inc"
+#include "ReDeathmatch/ReDM_settings_menu.inc"
 #include "ReDeathmatch/ReDM_api.inc"
 
 
@@ -83,10 +84,13 @@ public plugin_cfg() {
         EquipManager_Init()
         Config_Init()
         RoundModes_Init()
+        SettingsMenu_Init()
 
         SetActive(redm_active)
     }
     CallApi_Initialized()
+
+    server_cmd("redm_dump_commands")
 }
 
 public plugin_end() {

@@ -3,6 +3,7 @@ static Trie: g_cvarValues = Invalid_Trie
 CvarsHandler_Init() {
     register_concmd("redm_dump_cvars", "ConCmd_redm_dump_cvars", ADMIN_MAP, "Dump changed CVar to table.")
     register_concmd("redm_dump_settings", "ConCmd_redm_dump_settings", ADMIN_MAP, "Dump mode settings")
+    register_concmd("redm_dump_commands", "ConCmd_redm_dump_commands", ADMIN_MAP, "Dump mode commands")
 }
 
 /**
@@ -35,6 +36,23 @@ public ConCmd_redm_dump_settings(const player, const level, const commandId) {
         return PLUGIN_HANDLED
 
     DumpAllSettings(player)
+
+    return PLUGIN_HANDLED
+}
+
+/**
+ * Displays mode settings to the specified player.
+ *
+ * @param player        The player to whom the CVAR values should be displayed.
+ * @param level         The access level of the player executing the command.
+ * @param commandId     The ID of the command.
+ * @return              Returns PLUGIN_HANDLED.
+ */
+public ConCmd_redm_dump_commands(const player, const level, const commandId) {
+    if (!cmd_access(player, level, commandId, 1))
+        return PLUGIN_HANDLED
+
+    DumpAllCommands(player)
 
     return PLUGIN_HANDLED
 }
@@ -283,6 +301,38 @@ DumpAllSettings(const player = 0, const prefix[] = "redm_") {
             GetCvarTypeStr(flags),
             valueStr,
             boundsBuffer
+        )
+    }
+}
+
+// TODO: better filter
+static DumpAllCommands(const player = 0, const prefix[] = "redm") {
+    new const template[] = "| %-2i | %-32.32s (%i) | %-72.72s |"
+    console_print(player, "| %-2s | %-32.32s | %-72.72s |",
+        "#", "Command name", "Description"
+    )
+    console_print(player,
+        "| -- | -------------------------------- | ------------------------------------------------------------------------ |"
+    )
+
+    for (new commandIdx, len = get_concmdsnum(-1), idx = 1; commandIdx < len; commandIdx++) {
+        new command[32], flags, description[256]
+        get_concmd(
+            commandIdx,
+            command, charsmax(command),
+            flags,
+            description, charsmax(description),
+            -1
+        )
+
+        if (strncmp(command, prefix, strlen(prefix), .ignorecase = true) != 0)
+            continue
+
+        console_print(player, template,
+            idx++,
+            command,
+            flags,
+            description
         )
     }
 }
