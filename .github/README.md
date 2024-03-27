@@ -17,20 +17,17 @@
         <img
             src="https://img.shields.io/github/downloads/ReDeathmatch/ReDeathmatch_AMXX/total?label=Download%40latest&style=flat-square&logo=github&logoColor=white"
             alt="Build status"
-        >
-    </a>
+        ></a>
     <a href="https://github.com/ReDeathmatch/ReDeathmatch_AMXX/actions">
         <img
             src="https://img.shields.io/github/actions/workflow/status/ReDeathmatch/ReDeathmatch_AMXX/CI.yml?branch=master&style=flat-square&logo=github&logoColor=white"
             alt="Build status"
-        >
-    </a>
+        ></a>
     <a href="https://github.com/ReDeathmatch/ReDeathmatch_AMXX/releases">
         <img
             src="https://img.shields.io/github/v/release/ReDeathmatch/ReDeathmatch_AMXX?include_prereleases&style=flat-square&logo=github&logoColor=white"
             alt="Release"
-        >
-    </a>
+        ></a>
     <a href="https://www.amxmodx.org/downloads-new.php">
         <img
             src="https://img.shields.io/badge/AMXModX-1.9 | 1.10-blue?style=flat-square"
@@ -73,7 +70,7 @@ Many features have long been built and optimized to work directly in ReGameDLL_C
 - Installed [ReAPI](https://github.com/s1lentq/reapi) amxx module; 
       
 ## Installation
-Check the wiki [Installation](https://github.com/ReDeathmatch/ReDeathmatch_AMXX/wiki/Installation)
+Check the wiki [Installation](https://redeathmatch.github.io/en/Getting-started/installation/)
 
 ## Updating
 - Put new plugins and lang-files (`plugins/*.amxx` & `data/lang/*.txt`) into `amxmodx/` folder on the HLDS server;
