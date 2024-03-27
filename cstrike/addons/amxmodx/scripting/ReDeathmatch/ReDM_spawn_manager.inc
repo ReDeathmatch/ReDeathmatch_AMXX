@@ -20,10 +20,15 @@ SpawnManager_Init() {
         redm_spawn_preset,
         charsmax(redm_spawn_preset)
     )
+    hook_cvar_change(get_cvar_pointer("redm_spawn_preset"), "CvarChange_redm_spawn_preset")
 
     RegisterHookChain(RG_CSGameRules_GetPlayerSpawnSpot, "CSGameRules_GetPlayerSpawnSpot", .post = false)
 
     redm_setstyle(redm_spawn_preset)
+}
+
+public CvarChange_redm_spawn_preset(const cvar, const oldValue[], const value[]) {
+    redm_setstyle(value)
 }
 
 public CSGameRules_GetPlayerSpawnSpot(const player) {

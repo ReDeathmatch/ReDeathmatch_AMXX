@@ -161,6 +161,8 @@ public bool: native_redm_setstyle(const plugin_id, const argc) {
         }
     }
 
+    // TODO: rework
+    log_error(AMX_ERR_NOTFOUND, "Spawn preset style `%s` not found!", name)
     return false
 }
 
