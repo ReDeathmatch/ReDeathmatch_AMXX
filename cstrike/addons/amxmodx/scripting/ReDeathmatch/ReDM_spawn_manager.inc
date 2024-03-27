@@ -28,7 +28,12 @@ SpawnManager_Init() {
 }
 
 public CvarChange_redm_spawn_preset(const cvar, const oldValue[], const value[]) {
-    redm_setstyle(value)
+    new bool: result = redm_setstyle(value)
+    if (result)
+        return
+
+    set_pcvar_string(cvar, oldValue)
+    LogMessageEx(Warning, "CvarChange_redm_spawn_preset: Spawn preset style `%s` not found!", value)
 }
 
 public CSGameRules_GetPlayerSpawnSpot(const player) {
