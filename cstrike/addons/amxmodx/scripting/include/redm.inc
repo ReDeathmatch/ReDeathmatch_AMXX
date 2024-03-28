@@ -70,8 +70,11 @@ native redm_addstyle(const name[], const function[])
 /**
  * Sets the current spawn style handler by name.
  * The handler registered to this name will be called after every spawn.
+ * 
+ * @param name     Style preset name.
+ * @return         True if the style has been set, otherwise false.
  */
-native redm_setstyle(const name[])
+native bool: redm_setstyle(const name[])
 
 /**
  * Returns the current style ID.

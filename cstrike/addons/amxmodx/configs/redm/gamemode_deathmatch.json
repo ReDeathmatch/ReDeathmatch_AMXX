@@ -57,7 +57,10 @@
         // Minimum distance to the enemy to enable spawn checks.
         "redm_randomspawn_dist": "1500",
 
-        // Name of the spawn manager
+        /* Name of the spawn manager style.
+        `none`,
+        `preset`,
+        `random` - (beta) */
         "redm_spawn_preset": "preset",
 
     // ReDM: Features

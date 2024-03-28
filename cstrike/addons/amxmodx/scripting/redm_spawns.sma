@@ -6,6 +6,7 @@
 
 #include <reapi>
 #include <redm>
+#include <rog>
 
 static MENU_FLAG = ADMIN_MAP
 
@@ -76,6 +77,9 @@ public plugin_init() {
     register_clcmd("enter_spawnGroup", "ClCmd_EnterSpawnGroup")
 
     redm_addstyle("preset", "SpawnPreset_DefaultPreset")
+    redm_addstyle("random", "SpawnPreset_Random")
+
+    ROGInitialize(.MinDistance = 150.0)
 }
 
 public plugin_cfg() {
@@ -872,6 +876,54 @@ static GameDLLSpawnsCountFix() {
     set_member_game(m_bLevelInitialized, true)
     set_member_game(m_iSpawnPointCount_CT, 32)
     set_member_game(m_iSpawnPointCount_Terrorist, 32)
+}
+
+public bool: SpawnPreset_Random(const player) {
+    new attempts
+    const maxAttempts = 15
+
+startSearch:
+    new Float: origin[3]
+    ROGGetOrigin(origin)
+
+    new Float: bestvAngle[3]
+
+    // TODO: mb ConVar ?
+    const Float: searchPrecision = 8.0
+    for (new Float: addAngle = -90.0, Float: bestFraction; addAngle < 270.0; addAngle += (360.0 / searchPrecision)) {
+        new Float: angle[3]
+        angle[1] = addAngle
+
+        engfunc(EngFunc_MakeVectors, angle)
+        global_get(glb_v_forward, angle)
+        xs_vec_mul_scalar(angle, 9999.0, angle)
+
+        new Float: endOrigin[3]
+        xs_vec_add(origin, angle, endOrigin)
+
+        engfunc(EngFunc_TraceLine, origin, endOrigin, IGNORE_MONSTERS, player, 0)
+        new Float: fraction
+        get_tr2(0, TR_flFraction, fraction)
+
+        if (fraction > bestFraction) {
+            bestFraction = fraction
+            bestvAngle[1] = addAngle
+        }
+    }
+
+    new bool: res = Spawn_EntitySetPosition(player, origin, bestvAngle, bestvAngle)
+    if (!res) {
+        if (attempts++ < maxAttempts)
+            goto startSearch
+
+        LogMessageEx(Debug, "Player %n can't use a random spawns. (Max attempts reached!)",
+            player
+        )
+
+        return false
+    }
+
+    return true
 }
 
 public bool: SpawnPreset_DefaultPreset(const player) {
