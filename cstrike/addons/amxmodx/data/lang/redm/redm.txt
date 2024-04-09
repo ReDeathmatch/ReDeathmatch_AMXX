@@ -18,6 +18,7 @@ NextGameMode = next game mode
 Choose = Choose
 Selecting = Selecting
 Extend = extend
+ReDeathmatchSettingsMenu = ReDeathmatch settings:
 
 
 [ru]
@@ -40,6 +41,7 @@ NextGameMode = следующий игровой режим
 Choose = Выберите
 Selecting = Выбор
 Extend = продлить
+ReDeathmatchSettingsMenu = ReDeathmatch настройки:
 
 [cn]
 Currently = 当前
