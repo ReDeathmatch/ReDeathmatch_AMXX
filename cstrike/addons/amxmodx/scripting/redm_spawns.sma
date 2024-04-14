@@ -72,7 +72,7 @@ public plugin_init() {
     }
 
     get_mapname(g_mapName, charsmax(g_mapName))
-    GameDLLSpawnsCountFix()
+    RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = true)
 
     register_clcmd("enter_spawnGroup", "ClCmd_EnterSpawnGroup")
 
@@ -872,10 +872,14 @@ static ConvertOldSpawnsFile(const file[]) {
     return spawnsCount
 }
 
+public CSGameRules_RestartRound() {
+    GameDLLSpawnsCountFix()
+}
+
 static GameDLLSpawnsCountFix() {
     set_member_game(m_bLevelInitialized, true)
-    set_member_game(m_iSpawnPointCount_CT, 32)
-    set_member_game(m_iSpawnPointCount_Terrorist, 32)
+    set_member_game(m_iSpawnPointCount_CT, 64)
+    set_member_game(m_iSpawnPointCount_Terrorist, 64)
 }
 
 public bool: SpawnPreset_Random(const player) {
