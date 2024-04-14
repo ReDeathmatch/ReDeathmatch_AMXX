@@ -4,6 +4,7 @@ static g_fwdPrecacheEvent = -1
 static g_gunsEventsId
 static g_oldGroupinfo[MAX_PLAYERS + 1]
 static bool: g_protectionState[MAX_PLAYERS + 1]
+static Float: g_nextPlayerChooseTeam[MAX_PLAYERS + 1]
 
 static bool: redm_open_equip_menu_by_g
 static bool: redm_block_drop_weapon
@@ -19,6 +20,8 @@ static bool: redm_hide_other_deathnotice
 static redm_protection_color_t[32]
 static redm_protection_color_ct[32]
 static bool: mp_respawn_immunity_effects
+static bool: redm_changeteam_unlimited
+static Float: redm_changeteam_freq
 
 Features_Precache() {
     AimBarriers_Precache()
@@ -43,6 +46,9 @@ Features_Init() {
     RegisterHookChain(RG_CBasePlayer_SetSpawnProtection, "CBasePlayer_SetSpawnProtection_Post", .post = true)
     RegisterHookChain(RG_CBasePlayer_RemoveSpawnProtection, "CBasePlayer_RemoveSpawnProtection", .post = true)
     RegisterHookChain(RG_CBasePlayer_DropPlayerItem, "CBasePlayer_DropPlayerItem", .post = false)
+    RegisterHookChain(RG_ShowVGUIMenu, "ShowVGUIMenu_Pre", .post = false)
+    RegisterHookChain(RG_HandleMenu_ChooseTeam, "HandleMenu_ChooseTeam_Pre", .post = false)
+    RegisterHookChain(RG_HandleMenu_ChooseTeam, "HandleMenu_ChooseTeam", .post = true)
 
     AimBarriers_Init()
 
@@ -170,6 +176,29 @@ Features_Init() {
 
     bind_pcvar_num(get_cvar_pointer("mp_respawn_immunity_effects"), mp_respawn_immunity_effects)
 
+    bind_pcvar_num(
+        create_cvar(
+            "redm_changeteam_unlimited",
+            "0",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
+            .description = "Remove limits on player's team switching."
+        ),
+        redm_changeteam_unlimited
+    )
+    bind_pcvar_float(
+        create_cvar(
+            "redm_changeteam_freq",
+            "2",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 240.0,
+            .flags = _FCVAR_FLOAT,
+            .description = "Limit the frequency of team changes. ^n\
+                In seconds."
+        ),
+        redm_changeteam_freq
+    )
     
     register_clcmd("drop", "ClCmd_Drop", .FlagManager = false)
 }
@@ -464,6 +493,65 @@ public CBasePlayer_DropPlayerItem(const player, const itemName[]) {
 
     SetHookChainReturn(ATYPE_INTEGER, 0)
     return HC_SUPERCEDE
+}
+
+public ShowVGUIMenu_Pre(const player, VGUIMenu: menuType, bitsSlots, oldMenu[])
+{
+    if (!redm_changeteam_unlimited)
+        return
+
+    if (menuType != VGUI_Menu_Team)
+        return
+
+    // Force `old menu` style for better control
+    set_member(player, m_bForceShowMenu, true)
+
+    // Force `6. Spectate` case
+    SetHookChainArg(3, ATYPE_INTEGER, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0))
+    SetHookChainArg(4, ATYPE_STRING, "#IG_Team_Select_Spect")
+}
+
+public HandleMenu_ChooseTeam_Pre(const player, const MenuChooseTeam: slot) {
+    if (!redm_changeteam_unlimited)
+        return HC_CONTINUE
+
+    if (get_gametime() < g_nextPlayerChooseTeam[player]) {
+        client_printex(player, print_center, "#Only_1_Team_Change")
+
+        new bool: shouldMenuClose = false
+        SetHookChainReturn(ATYPE_INTEGER, shouldMenuClose)
+        return HC_SUPERCEDE
+    }
+
+    // Remove gamedll restrictions
+    GameDLL_Hack(player, true)
+
+    return HC_CONTINUE
+}
+public HandleMenu_ChooseTeam(const player, const MenuChooseTeam: slot) {
+    if (!redm_changeteam_unlimited)
+        return
+
+    // Revert gamedll workflow
+    GameDLL_Hack(player, false)
+
+    new bool: teamChanged = GetHookChainReturn(ATYPE_INTEGER)
+    if (!teamChanged)
+        return
+
+    if (!get_member(player, m_bJustConnected))
+        g_nextPlayerChooseTeam[player] = get_gametime() + redm_changeteam_freq
+}
+
+static GameDLL_Hack(const player, const bool: apply) {
+    static bool: old_freezePeriod
+    if (apply) {
+        old_freezePeriod = get_member_game(m_bFreezePeriod)
+        set_member_game(m_bFreezePeriod, true)
+    } else {
+        set_member_game(m_bFreezePeriod, old_freezePeriod)
+        set_member(player, m_bTeamChanged, false)
+    }
 }
 
 stock WeaponIdType: GetCurrentWeapon(const player) {
