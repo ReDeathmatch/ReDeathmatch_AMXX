@@ -14,7 +14,7 @@ Tickets_Init() {
 
     bind_pcvar_num(
         create_cvar(
-            "redm_tickets", "150",
+            "redm_tickets", "0",
             .has_min = true, .min_val = 0.0,
             .flags = _FCVAR_INTEGER,
             .description = "Number of times a team can ^n\
