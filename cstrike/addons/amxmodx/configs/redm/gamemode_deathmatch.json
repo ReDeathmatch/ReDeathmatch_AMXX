@@ -116,7 +116,33 @@
         // On spawn protection colors [RGBA]
         "redm_protection_color_t": "200 0 0 15",
         "redm_protection_color_ct": "0 0 200 15",
-    
+
+         /* Number of times a team can
+        have players respawn before they stop
+        being able to respawn.
+        `0` - disabled */
+        "redm_tickets": "0",
+
+        // Tickets HUD update frequency.
+        "redm_tickets_hud_update_freq": "1.0",
+
+        // Minimum percentage of tickets to start blinking.
+        "redm_tickets_hud_blink_percent": "10",
+
+        /* Ticket HUD display type.
+            0 - without colors and effects;
+            1 - color, with effects. */
+        "redm_tickets_hud_type": "1",
+
+        // Tickets HUD X position.
+        "redm_tickets_hud_x": "0.5",
+
+        // Tickets HUD Y position.
+        "redm_tickets_hud_y": "0.12",
+
+        // Space between tickets for teams (when type = 2).
+        "redm_tickets_hud_gap": "10",
+
     // ReDM: Modes
         /* Game mode change mode.
             `0`, `disable` - disable modes
