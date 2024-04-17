@@ -137,6 +137,7 @@ public CSGameRules_RestartRound() {
         return
 
     RoundModes_RestartRound()
+    Tickets_RestartRound()
 }
 
 public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor) {
