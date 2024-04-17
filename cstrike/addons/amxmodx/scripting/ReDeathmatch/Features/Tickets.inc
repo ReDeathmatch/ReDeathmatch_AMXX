@@ -89,6 +89,21 @@ Tickets_Init() {
     CTickets_UpdateHUD()
 }
 
+/**
+ * CvarChange_redm_tickets function
+ * Called when the value of the "redm_tickets" configuration variable changes
+ * 
+ * @param cvar      Name of the configuration variable whose value has changed
+ * @param oldValue  Previous value of the configuration variable
+ * @param value     New value of the configuration variable
+ * 
+ * The function performs the following actions:
+ * 1. Updates the information about the number of tickets on the HUD
+ * 2. For each connected player:
+ *    - Retrieves the team the player belongs to
+ *    - If the player's team has 0 tickets left, skips this player
+ *    - Allows the player to spawn, if possible
+ */
 public CvarChange_redm_tickets(const cvar, const oldValue[], const value[]) {
     CTickets_UpdateHUD()
     for (new player = 1; player <= MaxClients; player++) {
@@ -125,6 +140,11 @@ public CBasePlayer_Killed(const player, const killer, const gib) {
     CTickets_PreventPlayerSpawning(player)
 }
 
+/**
+ * Determines whether a player is allowed to respawn
+ * 
+ * @param player    The player who wants to respawn
+ */
 public CSGameRules_FPlayerCanRespawn(const player) {
     if (!IsActive())
         return HC_CONTINUE
@@ -152,6 +172,11 @@ public CTickets_UpdateHUD() {
     set_task_ex(redm_tickets_hud_update_freq, "CTickets_UpdateHUD", .id = taskId)
 }
 
+/**
+ * Displays the player's team tickets HUD.
+ *
+ * @param player    The player index to display the HUD for. If 0, it will be displayed for all players.
+ */
 static CTickets_ShowPlayerTicketsHUD(const player = 0) {
     new ticketsT = CTickets_TeamTicketsLeft(TEAM_TERRORIST) 
     new ticketsCT = CTickets_TeamTicketsLeft(TEAM_CT)
@@ -254,12 +279,25 @@ static CTickets_ShowPlayerTicketsHUD(const player = 0) {
     show_dhudmessage(player, digitsTemplate, ticketsCT)
 }
 
+/**
+ * Prevents or allows a player to spawn based on the remaining team tickets.
+ *
+ * @param player            The player index.
+ * @param isSpawnAvailable  Indicates whether the player should be allowed to spawn.
+ * @return  The player's respawn pending time.
+ */
 static Float: CTickets_PreventPlayerSpawning(const player, const bool: isSpawnAvailable = false) {
     set_member(player, m_flRespawnPending, isSpawnAvailable ? get_gametime() : 9999999.0)
 
     return get_member(player, m_flRespawnPending)
 }
 
+/**
+ * Calculates the number of tickets left for the given team.
+ *
+ * @param team  The team to check.
+ * @return The number of tickets left for the team.
+ */
 static CTickets_TeamTicketsLeft(const TeamName: team) {
     return max(0, redm_tickets - g_respawnsCount[team])
 }
