@@ -79,10 +79,28 @@ public plugin_init() {
     redm_addstyle("preset", "SpawnPreset_DefaultPreset")
     redm_addstyle("random", "SpawnPreset_Random")
 
+    Create_Convars()
+
     ROGInitialize(.MinDistance = 150.0)
 }
 
-public plugin_cfg() {
+public plugin_cfg() {    
+    RegisterHookChain(RG_CBasePlayer_UseEmpty, "CBasePlayer_UseEmpty", .post = false)
+
+    register_concmd("redm_edit_spawns", "ConCmd_EditSpawns",
+        MENU_FLAG,
+        "Edits spawn configuration"
+    )
+    
+    register_concmd("redm_convert_spawns", "ConCmd_ConvertOldSpawns",
+        MENU_FLAG,
+        "Convert old spawns to new format"
+    )
+
+    Editor_ReloadSpawns()
+}
+
+static Create_Convars() {
     bind_pcvar_num(get_cvar_pointer("mp_freeforall"), mp_freeforall)
     // set_pcvar_bounds(get_cvar_pointer("mp_forcerespawn"), CvarBound_Lower, true, 0.1) // TODO
 
@@ -119,20 +137,6 @@ public plugin_cfg() {
         ),
         redm_randomspawn_dist
     )
-    
-    RegisterHookChain(RG_CBasePlayer_UseEmpty, "CBasePlayer_UseEmpty", .post = false)
-
-    register_concmd("redm_edit_spawns", "ConCmd_EditSpawns",
-        MENU_FLAG,
-        "Edits spawn configuration"
-    )
-    
-    register_concmd("redm_convert_spawns", "ConCmd_ConvertOldSpawns",
-        MENU_FLAG,
-        "Convert old spawns to new format"
-    )
-
-    Editor_ReloadSpawns()
 }
 
 public client_putinserver(player) {
