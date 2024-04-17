@@ -1,4 +1,5 @@
 #include "ReDeathmatch/Features/AimBarriers.inc"
+#include "ReDeathmatch/Features/Tickets.inc"
 
 static g_fwdPrecacheEvent = -1
 static g_gunsEventsId
@@ -51,6 +52,7 @@ Features_Init() {
     RegisterHookChain(RG_HandleMenu_ChooseTeam, "HandleMenu_ChooseTeam", .post = true)
 
     AimBarriers_Init()
+    Tickets_Init()
 
     bind_pcvar_num(
         create_cvar(

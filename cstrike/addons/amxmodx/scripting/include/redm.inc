@@ -626,3 +626,20 @@ enum Bounds_s {
     bool: b_hasBound,
     Float: b_value
 }
+
+/**
+ * Gets the number of digits in a given number.
+ *
+ * @param number   The number to get the digit count for.
+ * @return         The number of digits in the given number.
+ */
+stock UTIL_getDigitsCount(number) {
+    return 1 + floatround(
+        floatlog(
+            floatabs(
+                float(number)
+            )
+        ),
+        floatround_floor
+    )
+}

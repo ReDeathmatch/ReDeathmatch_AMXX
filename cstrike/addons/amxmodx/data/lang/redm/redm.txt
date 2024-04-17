@@ -18,6 +18,7 @@ NextGameMode = next game mode
 Choose = Choose
 Selecting = Selecting
 Extend = extend
+TicketsTemplateType1 = T  %s    %s CT
 
 
 [ru]
@@ -40,6 +41,7 @@ NextGameMode = следующий игровой режим
 Choose = Выберите
 Selecting = Выбор
 Extend = продлить
+TicketsTemplateType1 = Т  %s    %s КТ
 
 [cn]
 Currently = 当前
@@ -61,3 +63,4 @@ NextGameMode = 下一个游戏模式
 Choose = 选择
 Selecting = 选中
 Extend = 扩展
+TicketsTemplateType1 = T  %s    %s CT
