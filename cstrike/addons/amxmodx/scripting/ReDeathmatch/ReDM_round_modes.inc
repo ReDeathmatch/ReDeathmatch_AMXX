@@ -17,7 +17,7 @@ RoundModes_Init() {
 
     bind_pcvar_string(
         create_cvar(
-            "redm_modes_switch", "sequentially",
+            "redm_modes_switch", "0",
             .flags = (_FCVAR_STRING | _FCVAR_BOOLEAN),
             .description = "Game mode change mode. ^n\
                 `0`, `disable` - disable modes, ^n\

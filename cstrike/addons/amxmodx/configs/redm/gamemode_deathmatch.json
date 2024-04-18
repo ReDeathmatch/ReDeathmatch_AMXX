@@ -90,7 +90,7 @@
         "redm_healer": "10",
 
         // How much to restore HP when killing with HS an enemy.
-        "redm_healer_hs": "15",
+        "redm_healer_hs": "20",
 
         // Mute the sounds of other players at a distance.
         "redm_sounds_distance": "1500",
@@ -166,10 +166,8 @@
         "bot_defer_to_human": "0",
         "bot_join_after_player": "0",
         "bot_quota_mode": "fill",
-        "mp_auto_join_team": "1",
         "mp_autoteambalance": "0",
         "mp_buytime": "0",
-        "mp_buy_anywhere": "1",
         "mp_ct_default_grenades": "",
         "mp_t_default_grenades": "",
         "mp_t_default_weapons_primary": "ak47",
@@ -191,7 +189,6 @@
         "mp_scoreboard_showhealth": "0",
         "mp_scoreboard_showmoney": "0",
         "mp_show_radioicon": "0",
-        "mp_timelimit": "30",
         "mp_weapons_allow_map_placed": "0",
         "mp_roundrespawn_time": "9999999"
     },

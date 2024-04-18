@@ -37,7 +37,7 @@ Tickets_Init() {
     )
     bind_pcvar_float(
         create_cvar(
-            "redm_tickets_hud_blink_percent", "10.0",
+            "redm_tickets_hud_blink_percent", "10",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 100.0,
             .flags = _FCVAR_FLOAT,

@@ -130,7 +130,7 @@ static Create_Convars() {
     )
     bind_pcvar_float(
         create_cvar(
-            "redm_randomspawn_dist", "1500.0",
+            "redm_randomspawn_dist", "1500",
             .has_min = true, .min_val = 0.0,
             .flags = _FCVAR_FLOAT,
             .description = "Minimum distance to the enemy to enable spawn checks."

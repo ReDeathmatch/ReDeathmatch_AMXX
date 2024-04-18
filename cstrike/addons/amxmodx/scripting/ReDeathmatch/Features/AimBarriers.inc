@@ -21,7 +21,7 @@ AimBarriers_Precache() {
 AimBarriers_Init() {
     bind_pcvar_num(
         create_cvar(
-            "redm_aim_barrier", "1",
+            "redm_aim_barrier", "0",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_BOOLEAN,

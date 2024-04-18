@@ -76,7 +76,7 @@ Features_Init() {
     )
     bind_pcvar_float(
         create_cvar(
-            "redm_healer", "10.0",
+            "redm_healer", "10",
             .has_min = true, .min_val = 0.0,
             .flags = _FCVAR_FLOAT,
             .description = "How much to restore HP when killing an enemy."
@@ -85,7 +85,7 @@ Features_Init() {
     )
     bind_pcvar_float(
         create_cvar(
-            "redm_healer_hs", "20.0",
+            "redm_healer_hs", "20",
             .has_min = true, .min_val = 0.0,
             .flags = _FCVAR_FLOAT,
             .description = "How much to restore HP when killing with HS an enemy."
@@ -94,7 +94,7 @@ Features_Init() {
     )
     bind_pcvar_float(
         create_cvar(
-            "redm_sounds_distance", "1500.0",
+            "redm_sounds_distance", "1500",
             .has_min = true, .min_val = 0.0,
             .flags = _FCVAR_FLOAT,
             .description = "Mute the sounds of other players at a distance."
@@ -131,7 +131,7 @@ Features_Init() {
     )
     bind_pcvar_num(
         create_cvar(
-            "redm_hitsound", "1",
+            "redm_hitsound", "0",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_BOOLEAN,
@@ -151,7 +151,7 @@ Features_Init() {
     )
     bind_pcvar_num(
         create_cvar(
-            "redm_hide_other_deathnotice", "1",
+            "redm_hide_other_deathnotice", "0",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_BOOLEAN,
