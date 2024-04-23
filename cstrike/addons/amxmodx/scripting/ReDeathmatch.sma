@@ -147,11 +147,11 @@ public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor
     if (!SV_IsPlayerIndex(killer))
         return
 
+    EquipManager_PlayerKilled(victim)
     if (killer == victim)
         return
 
     Features_PlayerKilled(victim, killer)
-    EquipManager_PlayerKilled(victim)
 }
 
 public CvarChange_redm_active(const cvar, const oldValue[], const value[]) {
