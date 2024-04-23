@@ -546,7 +546,11 @@ static bool: Player_GiveWeapon(const player, const EquipType_e: section) {
         charsmax(weaponName)
     )
 
-    rg_give_item(player, weaponName, .type = GT_REPLACE)
+    new item = rg_give_item(player, weaponName, .type = GT_REPLACE)
+
+    // Reset last item
+    set_member(player, m_pLastItem, item)
+
     return true
 }
 
