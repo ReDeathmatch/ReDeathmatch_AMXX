@@ -18,6 +18,33 @@
                 "kind": "build",
                 "isDefault": false
             }
+        },
+        {
+            "label": "Build ReDeathmatch Image",
+            "type": "docker-build",
+            "dockerBuild": {
+                "context": "${workspaceFolder}/",
+                "tag": "redeathmatch:${input:mod}",
+                "buildArgs": {
+                    "MOD": "${input:mod}"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Run HLDS container",
+            "command": "docker run --rm -ti -p 26900-27020:26900-27020/udp redeathmatch:${input:mod} ./hlds_run -game ${input:mod} +maxplayers 32 -bots +ip 0.0.0.0 -port 27016 +map de_dust2",
+            "dependsOn": [
+                "Build ReDeathmatch Image"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
         }
     ],
     "presentation": {
@@ -44,5 +71,17 @@
             "severity": 4,
             "message": 5
         }
-    }
+    },
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "mod",
+            "default": "cstrike",
+            "description": "Select mod.",
+            "options": [
+                "cstrike",
+                "czero"
+            ]
+        }
+    ]
 }
