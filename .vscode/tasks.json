@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build AMX Mod X Plugins",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                ".vscode/build.sh",
+                // sourceDir
+                "$PWD/cstrike/addons/amxmodx",
+                // outputDir
+                "D:/Dev/HLDS_Server/cstrike/addons/amxmodx",
+                // copy `data` and `configs` ?
+                "1"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        }
+    ],
+    "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+    },
+    "problemMatcher": {
+        "fileLocation": "autoDetect",
+        "owner": "problem",
+        "pattern": {
+            // Group 1 - filename (absolute path for filename)
+            // Group 2 - beginning line
+            // Group 3 - ending line (optional)
+            // Group 4 - error | warning (severity)
+            // Group 5 - message
+            "regexp": "(.+?)\\((\\d+)(?:\\s--\\s(\\d+))?\\)\\s:\\s(warning|error)\\s\\d+:\\s(.*)",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+        }
+    }
+}
