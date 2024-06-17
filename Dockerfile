@@ -2,16 +2,16 @@
 
 ARG MOD="cstrike"
 
-FROM debian:trixie-slim AS build_stage
+FROM debian:12-slim AS build_stage
 
 # Install required packages
 RUN set -x \
     && apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
-       ca-certificates=20240203 \
-       curl=8.5.0-2 \
-       libarchive-tools=3.7.2-1 \
-       lib32stdc++6=14-20240201-3 \
+       ca-certificates \
+       curl \
+       libarchive-tools \
+       lib32stdc++6 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local/bin/
