@@ -228,6 +228,9 @@ static bool: Player_SwitchRandomWeapons(const player, const bool: newState) {
     if (!IsActive())
         return false
 
+    if (is_user_bot(player))
+        return false
+
     SetGlobalTransTarget(player)
 
     g_playerRandomWeapons[player] = newState
@@ -577,8 +580,7 @@ EquipManager_Reset(const player) {
         g_playerWeapons[player][section] = EQUIP_NOT_CHOOSEN
     }
 
-    if (is_user_bot(player))
-        g_playerRandomWeapons[player] = true
+    g_playerRandomWeapons[player] = bool: is_user_bot(player)
 }
 
 /**
