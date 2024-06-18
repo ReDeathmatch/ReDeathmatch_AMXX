@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       COMMIT_SHA: ${{ steps.declare_sha.outputs.COMMIT_SHA }}
-      SEMVER_PATCH: ${{ steps.declare_sha.outputs.SEMVER }}
+      FULLVERSION: ${{ steps.semver_parser.outputs.fullversion }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
@@ -41,7 +41,7 @@ jobs:
         run: |
           SHA=$(git rev-parse --short HEAD)
           echo "COMMIT_SHA=$SHA" >> $GITHUB_OUTPUT        
-          echo "SEMVER_PATCH=${{ steps.semver_parser.outputs.patch }}.${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_OUTPUT
+          echo "SEMVER_PATCH=${{ steps.semver_parser.outputs.patch }}-${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_OUTPUT
 
       - name: Setup latest ReAPI includes
         env:
@@ -130,7 +130,7 @@ jobs:
 
       - name: Packaging binaries
         id: packaging
-        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathmatch-${{ needs.build.outputs.SEMVER_PATCH }}.zip cstrike/
+        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathmatch-${{ needs.build.outputs.FULLVERSION }}.zip cstrike/
 
       - name: Publish artifacts
         uses: softprops/action-gh-release@v2.0.4
