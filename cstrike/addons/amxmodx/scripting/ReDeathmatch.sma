@@ -62,7 +62,7 @@ public plugin_init() {
     register_concmd("redm_enable", "ConCmd_redm_enable", ADMIN_MAP, "Enables Re:DM.")
     register_concmd("redm_disable", "ConCmd_redm_disable", ADMIN_MAP, "Disables Re:DM.")
     register_concmd("redm_status", "ConCmd_redm_status", ADMIN_MAP, "Get Re:DM status.")
-    register_concmd("redm", "ConCmd_redm", ADMIN_ALL, "Get info.", .FlagManager = false)
+    register_concmd("redm", "ConCmd_redm", ADMIN_MAP, "Get info.", .FlagManager = false)
 
     ApiInit_Forwards()
 }
@@ -210,7 +210,15 @@ public ConCmd_redm(const player, const level, const commandId) {
 
     console_print(player, "[Re:DM] Version `%s`", REDM_VERSION)
     console_print(player, "[Re:DM] https://github.com/wopox1337/ReDeathmatch")
-    console_print(player, "[Re:DM] Copyright (c) 2023 Sergey Shorokhov", REDM_VERSION)
+    console_print(player, "[Re:DM] Copyright (c) 2024 Sergey Shorokhov")
+
+    if (!cmd_access(player, level, commandId, 1, .accesssilent = true))
+        return PLUGIN_HANDLED
+
+    console_print(player, "Compilation info:")
+    console_print(player, "  AMXX version: `%s`", AMXX_VERSION_STR)
+    console_print(player, "  ReAPI version: `%i.%i`", REAPI_VERSION_MAJOR, REAPI_VERSION_MINOR)
+    console_print(player, "  Time: `%s %s`", __DATE__, __TIME__)
 
     return PLUGIN_HANDLED
 }
