@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       COMMIT_SHA: ${{ steps.declare_sha.outputs.COMMIT_SHA }}
-      SEMVER: ${{ steps.declare_sha.outputs.SEMVER }}
+      SEMVER_PATCH: ${{ steps.declare_sha.outputs.SEMVER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
@@ -41,7 +41,7 @@ jobs:
         run: |
           SHA=$(git rev-parse --short HEAD)
           echo "COMMIT_SHA=$SHA" >> $GITHUB_OUTPUT        
-          echo "SEMVER=${{ steps.semver_parser.outputs.fullversion }}" >> $GITHUB_OUTPUT
+          echo "SEMVER_PATCH=${{ steps.semver_parser.outputs.patch }}.${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_OUTPUT
 
       - name: Setup latest ReAPI includes
         env:
@@ -68,14 +68,14 @@ jobs:
           github.event.action == 'published' &&
           startsWith(github.ref, 'refs/tags/')
         env:
-          PLUGIN_VERSION: "${{ steps.declare_sha.outputs.SEMVER }}"
-        run: sed -i "s|%VERSION%|$PLUGIN_VERSION|g" redm_version.inc
+          PLUGIN_VERSION: "${{ steps.declare_sha.outputs.SEMVER_PATCH }}"
+        run: sed -i "s|manual|$PLUGIN_VERSION|g" redm_version.inc
 
       - name: Update versions for plugins (only for artifacts builds)
         working-directory: cstrike/addons/amxmodx/scripting/include/
         env:
           PLUGIN_VERSION: "${{ steps.declare_sha.outputs.COMMIT_SHA }}"
-        run: sed -i "s|%VERSION%|$PLUGIN_VERSION|g" redm_version.inc
+        run: sed -i "s|manual|$PLUGIN_VERSION|g" redm_version.inc
 
       - name: Setup AMXXPawn Compiler
         uses: wopox1337/setup-amxxpawn@v1.1.0
@@ -130,7 +130,7 @@ jobs:
 
       - name: Packaging binaries
         id: packaging
-        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathmatch-${{ needs.build.outputs.SEMVER }}.zip cstrike/
+        run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathmatch-${{ needs.build.outputs.SEMVER_PATCH }}.zip cstrike/
 
       - name: Publish artifacts
         uses: softprops/action-gh-release@v2.0.4
