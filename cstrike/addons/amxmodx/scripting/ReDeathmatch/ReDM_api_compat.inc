@@ -206,7 +206,12 @@ public @csdm_fwd_drop(const plugin_id, const argc) {
 }
 
 CallCompatApi_Init() {
-    ExecuteForward(g_fwdInit)
+    ExecuteForward(g_fwdInit, _, 
+        PrepareArray(
+            REDM_VERSION,
+            32
+        )
+    )
 }
 
 CallCompatApi_CfgInit() {

@@ -175,11 +175,11 @@ public native_redm_curstyle(const plugin_id, const argc) {
 
 CallApi_InitStart() {
     ExecuteForward(g_fwdInitStart)
+    CallCompatApi_Init()
 }
 
 CallApi_Initialized() {
     ExecuteForward(g_fwdInitialized)
-    CallCompatApi_Init()
 }
 
 // TODO
