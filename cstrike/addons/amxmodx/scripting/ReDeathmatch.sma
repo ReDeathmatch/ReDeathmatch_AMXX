@@ -18,6 +18,7 @@
 #include "ReDeathmatch/ReDM_equip_manager.inc"
 #include "ReDeathmatch/ReDM_features.inc"
 #include "ReDeathmatch/ReDM_round_modes.inc"
+#include "ReDeathmatch/ReDM_api_compat.inc"
 #include "ReDeathmatch/ReDM_api.inc"
 
 
@@ -64,7 +65,13 @@ public plugin_init() {
     register_concmd("redm_status", "ConCmd_redm_status", ADMIN_MAP, "Get Re:DM status.")
     register_concmd("redm", "ConCmd_redm", ADMIN_MAP, "Get info.", .FlagManager = false)
 
-    ApiInit_Forwards()
+    API_Forwards()
+    APICompat_Forwards()
+}
+
+public plugin_natives() {
+    API_Init()
+    APICompat_Init()
 }
 
 public plugin_precache() {
