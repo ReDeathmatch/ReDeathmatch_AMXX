@@ -15,6 +15,8 @@ static g_fwdRemoveWeapon
 static g_fwdHandleDrop
 
 APICompat_Init() {
+    register_library("csdm")
+    
     register_native("csdm_active", "@csdm_active")
     register_native("csdm_set_active", "@csdm_set_active")
     register_native("csdm_csdm_get_ffa", "@csdm_get_ffa")
@@ -59,6 +61,7 @@ APICompat_Forwards() {
     g_fwdStateChange = CreateMultiForward("csdm_StateChange", ET_IGNORE, FP_CELL)
     g_fwdRemoveWeapon = CreateMultiForward("csdm_RemoveWeapon", ET_STOP, FP_CELL, FP_CELL, FP_CELL)
     g_fwdHandleDrop = CreateMultiForward("csdm_HandleDrop", ET_CONTINUE, FP_CELL, FP_CELL, FP_CELL)
+
 }
 
 public bool: @csdm_active(const plugin_id, const argc) {

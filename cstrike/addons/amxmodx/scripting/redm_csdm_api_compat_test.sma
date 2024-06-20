@@ -38,13 +38,19 @@ public csdm_RoundRestart(post) {
 }
 
 public csdm_StateChange(csdm_state) {
-
+    server_print("csdm_StateChange(%i)",
+        csdm_state
+    )
 }
 
 public csdm_RemoveWeapon(owner, entity_id, boxed_id) {
-
+    server_print("csdm_RemoveWeapon(%i, %i, %i)",
+        owner, entity_id, boxed_id
+    )
 }
 
 public csdm_HandleDrop(id, weapon, death) {
-    
+    server_print("csdm_HandleDrop(%i, %i, %i)",
+        id, weapon, death
+    )
 }
