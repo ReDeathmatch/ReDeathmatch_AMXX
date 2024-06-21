@@ -75,10 +75,10 @@
         "redm_aim_barrier_always_show": "2",
 
         // Open equip menu by pressing `G` (drop command).
-        "redm_open_equip_menu_by_g": "1",
+        "redm_open_equip_menu_by_g": "0",
 
         // Block the ability to drop the weapon.
-        "redm_block_drop_weapon": "1",
+        "redm_block_drop_weapon": "0",
 
         // Restore weapon slot on respawn.
         "redm_keep_weapon_slot": "0",
@@ -179,7 +179,7 @@
         "mp_freezetime": "0",
         "mp_give_player_c4": "0",
         "mp_infinite_ammo": "2",
-        "mp_item_staytime": "0",
+        "mp_item_staytime": "10",
         "mp_limitteams": "0",
         "mp_startmoney": "0",
         "mp_playerid": "0",

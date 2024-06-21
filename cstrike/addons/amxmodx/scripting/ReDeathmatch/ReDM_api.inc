@@ -6,7 +6,7 @@ static g_fwdGetConfigName = -1
 static g_fwdGetConfigPrefixName = -1
 
 
-public plugin_natives() {
+API_Init() {
     register_native("redm_is_active", "native_redm_is_active")
     register_native("redm_set_active", "native_redm_set_active")
     register_native("redm_get_config", "native_redm_get_config")
@@ -20,7 +20,7 @@ public plugin_natives() {
     register_native("redm_curstyle", "native_redm_curstyle")
 }
 
-ApiInit_Forwards() {
+API_Forwards() {
     g_fwdChangeState = CreateMultiForward("ReDM_ChangeState", ET_IGNORE, FP_CELL)
     g_fwdInitStart = CreateMultiForward("ReDM_InitStart", ET_IGNORE)
     g_fwdInitialized = CreateMultiForward("ReDM_Initialized", ET_IGNORE)
@@ -175,6 +175,8 @@ public native_redm_curstyle(const plugin_id, const argc) {
 
 CallApi_InitStart() {
     ExecuteForward(g_fwdInitStart)
+    CallCompatApi_Init()
+    CallCompatApi_CfgInit()
 }
 
 CallApi_Initialized() {
@@ -213,4 +215,5 @@ CallApi_GetConfigPrefixName(fileName[], len, const mapPrefix[]) {
 
 CallApi_ChangeState(const bool: active) {
     ExecuteForward(g_fwdChangeState, _, active)
+    CallCompatApi_StateChange(active)
 }

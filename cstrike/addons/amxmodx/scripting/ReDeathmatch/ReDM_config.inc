@@ -131,6 +131,8 @@ Config_Reload() {
     RoundModes_ReadModes()
 
     json_free(equipConfig)
+
+    CallApi_ConfigLoaded()
 }
 
 /**
