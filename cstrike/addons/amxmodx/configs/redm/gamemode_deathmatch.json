@@ -75,10 +75,13 @@
         "redm_aim_barrier_always_show": "2",
 
         // Open equip menu by pressing `G` (drop command).
-        "redm_open_equip_menu_by_g": "1",
+        "redm_equip_menu_open_by_g": "1",
 
         // Block the ability to drop the weapon.
         "redm_block_drop_weapon": "1",
+
+        // Enable equip manager.
+        "redm_equip_manager": "1",
 
         // Restore weapon slot on respawn.
         "redm_keep_weapon_slot": "0",
