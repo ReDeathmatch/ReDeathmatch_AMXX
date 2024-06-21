@@ -49,8 +49,10 @@ static WeaponState: g_weaponState[MAX_PLAYERS + 1]
  */
 static bool: g_inEquipMenu[MAX_PLAYERS + 1]
 
+static bool: redm_equip_manager
 static redm_keep_weapon_slot
 static bool: redm_open_equip_menu
+static bool: redm_equip_menu_open_by_g
 
 
 EquipManager_Init() {
@@ -59,6 +61,16 @@ EquipManager_Init() {
     // RegisterHookChain(RG_CBasePlayer_GiveNamedItem, "CBasePlayer_GiveNamedItem", .post = false)
     RegisterHookChain(RG_CBasePlayer_AddPlayerItem, "CBasePlayer_AddPlayerItem", .post = false)
 
+    bind_pcvar_num(
+        create_cvar(
+            "redm_equip_manager", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
+            .description = "Enable equip manager."
+        ),
+        redm_equip_manager
+    )
     bind_pcvar_num(
         create_cvar(
             "redm_keep_weapon_slot", "0",
@@ -79,8 +91,22 @@ EquipManager_Init() {
         ),
         redm_open_equip_menu
     )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_equip_menu_open_by_g", "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
+            .description = "Open equip menu by pressing `G` (drop command)."
+        ),
+        redm_equip_menu_open_by_g
+    )
 
-    register_concmd("redm_dump_equip", "ConCmd_redm_dump_equip", ADMIN_MAP, "Dump loaded equipset from config to table in console.")
+    register_concmd(
+        "redm_dump_equip", "ConCmd_redm_dump_equip",
+        ADMIN_MAP,
+        "Dump loaded equipset from config to table in console."
+    )
 
     new const equipMenuCmds[][] = {
         "say /guns", "say !guns", "guns"
@@ -91,6 +117,7 @@ EquipManager_Init() {
     }
 
     register_clcmd("cl_autobuy", "ClCmd_cl_autobuy", .FlagManager = false)
+    register_clcmd("drop", "ClCmd_Drop", .FlagManager = false)
 }
 
 /**
@@ -101,6 +128,9 @@ EquipManager_Init() {
 EquipManager_PutInServer(const player) {
     EquipManager_Reset(player)
     g_lastWeaponSlot[player] = PRIMARY_WEAPON_SLOT
+
+    if (!redm_equip_manager)
+        return
 
     if (is_user_bot(player) || is_user_hltv(player))
         return
@@ -192,10 +222,23 @@ static LoadConfigBotEquip(const JSON: objEquip, const EquipType_e: section) {
 public ClCmd_cl_autobuy(const player) {
     if (!IsActive())
         return PLUGIN_CONTINUE
+    
+    if (!redm_equip_manager)
+        return PLUGIN_CONTINUE
 
     Player_SwitchRandomWeapons(player, .newState = !g_playerRandomWeapons[player])
 
     return PLUGIN_HANDLED
+}
+
+public ClCmd_Drop(const player) {
+    if (!IsActive())
+        return PLUGIN_CONTINUE
+
+    if (!redm_equip_menu_open_by_g)
+        return PLUGIN_CONTINUE
+
+    return ClCmd_Guns(player)
 }
 
 /**
@@ -205,6 +248,9 @@ public ClCmd_cl_autobuy(const player) {
  */
 public ClCmd_Guns(const player) {
     if (!IsActive())
+        return PLUGIN_CONTINUE
+
+    if (!redm_equip_manager)
         return PLUGIN_CONTINUE
 
     Player_CallEquipMenu(player)
@@ -290,7 +336,7 @@ static Menu_ChooseEquip(const player, const EquipType_e: section) {
     new menuTitle[128]
     formatex(menuTitle, charsmax(menuTitle), "%l", section == et_Primary ? "PrimaryEquip" : "SecondaryEquip")
 
-    if (get_cvar_num("redm_open_equip_menu_by_g"))
+    if (get_cvar_num("redm_equip_menu_open_by_g"))
         strcat(menuTitle, fmt("^n%l", "ToClosePressG"), charsmax(menuTitle))
 
     new menu = menu_create(menuTitle, "MenuHandler_ChooseEquip")
@@ -343,6 +389,9 @@ public MenuCallback_Primary(const player, const menu, const item) {
 public MenuHandler_ChooseEquip(const player, const menu, const item) {
     if (!IsActive())
         return PLUGIN_HANDLED
+    
+    if (!redm_equip_manager)
+        return PLUGIN_HANDLED
 
     new info[2]
     menu_item_getinfo(
@@ -391,10 +440,13 @@ public CBasePlayer_OnSpawnEquip(const player, bool: addDefault, bool: equipGame)
     if (!IsActive())
         return
 
-    SetHookChainArg(3, ATYPE_BOOL, (equipGame = false))
-
     RoundModes_OnSpawnEquip(player)
     ModeVote_OnSpawnEquip(player)
+
+    if (!redm_equip_manager)
+        return
+
+    SetHookChainArg(3, ATYPE_BOOL, (equipGame = false))
 
     set_member(player, m_bNotKilled, false)
     rg_set_user_armor(player, 0, ARMOR_NONE)
@@ -427,6 +479,9 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
     if (!IsActive())
         return
 
+    if (!redm_equip_manager)
+        return
+
     new hasConfiguredEquip = false
     for (new EquipType_e: section; section < EquipType_e; section++) {
         if (g_playerWeapons[player][section] == EQUIP_NOT_CHOOSEN)
@@ -451,6 +506,9 @@ public CBasePlayer_OnSpawnEquip_Post(const player, bool: addDefault, bool: equip
 
 public CBasePlayer_AddPlayerItem(const player, const item) {
     if (!IsActive())
+        return
+
+    if (!redm_equip_manager)
         return
 
     // Restore weaponState
