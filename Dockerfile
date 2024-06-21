@@ -28,6 +28,10 @@ ARG AMXModX_URL="https://www.amxmodx.org/amxxdrop/1.9/amxmodx-1.9.0-git5294-base
 RUN curl -sSL ${AMXModX_URL} | bsdtar -xf - addons/  \
     && echo "linux addons/amxmodx/dlls/amxmodx_mm_i386.so" > addons/metamod/plugins.ini
 
+# Install AMXModX 1.9.0 cstrike
+ARG AMXModX_CSTRIKE_URL="https://www.amxmodx.org/amxxdrop/1.9/amxmodx-1.9.0-git5294-cstrike-linux.tar.gz"
+RUN curl -sSL ${AMXModX_CSTRIKE_URL} | bsdtar -xf - addons/
+
 # Install ReAPI
 RUN releaseLink="https://github.com/s1lentq/reapi/releases/download/5.24.0.300/reapi-bin-5.24.0.300.zip" \
     && curl -sSL ${releaseLink} | bsdtar -xf - --exclude='*.dll' --exclude='*.pdb' addons/
@@ -43,10 +47,10 @@ WORKDIR /root/hlds/cstrike/addons/amxmodx/
 RUN BuildAMXXPlugins . .
 
 
-WORKDIR /root/hlds/cstrike/
-ARG YaPB_URL="https://github.com/yapb/yapb/releases/download/4.4.957/yapb-4.4.957-linux.tar.xz"
-RUN curl -sSL ${YaPB_URL} | bsdtar -xf - addons/ \
-    && echo "linux addons/yapb/bin/yapb.so" >> addons/metamod/plugins.ini
+# WORKDIR /root/hlds/cstrike/
+# ARG YaPB_URL="https://github.com/yapb/yapb/releases/download/4.4.957/yapb-4.4.957-linux.tar.xz"
+# RUN curl -sSL ${YaPB_URL} | bsdtar -xf - addons/ \
+#     && echo "linux addons/yapb/bin/yapb.so" >> addons/metamod/plugins.ini
 
 
 ARG MOD

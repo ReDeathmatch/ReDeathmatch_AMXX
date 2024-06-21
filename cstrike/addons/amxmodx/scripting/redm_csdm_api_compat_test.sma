@@ -24,9 +24,8 @@ public csdm_PreSpawn(player, bool:fake) {
     server_print(" -- %.2f csdm_PreSpawn(%i, %i)", get_gametime(),
         player, fake
     )
-
-    return PLUGIN_HANDLED
 }
+
 public csdm_PostSpawn(player, bool:fake) {
     server_print(" -- %.2f csdm_PostSpawn(%i, %i)", get_gametime(),
         player, fake

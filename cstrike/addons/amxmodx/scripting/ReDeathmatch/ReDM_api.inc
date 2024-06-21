@@ -176,6 +176,7 @@ public native_redm_curstyle(const plugin_id, const argc) {
 CallApi_InitStart() {
     ExecuteForward(g_fwdInitStart)
     CallCompatApi_Init()
+    CallCompatApi_CfgInit()
 }
 
 CallApi_Initialized() {
@@ -185,7 +186,6 @@ CallApi_Initialized() {
 // TODO
 stock CallApi_ConfigLoaded() {
     ExecuteForward(g_fwdConfigLoaded)
-    CallCompatApi_CfgInit()
 }
 
 CallApi_GetConfigName(fileName[], len) {

@@ -488,6 +488,11 @@ public CBasePlayer_DropPlayerItem(const player, const itemName[]) {
     if (!IsActive())
         return HC_CONTINUE
 
+    if (CallCompatApi_HandleDrop(player, itemName) == PLUGIN_HANDLED) {
+        SetHookChainReturn(ATYPE_INTEGER, 0)
+        return HC_SUPERCEDE
+    }
+
     if (!redm_block_drop_weapon)
         return HC_CONTINUE
 
