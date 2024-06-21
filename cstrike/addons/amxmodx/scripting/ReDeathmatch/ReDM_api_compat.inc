@@ -1,3 +1,16 @@
+/**
+ * The code implements compatibility
+ *  with the old CSDM 2.10 API by BAILOPAN.
+ * https://github.com/Arkshine/CSDM/blob/master/amxmodx/scripting/include/csdm.inc
+ * 
+ * Allows to use plugins that were compatible with CSDM by BAILOPAN with ReDeathmatch.
+ * 
+ * NOTE: implementation does not match 100% accuracy of the code of the original mod,
+ *  may not work correctly!
+ */
+
+#include <csdm.inc>
+
 #if defined CSDM_VERSION
     #undef CSDM_VERSION
     #define	CSDM_VERSION REDM_VERSION
@@ -73,12 +86,26 @@ public bool: @csdm_set_active(const plugin_id, const argc) {
 }
 
 public bool: @csdm_get_ffa(const plugin_id, const argc) {
+    if (!IsActive())
+        return false
+
     return get_cvar_num("mp_freeforall") != 0
 }
 
 public bool: @csdm_set_ffa(const plugin_id, const argc) {
+    if (!IsActive())
+        return false
+
+    new bool: isFFA = get_cvar_num("mp_freeforall") != 0
     new bool: active = get_param(1) != 0
+
+    if (isFFA == active)
+        return false
+    
     set_cvar_num("mp_freeforall", active)
+
+    ExecuteForward(g_fwdStateChange, _, isFFA ? CSDM_FFA_ENABLE : CSDM_FFA_DISABLE)
+    return true
 }
 
 public Float: @csdm_get_spawnwait(const plugin_id, const argc) {
@@ -209,32 +236,34 @@ public @csdm_fwd_drop(const plugin_id, const argc) {
 }
 
 CallCompatApi_Init() {
-    ExecuteForward(g_fwdInit, _, 
-        PrepareArray(
-            REDM_VERSION,
-            32
-        )
-    )
+    ExecuteForward(g_fwdInit, _, REDM_VERSION)
 }
 
 CallCompatApi_CfgInit() {
     ExecuteForward(g_fwdCfgInit)
 }
 
-CallCompatApi_Death_Pre() {
-    ExecuteForward(g_fwdPreDeath, _)
+CallCompatApi_Death_Pre(killer, victim) {
+    new bool: isHeadshot = bool: get_member(victim, m_bHeadshotKilled)
+    new weapon[] = "weapon_" // TODO: Implement 
+    ExecuteForward(g_fwdPreDeath, _, killer, victim, isHeadshot, weapon)
 }
 
-CallCompatApi_Death_Post() {
-    ExecuteForward(g_fwdPostDeath, _)
+CallCompatApi_Death_Post(const killer, const victim) {
+    new bool: isHeadshot = bool: get_member(victim, m_bHeadshotKilled)
+    new weapon[] = "weapon_" // TODO: Implement 
+    ExecuteForward(g_fwdPostDeath, _, killer, victim, isHeadshot, weapon)
 }
 
-CallCompatApi_Spawn_Pre() {
-    ExecuteForward(g_fwdPreSpawn, _)
+CallCompatApi_Spawn_Pre(player) {
+    new ret
+    ExecuteForward(g_fwdPreSpawn, ret, player, false)
+
+    return ret
 }
 
-CallCompatApi_Spawn_Post() {
-    ExecuteForward(g_fwdPostSpawn, _)
+CallCompatApi_Spawn_Post(const player) {
+    ExecuteForward(g_fwdPostSpawn, _, player, false)
 }
 
 CallCompatApi_RoundRestart_Pre() {
@@ -245,8 +274,8 @@ CallCompatApi_RoundRestart_Post() {
     ExecuteForward(g_fwdRoundRestart, _, true)
 }
 
-CallCompatApi_StateChange(const bool: active) {
-    ExecuteForward(g_fwdStateChange, _, active)
+CallCompatApi_StateChange(bool: isActive) {
+    ExecuteForward(g_fwdStateChange, _, isActive ? CSDM_ENABLE : CSDM_DISABLE)
 }
 
 CallCompatApi_RemoveWeapon() {

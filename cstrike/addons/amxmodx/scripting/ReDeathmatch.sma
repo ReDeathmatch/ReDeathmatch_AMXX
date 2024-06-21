@@ -45,6 +45,8 @@ public plugin_init() {
 
     RegisterHookChain(RG_RoundEnd, "RoundEnd_Post", .post = true)
     RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound", .post = false)
+    RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound_Post", .post = true)
+    RegisterHookChain(RG_CSGameRules_PlayerKilled, "CSGameRules_PlayerKilled", .post = false)
     RegisterHookChain(RG_CSGameRules_PlayerKilled, "CSGameRules_PlayerKilled_Post", .post = true)
 
     bind_pcvar_num(
@@ -143,8 +145,27 @@ public CSGameRules_RestartRound() {
     if (!IsActive())
         return
 
+    CallCompatApi_RoundRestart_Pre()
+
     RoundModes_RestartRound()
     Tickets_RestartRound()
+}
+
+public CSGameRules_RestartRound_Post() {
+    if (!IsActive())
+        return
+
+    CallCompatApi_RoundRestart_Post()
+}
+
+public CSGameRules_PlayerKilled(const victim, const killer, const inflictor) {
+    if (!IsActive())
+        return
+    
+    if (!SV_IsPlayerIndex(killer))
+        return
+
+    CallCompatApi_Death_Pre(killer, victim)
 }
 
 public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor) {
@@ -155,6 +176,7 @@ public CSGameRules_PlayerKilled_Post(const victim, const killer, const inflictor
         return
 
     EquipManager_PlayerKilled(victim)
+    CallCompatApi_Death_Post(killer, victim)
     if (killer == victim)
         return
 

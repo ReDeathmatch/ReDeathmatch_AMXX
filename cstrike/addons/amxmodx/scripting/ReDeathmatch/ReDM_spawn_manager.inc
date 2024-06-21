@@ -23,6 +23,7 @@ SpawnManager_Init() {
     hook_cvar_change(get_cvar_pointer("redm_spawn_preset"), "CvarChange_redm_spawn_preset")
 
     RegisterHookChain(RG_CSGameRules_GetPlayerSpawnSpot, "CSGameRules_GetPlayerSpawnSpot", .post = false)
+    RegisterHookChain(RG_CSGameRules_GetPlayerSpawnSpot, "CSGameRules_GetPlayerSpawnSpot_Post", .post = true)
 
     redm_setstyle(redm_spawn_preset)
 }
@@ -43,11 +44,24 @@ public CSGameRules_GetPlayerSpawnSpot(const player) {
     if (get_member(player, m_bJustConnected))
         return HC_CONTINUE
 
+    if (CallCompatApi_Spawn_Pre(player) == PLUGIN_HANDLED)
+        return HC_CONTINUE
+
     if (!SpawnManager_Spawn(player))
         return HC_CONTINUE
 
     SetHookChainReturn(ATYPE_INTEGER, 0)
     return HC_SUPERCEDE
+}
+
+public CSGameRules_GetPlayerSpawnSpot_Post(const player) {
+    if (!IsActive())
+        return
+
+    if (get_member(player, m_bJustConnected))
+        return
+
+    CallCompatApi_Spawn_Post(player)
 }
 
 SpawnManager_AddMethod(const name[], const callbackHandle) {
