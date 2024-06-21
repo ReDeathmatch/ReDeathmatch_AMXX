@@ -73,7 +73,9 @@ APICompat_Forwards() {
     g_fwdRoundRestart = CreateMultiForward("csdm_RoundRestart", ET_IGNORE, FP_CELL)
     g_fwdStateChange = CreateMultiForward("csdm_StateChange", ET_IGNORE, FP_CELL)
     g_fwdRemoveWeapon = CreateMultiForward("csdm_RemoveWeapon", ET_STOP, FP_CELL, FP_CELL, FP_CELL)
-    g_fwdHandleDrop = CreateMultiForward("csdm_HandleDrop", ET_IGNORE, FP_CELL, FP_CELL, FP_CELL)
+    g_fwdHandleDrop = CreateMultiForward("csdm_HandleDrop", ET_CONTINUE, FP_CELL, FP_CELL, FP_CELL)
+
+    RegisterHookChain(RG_CSGameRules_DeadPlayerWeapons, "CSGameRules_DeadPlayerWeapons", .post = false)
 }
 
 public bool: @csdm_active(const plugin_id, const argc) {
@@ -282,14 +284,22 @@ CallCompatApi_RemoveWeapon() {
     ExecuteForward(g_fwdRemoveWeapon, _)
 }
 
-CallCompatApi_HandleDrop(const player, const weapon[]) {
+CallCompatApi_HandleDrop(const player, const weapon[], const bool: inDeath = false) {
     new weaponId = rg_get_weapon_info(weapon, WI_ID)
-    new bool: inDeath = bool: is_user_alive(player) == false
-
-    // TODO: inDeath implementation!
 
     new ret
     ExecuteForward(g_fwdHandleDrop, ret, player, weaponId, inDeath)
-    server_print("ret = %i", ret)
+
     return ret == CSDM_DROP_REMOVE ? PLUGIN_HANDLED : PLUGIN_CONTINUE
+}
+
+public CSGameRules_DeadPlayerWeapons(player) {
+    // TODO: rework weapon getting
+    new weapon[] = "weapon_"
+    if (CallCompatApi_HandleDrop(player, weapon, .inDeath = true) == PLUGIN_HANDLED) {
+        SetHookChainReturn(ATYPE_INTEGER, GR_PLR_DROP_GUN_NO)
+        return HC_SUPERCEDE
+    }
+
+    return HC_CONTINUE
 }

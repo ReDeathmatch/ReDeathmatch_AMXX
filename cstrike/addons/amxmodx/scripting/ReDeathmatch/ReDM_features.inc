@@ -488,6 +488,7 @@ public CBasePlayer_DropPlayerItem(const player, const itemName[]) {
     if (!IsActive())
         return HC_CONTINUE
 
+    // TODO: rework weapon getting
     if (CallCompatApi_HandleDrop(player, itemName) == PLUGIN_HANDLED) {
         SetHookChainReturn(ATYPE_INTEGER, 0)
         return HC_SUPERCEDE
