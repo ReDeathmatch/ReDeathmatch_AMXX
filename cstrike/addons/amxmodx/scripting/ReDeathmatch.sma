@@ -208,8 +208,27 @@ public ConCmd_redm_status(const player, const level, const commandId) {
 public ConCmd_redm(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
 
+    console_print(player, " _____      _____  __  __")
+    console_print(player, "|  __ \    |  __ \|  \/  |")
+    console_print(player, "| |__) |___| |  | | \  / |")
+    console_print(player, "|  _  // _ \ |  | | |\/| |")
+    console_print(player, "| | \ \  __/ |__| | |  | |")
+    console_print(player, "|_|  \_\___|_____/|_|  |_|")
+
     console_print(player, "[Re:DM] Version `%s`", REDM_VERSION)
-    console_print(player, "[Re:DM] https://github.com/wopox1337/ReDeathmatch")
+    console_print(player, "[Re:DM] https://ReDeathmatch.github.io")
+
+    new bool: isManualBuild = (strfind(REDM_VERSION, "manual") != -1)
+    if (!isManualBuild) {
+        new bool: isRelease = (strlen(REDM_VERSION_PATCH) < 4)
+
+        console_print(player,
+            "[Re:DM] https://github.com/ReDeathmatch/ReDeathmatch_AMXX/%s/%s",
+            isRelease ? "releases/tag" : "commit",
+            isRelease ? REDM_VERSION : REDM_VERSION_PATCH
+        )
+    }
+
     console_print(player, "[Re:DM] Copyright (c) 2024 Sergey Shorokhov")
 
     if (!cmd_access(player, level, commandId, 1, .accesssilent = true))
@@ -218,7 +237,7 @@ public ConCmd_redm(const player, const level, const commandId) {
     console_print(player, "Compilation info:")
     console_print(player, "  AMXX version: `%s`", AMXX_VERSION_STR)
     console_print(player, "  ReAPI version: `%i.%i`", REAPI_VERSION_MAJOR, REAPI_VERSION_MINOR)
-    console_print(player, "  Time: `%s %s`", __DATE__, __TIME__)
+    console_print(player, "  Time: `%s %s (GMT)`", __DATE__, __TIME__)
 
     return PLUGIN_HANDLED
 }
