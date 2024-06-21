@@ -666,6 +666,9 @@ static Array: GetEquipConfig(const player, const EquipType_e: section) {
 }
 
 public ConCmd_redm_dump_equip(const player, const level, const commandId) {
+    if (!cmd_access(player, level, commandId, 1))
+        return PLUGIN_HANDLED
+
     DumpEquip(player)
 
     return PLUGIN_HANDLED
