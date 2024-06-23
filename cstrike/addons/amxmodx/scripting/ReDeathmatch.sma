@@ -112,6 +112,10 @@ public plugin_unpause() {
     SetActive(true)
 }
 
+public plugin_natives() {
+    ApiInit_Natives()
+}
+
 public client_putinserver(player) {
     if (!IsActive())
         return
