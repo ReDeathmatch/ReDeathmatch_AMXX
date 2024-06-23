@@ -11,6 +11,8 @@ static g_currentRoundModeIdx = RoundMode_NotSet
 static g_forcedModeIdx = RoundMode_NotSet
 
 static redm_modes_switch[32]
+static Float: redm_mode_title_hud_x
+static Float: redm_mode_title_hud_y
 
 RoundModes_Init() {
     register_dictionary("redm/modes.txt")
@@ -26,6 +28,26 @@ RoundModes_Init() {
         ),
         redm_modes_switch,
         charsmax(redm_modes_switch)
+    )
+    bind_pcvar_float(
+        create_cvar(
+            "redm_mode_title_hud_x", "-1.0",
+            .has_min = true, .min_val = -1.0,
+            .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_FLOAT,
+            .description = "Mode title HUD X position."
+        ),
+        redm_mode_title_hud_x
+    )
+    bind_pcvar_float(
+        create_cvar(
+            "redm_mode_title_hud_y", "0.85",
+            .has_min = true, .min_val = -1.0,
+            .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_FLOAT,
+            .description = "Mode title HUD Y position."
+        ),
+        redm_mode_title_hud_y
     )
 
     ModesMenus_Init()
@@ -121,7 +143,8 @@ public RoundInfoMessage(const player) {
         .red = 200,
         .green = 200,
         .blue = 200,
-        .y = 0.85,
+        .x = redm_mode_title_hud_x,
+        .y = redm_mode_title_hud_y,
         .holdtime = 4.0
     )
 
