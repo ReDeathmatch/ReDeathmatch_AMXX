@@ -143,3 +143,4 @@ jobs:
         with:
           files: |
             *.zip
+            *.amxx
