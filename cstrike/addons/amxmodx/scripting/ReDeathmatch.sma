@@ -20,6 +20,7 @@
 #include "ReDeathmatch/ReDM_features.inc"
 #include "ReDeathmatch/ReDM_round_modes.inc"
 #include "ReDeathmatch/ReDM_api.inc"
+#include "ReDeathmatch/ReDM_updater.inc"
 
 
 static bool: g_prevState
@@ -66,6 +67,7 @@ public plugin_init() {
     register_concmd("redm", "ConCmd_redm", ADMIN_MAP, "Get info.", .FlagManager = false)
 
     ApiInit_Forwards()
+    Updater_Init()
 }
 
 public plugin_precache() {
@@ -114,6 +116,7 @@ public plugin_unpause() {
 
 public plugin_natives() {
     ApiInit_Natives()
+    Updater_Natives()
 }
 
 public client_putinserver(player) {
