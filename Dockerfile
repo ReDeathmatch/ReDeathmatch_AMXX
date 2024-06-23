@@ -32,6 +32,10 @@ RUN curl -sSL ${AMXModX_URL} | bsdtar -xf - addons/  \
 RUN releaseLink="https://github.com/s1lentq/reapi/releases/download/5.24.0.300/reapi-bin-5.24.0.300.zip" \
     && curl -sSL ${releaseLink} | bsdtar -xf - --exclude='*.dll' --exclude='*.pdb' addons/
 
+# # Install AmxxEasyHttp
+RUN releaseLink="https://github.com/Next21Team/AmxxEasyHttp/releases/download/1.3.0/release_linux_v1.3.0.zip" \
+    && curl -sSL ${releaseLink} | bsdtar -xf - --strip-components=1
+
 COPY cstrike .
 
 SHELL ["/bin/bash", "-c"]
