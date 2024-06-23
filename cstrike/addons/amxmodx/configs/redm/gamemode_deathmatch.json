@@ -163,6 +163,12 @@
         // How many times can the game mode be extended.
         "redm_mode_vote_extend_times": "1",
 
+        // Mode title HUD X position.
+        "redm_mode_title_hud_x": "-1.0",
+
+        // Mode title HUD Y position.
+        "redm_mode_title_hud_y": "0.85",
+
     // ReGameDLL Settings
         "mp_freeforall": "1",
         "bot_deathmatch": "1",
