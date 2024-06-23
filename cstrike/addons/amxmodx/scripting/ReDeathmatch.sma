@@ -4,6 +4,7 @@
 #include <fakemeta_util>
 #include <amxmisc>
 #include <json>
+#include <easy_http>
 
 #include <reapi>
 #include <redm>
