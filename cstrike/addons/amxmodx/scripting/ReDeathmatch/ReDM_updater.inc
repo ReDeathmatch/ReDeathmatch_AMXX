@@ -26,7 +26,7 @@ Updater_Init() {
     CheckUpdate()
 }
 
-public ConCmd_redm_update_check(const player) {
+public ConCmd_redm_update_check(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
       
     if (!cmd_access(player, level, commandId, 1))
