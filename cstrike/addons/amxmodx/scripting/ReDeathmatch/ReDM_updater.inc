@@ -17,7 +17,24 @@ Updater_Init() {
         redm_update_notify
     )
 
+    register_concmd(
+        "redm_update_check", "ConCmd_redm_update_check",
+        ADMIN_MAP,
+        "Checks ReDM update."
+    )
+
     CheckUpdate()
+}
+
+public ConCmd_redm_update_check(const player) {
+    SetGlobalTransTarget(player)
+      
+    if (!cmd_access(player, level, commandId, 1))
+        return PLUGIN_HANDLED
+
+    Request_NewVersion(g_versionLink)
+
+    return PLUGIN_HANDLED
 }
 
 Updater_Natives() {
