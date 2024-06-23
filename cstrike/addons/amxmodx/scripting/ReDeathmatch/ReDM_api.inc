@@ -6,7 +6,7 @@ static g_fwdGetConfigName = -1
 static g_fwdGetConfigPrefixName = -1
 
 
-public plugin_natives() {
+public ApiInit_Natives() {
     register_native("redm_is_active", "native_redm_is_active")
     register_native("redm_set_active", "native_redm_set_active")
     register_native("redm_get_config", "native_redm_get_config")

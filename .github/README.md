@@ -68,6 +68,7 @@ Many features have long been built and optimized to work directly in ReGameDLL_C
 - [ReGameDLL_CS](https://github.com/s1lentq/ReGameDLL_CS) installed;
 - Installed AMXModX ([`v1.9`](https://www.amxmodx.org/downloads-new.php) or [`v1.10`](https://www.amxmodx.org/downloads-new.php?branch=master));
 - Installed [ReAPI](https://github.com/s1lentq/reapi) amxx module; 
+- Installed [AmxxEasyHttp](https://github.com/Next21Team/AmxxEasyHttp) module (optional);
       
 ## Installation
 Check the wiki [Installation](https://redeathmatch.github.io/en/Getting-started/installation/)
