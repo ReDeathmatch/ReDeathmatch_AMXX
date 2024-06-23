@@ -60,7 +60,7 @@ Tickets_Init() {
     bind_pcvar_float(
         create_cvar(
             "redm_tickets_hud_x", "0.5",
-            .has_min = true, .min_val = 0.0,
+            .has_min = true, .min_val = -1.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_FLOAT,
             .description = "Tickets HUD X position."
@@ -70,7 +70,7 @@ Tickets_Init() {
     bind_pcvar_float(
         create_cvar(
             "redm_tickets_hud_y", "0.12",
-            .has_min = true, .min_val = 0.0,
+            .has_min = true, .min_val = -1.0,
             .has_max = true, .max_val = 1.0,
             .flags = _FCVAR_FLOAT,
             .description = "Tickets HUD Y position."
