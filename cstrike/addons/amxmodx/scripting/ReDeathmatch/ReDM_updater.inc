@@ -54,7 +54,7 @@ Updater_Natives() {
     return PLUGIN_CONTINUE
 }
 
-static Updater_Check() {
+Updater_Check() {
     if (!redm_update_notify)
         return
 
