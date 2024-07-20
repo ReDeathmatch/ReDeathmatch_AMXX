@@ -90,6 +90,7 @@ public plugin_cfg() {
         SetActive(redm_active)
     }
     CallApi_Initialized()
+    Updater_Check()
 }
 
 public plugin_end() {

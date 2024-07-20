@@ -22,8 +22,6 @@ Updater_Init() {
         ADMIN_MAP,
         "Checks ReDM update."
     )
-
-    CheckUpdate()
 }
 
 public ConCmd_redm_update_check(const player, const level, const commandId) {
@@ -56,7 +54,7 @@ Updater_Natives() {
     return PLUGIN_CONTINUE
 }
 
-static CheckUpdate() {
+static Updater_Check() {
     if (!redm_update_notify)
         return
 
