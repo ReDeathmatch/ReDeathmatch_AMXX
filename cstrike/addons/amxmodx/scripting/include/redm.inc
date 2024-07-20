@@ -398,7 +398,8 @@ stock registerClCmd(const clientCmd[], const function[], flags = -1, const info[
         infoMl
     )
 
-    AddMenuItem(info, clientCmd, flags, "ReDeathmatch")
+    if (is_plugin_loaded("Menus Front-End"))
+        AddMenuItem(info, clientCmd, flags, "ReDeathmatch")
 
     return clCmdId
 }
