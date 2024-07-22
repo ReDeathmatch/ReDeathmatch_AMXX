@@ -169,6 +169,9 @@
         // Mode title HUD Y position.
         "redm_mode_title_hud_y": "0.85",
 
+        // Notify for new ReDM update.
+        "redm_update_notify": "1",
+
     // ReGameDLL Settings
         "mp_freeforall": "1",
         "bot_deathmatch": "1",
