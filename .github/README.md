@@ -33,8 +33,9 @@
             src="https://img.shields.io/badge/AMXModX-1.9 | 1.10-blue?style=flat-square"
             alt="AMXModX dependency"
         ></a>
-    <a href="https://discord.gg/fC2AasCPfh">
-        <img src="https://img.shields.io/discord/1099870919138213890?style=flat-square&logo=discord&label=Discord%20&labelColor=%237289DA" alt="Discord Shield"
+    <a href="https://t.me/ReDeathmatch_AMXX">
+        <img
+            src="https://img.shields.io/endpoint?label=Telegram&style=flat-square&url=https%3A%2F%2Fmogyo.ro%2Fquart-apis%2Ftgmembercount%3Fchat_id%3DReDeathmatch_AMXX"
         ></a>
 </p>
 
