@@ -127,6 +127,9 @@
             In seconds. */
         "redm_changeteam_freq": "2.0",
 
+        // Hide hostages.
+        "redm_hide_hostages": 1,
+
          /* Number of times a team can
             have players respawn before they stop
             being able to respawn.
