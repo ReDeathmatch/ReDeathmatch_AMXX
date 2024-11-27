@@ -22,6 +22,7 @@ static redm_protection_color_ct[32]
 static bool: mp_respawn_immunity_effects
 static bool: redm_changeteam_unlimited
 static Float: redm_changeteam_freq
+static bool: redm_hide_hostages
 
 Features_Precache() {
     AimBarriers_Precache()
@@ -49,6 +50,7 @@ Features_Init() {
     RegisterHookChain(RG_ShowVGUIMenu, "ShowVGUIMenu_Pre", .post = false)
     RegisterHookChain(RG_HandleMenu_ChooseTeam, "HandleMenu_ChooseTeam_Pre", .post = false)
     RegisterHookChain(RG_HandleMenu_ChooseTeam, "HandleMenu_ChooseTeam", .post = true)
+    RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound_Post", .post = true)
 
     AimBarriers_Init()
     Tickets_Init()
@@ -189,6 +191,17 @@ Features_Init() {
                 In seconds."
         ),
         redm_changeteam_freq
+    )
+    bind_pcvar_num(
+        create_cvar(
+            "redm_hide_hostages",
+            "1",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 1.0,
+            .flags = _FCVAR_BOOLEAN,
+            .description = "Hide hostages."
+        ),
+        redm_hide_hostages
     )
 }
 
@@ -537,4 +550,22 @@ stock WeaponIdType: GetCurrentWeapon(const player) {
         return WEAPON_NONE
 
     return WeaponIdType: get_member(activeItem, m_iId)
+}
+
+public CSGameRules_RestartRound_Post() {
+    if (!IsActive())
+        return
+
+    if (redm_hide_hostages)
+        HideHostages()
+}
+
+HideHostages() {
+    new entity = NULLENT
+    while ((entity = fm_find_ent_by_class(entity, "hostage_entity"))) {
+        new Float: origin[3]
+        get_entvar(entity, var_origin, origin)
+        xs_vec_add(origin, Float: {0.0, 0.0, -8192.0}, origin)
+        set_entvar(entity, var_origin, origin)
+    }
 }
