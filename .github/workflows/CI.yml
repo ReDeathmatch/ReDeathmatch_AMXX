@@ -20,7 +20,7 @@ jobs:
       FULLVERSION: ${{ steps.semver_parser.outputs.fullversion }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -45,7 +45,7 @@ jobs:
 
       - name: Setup latest ReAPI includes
         env:
-          REPO: "s1lentq/reapi"
+          REPO: "rehlds/reapi"
         run: |
           mkdir -p dep/reapi
           cd dep/reapi
@@ -78,7 +78,7 @@ jobs:
         run: sed -i "s|manual|$PLUGIN_VERSION|g" redm_version.inc
 
       - name: Setup AMXXPawn Compiler
-        uses: wopox1337/setup-amxxpawn@v1.1.0
+        uses: wopox1337/setup-amxxpawn@v1
         with:
           version: "1.10.5428"
 
@@ -109,7 +109,7 @@ jobs:
           mv cstrike/ publish/
 
       - name: Deploy artifact
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4
         with:
           name: ReDeathmatch-${{ steps.declare_sha.outputs.COMMIT_SHA }}-dev
           path: publish/*
@@ -124,7 +124,7 @@ jobs:
       startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4
         with:
           name: ReDeathmatch-${{ needs.build.outputs.COMMIT_SHA }}-dev
 
@@ -133,7 +133,7 @@ jobs:
         run: 7z a -mm=Deflate -mfb=258 -mpass=15 -r ReDeathmatch-${{ needs.build.outputs.FULLVERSION }}.zip cstrike/
 
       - name: Publish artifacts
-        uses: softprops/action-gh-release@v2.0.4
+        uses: softprops/action-gh-release@v2
         id: publish-job
         if: |
           startsWith(github.ref, 'refs/tags/') &&
