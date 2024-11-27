@@ -43,35 +43,35 @@
     "cvars": {
     // ReDM: Spawns
         /* Enables the system of selecting spawns. 
-        0 - disable
-        1 - for all
-        2 - only for T
-        3 - only for CT */
+            0 - disable
+            1 - for all
+            2 - only for T
+            3 - only for CT */
         "redm_randomspawn": "1",
 
         /* Check the spawn point for visibility by enemies (line of sight).
-        0 - disable
-        1 - enable */
+            0 - disable
+            1 - enable */
         "redm_randomspawn_los": "1",
 
         // Minimum distance to the enemy to enable spawn checks.
         "redm_randomspawn_dist": "1500",
 
         /* Name of the spawn manager style.
-        `none`,
-        `preset`,
-        `random` - (beta) */
+            `none`,
+            `preset`,
+            `random` - (beta) */
         "redm_spawn_preset": "preset",
 
     // ReDM: Features
         /* Enable a barrier in the middle of the map (`anti-rush' system).
-        It dont work on `de_`, `cs_` `css_` maps. */
+            It dont work on `de_`, `cs_` `css_` maps. */
         "redm_aim_barrier": "0",
 
         /* Barrier display mode
-        `0` - disable,
-        `1` - display permanently (beta),
-        `2` - display only when touched. */
+            `0` - disable,
+            `1` - display permanently (beta),
+            `2` - display only when touched. */
         "redm_aim_barrier_always_show": "2",
 
         // Open equip menu by pressing `G` (drop command).
@@ -120,10 +120,17 @@
         "redm_protection_color_t": "200 0 0 15",
         "redm_protection_color_ct": "0 0 200 15",
 
+        // Remove limits on player's team switching.
+        "redm_changeteam_unlimited": "0",
+
+        /* Limit the frequency of team changes. ^n\
+            In seconds. */
+        "redm_changeteam_freq": "2.0",
+
          /* Number of times a team can
-        have players respawn before they stop
-        being able to respawn.
-        `0` - disabled */
+            have players respawn before they stop
+            being able to respawn.
+            `0` - disabled */
         "redm_tickets": "0",
 
         // Tickets HUD update frequency.
@@ -150,8 +157,7 @@
         /* Game mode change mode.
             `0`, `disable` - disable modes
             `random` - random change
-            `sequentially` - sequential mode change
-        */
+            `sequentially` - sequential mode change */
         "redm_modes_switch": "0",
 
         // Enable voting for the next game mode.

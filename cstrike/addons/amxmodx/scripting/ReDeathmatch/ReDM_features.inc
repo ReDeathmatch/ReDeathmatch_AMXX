@@ -181,7 +181,7 @@ Features_Init() {
     bind_pcvar_float(
         create_cvar(
             "redm_changeteam_freq",
-            "2",
+            "2.0",
             .has_min = true, .min_val = 0.0,
             .has_max = true, .max_val = 240.0,
             .flags = _FCVAR_FLOAT,
