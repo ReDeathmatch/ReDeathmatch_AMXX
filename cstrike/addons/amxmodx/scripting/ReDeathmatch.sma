@@ -217,13 +217,6 @@ public ConCmd_redm_status(const player, const level, const commandId) {
 public ConCmd_redm(const player, const level, const commandId) {
     SetGlobalTransTarget(player)
 
-    console_print(player, " _____      _____  __  __")
-    console_print(player, "|  __ \    |  __ \|  \/  |")
-    console_print(player, "| |__) |___| |  | | \  / |")
-    console_print(player, "|  _  // _ \ |  | | |\/| |")
-    console_print(player, "| | \ \  __/ |__| | |  | |")
-    console_print(player, "|_|  \_\___|_____/|_|  |_|")
-
     console_print(player, "[Re:DM] Version `%s`", REDM_VERSION)
     console_print(player, "[Re:DM] https://ReDeathmatch.github.io")
 
