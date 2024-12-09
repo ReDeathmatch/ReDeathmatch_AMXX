@@ -111,7 +111,7 @@ if [ "$needCopyOther" ]; then
 
     # Copy directories without confirmation with green messages
     print_color $GREEN " - Copying configs..."
-    cp -an $srcDir/configs/* $destinationDir/configs/
+    cp -r $srcDir/configs/* $destinationDir/configs/
     print_color $GREEN " - Copying data..."
-    cp -an $srcDir/data/* $destinationDir/data/
+    cp -r $srcDir/data/* $destinationDir/data/
 fi

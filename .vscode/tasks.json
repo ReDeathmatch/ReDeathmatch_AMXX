@@ -37,7 +37,7 @@
         {
             "type": "shell",
             "label": "Run HLDS container",
-            "command": "docker run --rm -ti -p 26900-27020:26900-27020/udp redeathmatch:${input:mod} ./hlds_run -game ${input:mod} +maxplayers 32 -bots +ip 0.0.0.0 -port 27016 +map de_dust2",
+            "command": "docker run --rm -ti -p 27016:27016/udp redeathmatch:${input:mod} ./hlds_run -game ${input:mod} +maxplayers 32 -bots +ip 0.0.0.0 -port 27016 +map de_dust2",
             "dependsOn": [
                 "Build ReDeathmatch Image"
             ],
