@@ -2,11 +2,16 @@
 #include <amxmisc>
 #include <fakemeta>
 #include <fakemeta_util>
+#include <hamsandwich>
 #include <json>
 
 #include <reapi>
 #include <redm>
 #include <rog>
+
+//////////////////////////////////////////////////
+// #define DEBUG_SPAWNS_TRANCUATE_COUNT 20
+
 
 static MENU_FLAG = ADMIN_MAP
 
@@ -23,26 +28,38 @@ enum HullVacant_s {
 }
 
 enum EditorProps_s {
-    ep_team,
+    TeamName: ep_team,
     ep_focusEntity,
     ep_gravityPreset,
     ep_group[32]
+}
+
+enum _: SpawnProps_s {
+    Float: sp_origin[3],
+    Float: sp_angle[3],
+    Float: sp_vAngle[3],
+    TeamName: sp_team,
+    sp_group[32],
 }
 
 static g_editorProps[MAX_PLAYERS + 1][EditorProps_s]
 
 static JSON: g_arrSpawns = Invalid_JSON
 
-static const g_spawnViewModels[_: TeamName - 1][] = {
+static const g_spawnViewModels[TeamName][] = {
     "models/player/vip/vip.mdl",
     "models/player/leet/leet.mdl",
     "models/player/gign/gign.mdl",
+
+    "" // TeamName compability
 }
 
-static const g_teamName[_: TeamName - 1][] = {
+static const g_teamName[TeamName][] = {
     "ANY",
     "T",
     "CT",
+
+    "" // TeamName compability
 }
 
 static Float: g_gravityValues[] = {
@@ -53,12 +70,14 @@ static redm_randomspawn
 static redm_randomspawn_los
 static Float: redm_randomspawn_dist
 
-static bool: mp_freeforall
+new bool: mp_freeforall
 
+
+#include "ReDeathmatch/Features/ControlPoints.inc"
 
 public plugin_precache() {
-    for (new i = 0; i < sizeof(g_spawnViewModels); i++) {
-        precache_model(g_spawnViewModels[i])
+    for (new i = 0; i < (sizeof(g_spawnViewModels) - 1); i++) {
+        precache_model(g_spawnViewModels[TeamName: i])
     }
 }
 
@@ -82,6 +101,8 @@ public plugin_init() {
     Create_Convars()
 
     ROGInitialize(.MinDistance = 150.0)
+
+    CapturePoints_Init()
 }
 
 public plugin_cfg() {    
@@ -194,11 +215,13 @@ static Editor_ReloadSpawns() {
         json_free(g_arrSpawns)
 
     g_arrSpawns = Editor_LoadSpawns()
+
+    ControlPoints_SpawnsLoaded(g_arrSpawns)
 }
 
 static Editor_ResetProps(const player) {
     g_editorProps[player][ep_focusEntity] = FM_NULLENT
-    g_editorProps[player][ep_team] = 0
+    g_editorProps[player][ep_team] = TEAM_UNASSIGNED
     g_editorProps[player][ep_gravityPreset] = 0
     g_editorProps[player][ep_group][0] = EOS
 }
@@ -280,7 +303,7 @@ static bool: Editor_SetEntityFocus(const player, const entity = FM_NULLENT) {
     )
 
     g_editorProps[player][ep_focusEntity] = entity
-    g_editorProps[player][ep_team] = pev(entity, pev_team)
+    g_editorProps[player][ep_team] = TeamName: pev(entity, pev_team)
 
     pev(entity, pev_netname,
         g_editorProps[player][ep_group],
@@ -332,7 +355,7 @@ static Menu_Editor(const player/* , const level */) {
         .callback = callback
     )
 
-    new team = g_editorProps[player][ep_team]
+    new TeamName: team = g_editorProps[player][ep_team]
     menu_additem(menu, fmt("Team: %s", g_teamName[team]))
     menu_additem(menu, "Teleport", .callback = callback)
     menu_additem(menu, "Delete", .callback = callback)
@@ -383,9 +406,9 @@ public MenuHandler_Editor(const player, const menu, const item) {
             }
         }
         case 1: {
-            ++g_editorProps[player][ep_team]
-            g_editorProps[player][ep_team] %= sizeof(g_spawnViewModels)
-            
+            g_editorProps[player][ep_team]++
+            g_editorProps[player][ep_team] = g_editorProps[player][ep_team] % TeamName: (sizeof(g_spawnViewModels) - 1)
+
             new entity = g_editorProps[player][ep_focusEntity]
             if (entity != FM_NULLENT)
                 Spawn_SetTeam(player, entity, g_editorProps[player][ep_team])
@@ -467,13 +490,15 @@ static bool: Spawn_Add(const player) {
     Spawn_EntityGetPosition(player, origin, angle, vAngle)
     origin[2] += 0.1
 
-    new team = g_editorProps[player][ep_team]
+    new TeamName: team = g_editorProps[player][ep_team]
 
     return Add(origin, angle, vAngle, team, g_editorProps[player][ep_group])
 }
 
-static bool: Add(const Float: origin[3], const Float: angle[3], const Float: vAngle[3], const team, const group[]) {
-    new entity = Spawn_CreateEntity()
+static bool: Add(const Float: origin[3], const Float: angle[3], const Float: vAngle[3], const TeamName: team, const group[]) {
+    new entity = fm_create_entity("info_target")
+    set_pev(entity, pev_classname, g_spawnClassname)
+
     if (!Spawn_EntitySetPosition(entity, origin, angle, vAngle)) {
         Spawn_Delete(entity)
         return false
@@ -481,6 +506,7 @@ static bool: Add(const Float: origin[3], const Float: angle[3], const Float: vAn
 
     set_pev(entity, pev_team, team)
     set_pev(entity, pev_netname, group)
+    set_pev(entity, pev_solid, SOLID_BBOX)
     engfunc(EngFunc_SetModel, entity, g_spawnViewModels[team])
 
     return true
@@ -498,7 +524,7 @@ static Spawn_Delete(const entity) {
     engfunc(EngFunc_RemoveEntity, entity)
 }
 
-static Spawn_SetTeam(const player, const entity, const team) {
+static Spawn_SetTeam(const player, const entity, const TeamName: team) {
     set_pev(entity, pev_team, team)
     engfunc(EngFunc_SetModel, entity, g_spawnViewModels[team])
 
@@ -539,16 +565,7 @@ static bool: Spawn_EntitySetPosition(const entity, const Float: origin[3], const
     return true
 }
 
-static Spawn_CreateEntity() {
-    new entity = fm_create_entity("info_target")
-
-    set_pev(entity, pev_classname, g_spawnClassname)
-    set_pev(entity, pev_solid, SOLID_BBOX)
-
-    return entity
-}
-
-static stock fm_animate_entity(const entity, const Activity: sequence = ACT_IDLE, const Float: framerate = 0.0) {
+stock fm_animate_entity(const entity, const Activity: sequence = ACT_IDLE, const Float: framerate = 0.0) {
     set_pev(entity, pev_sequence, sequence)
     set_pev(entity, pev_framerate, framerate)
 }
@@ -588,7 +605,7 @@ static Editor_AddViewSpawns(const JSON: arrSpawns) {
         new JSON: spawn = json_array_get_value(arrSpawns, idx)
          
         new Float: origin[3], Float: angle[3], Float: vAngle[3]
-        new team = json_object_get_number(spawn, "team")
+        new TeamName: team = TeamName: json_object_get_number(spawn, "team")
         new JSON: arrOrigin = json_object_get_value(spawn, "origin")
         new JSON: arrAngle = json_object_get_value(spawn, "angle")
         new JSON: arrVAngle = json_object_get_value(spawn, "vAngle")
@@ -700,6 +717,10 @@ static JSON: Editor_LoadSpawns() {
     }
 
     new JSON: arrSpawns = json_object_get_value(objSpawns, "spawns")
+
+#if defined DEBUG_SPAWNS_TRANCUATE_COUNT
+    while(json_array_remove(arrSpawns, DEBUG_SPAWNS_TRANCUATE_COUNT)) { }
+#endif
 
     LogMessageEx(Debug, "Editor_LoadSpawns: Map `%s` total spawns: %i loaded.",
         g_mapName, json_array_get_count(arrSpawns)
@@ -960,7 +981,7 @@ public bool: SpawnPreset_DefaultPreset(const player) {
 }
 
 static bool: Player_MoveToSpawn(const player, const count) {
-    new team = mp_freeforall ? 0 : get_member(player, m_iTeam)
+    new TeamName: team = mp_freeforall ? TEAM_UNASSIGNED : get_member(player, m_iTeam)
 
     new bestSpawnIdx = -1
     for (new attempt; attempt <= 2 && bestSpawnIdx == -1; attempt++) {
@@ -994,32 +1015,37 @@ static bool: Player_MoveToSpawn(const player, const count) {
         return false
     }
 
-    new Float: origin[3], Float: angle[3], Float: vAngle[3]
-    GetSpawnFromObject(bestSpawnIdx, origin, angle, vAngle)
-    new bool: res = Spawn_EntitySetPosition(player, origin, angle, vAngle)
+    new spawn[SpawnProps_s]
+    GetSpawnFromObject(bestSpawnIdx, spawn)
+
+    new bool: res = Spawn_EntitySetPosition(player, spawn[sp_origin], spawn[sp_angle], spawn[sp_vAngle])
     if (!res) {
         LogMessageEx(Debug, "Player %n can't use a spawn point %i[%.2f,%.2f,%.2f]",
             player, bestSpawnIdx,
-            origin[0], origin[1], origin[2]
+            spawn[sp_origin][0], spawn[sp_origin][1], spawn[sp_origin][2]
         )
     }
 
     return res
 }
 
-static Spawn_CheckConditions(const target, const targetTeam, const spawnIdx, const attempt) {
-    new Float: spawnOrigin[3], Float: spawnAngle[3], Float: spawnVAngle[3], spawnTeam, spawnGroup[32]
-    GetSpawnFromObject(spawnIdx, spawnOrigin, spawnAngle, spawnVAngle, spawnTeam, spawnGroup)
+static Spawn_CheckConditions(const target, const TeamName: targetTeam, const spawnIdx, const attempt) {
+    new spawn[SpawnProps_s]
+    GetSpawnFromObject(spawnIdx, spawn)
 
-    // Doesn't match because of the spawn team
-    if (targetTeam && spawnTeam && (spawnTeam != targetTeam))
+    new bool: isSpawnAvailable = ControlPoints_IsSpawnAvailable(spawnIdx, targetTeam) != 0
+    // server_print("------- attempt:#%i, isSpawnAvailable:%i",
+    //     attempt, isSpawnAvailable
+    // )
+
+    if (!isSpawnAvailable)
         return 1
 
     // TODO: implement spawn group check
     // if (spawnGroup[0] != EOS && spawnGroup[0] == 'A')
     //     return false
 
-    new HullVacant_s: res = CheckHullVacant(spawnOrigin, .ignoreEnt = target, .ignorePlayers = false)
+    new HullVacant_s: res = CheckHullVacant(spawn[sp_origin], .ignoreEnt = target, .ignorePlayers = false)
     if (res == hull_Invalid)
         return 2
 
@@ -1037,7 +1063,7 @@ static Spawn_CheckConditions(const target, const targetTeam, const spawnIdx, con
         new Float: enemyOrigin[3]
         pev(i, pev_origin, enemyOrigin)
 
-        new Float: disatanceToEnemy = get_distance_f(spawnOrigin, enemyOrigin)
+        new Float: disatanceToEnemy = get_distance_f(spawn[sp_origin], enemyOrigin)
         new Float: searchDistance = redm_randomspawn_dist / (attempt + 1)
 
         if (disatanceToEnemy < 200.0)
@@ -1047,11 +1073,11 @@ static Spawn_CheckConditions(const target, const targetTeam, const spawnIdx, con
             continue
 
         new Float: spawnHeadOrigin[3]
-        spawnHeadOrigin = spawnOrigin
+        xs_vec_add(spawnHeadOrigin, Float: { 0.0, 0.0, 17.0 }, spawnHeadOrigin)
         spawnHeadOrigin[2] + 17.0 // check the head
 
         if (redm_randomspawn_los) {
-            if (/* fm_is_in_viewcone(i, spawnOrigin) && */ fm_is_visible(i, spawnHeadOrigin, true)) {
+            if (/* fm_is_in_viewcone(i, spawn[sp_origin]) && */ fm_is_visible(i, spawnHeadOrigin, true)) {
                 return 4
             }
         }
@@ -1060,19 +1086,19 @@ static Spawn_CheckConditions(const target, const targetTeam, const spawnIdx, con
     return 0
 }
 
-static GetSpawnFromObject(const spawnIdx, Float: origin[3], Float: angle[3], Float: vAngle[3], &team = 0, spawnGroup[] = "") {
+GetSpawnFromObject(const spawnIdx, arrSpawn[SpawnProps_s]) {
     new JSON: spawn = json_array_get_value(g_arrSpawns, spawnIdx)
-    team = json_object_get_number(spawn, "team")
+    arrSpawn[sp_team] = TeamName: json_object_get_number(spawn, "team")
     new JSON: arrOrigin = json_object_get_value(spawn, "origin")
     new JSON: arrAngle = json_object_get_value(spawn, "angle")
     new JSON: arrVAngle = json_object_get_value(spawn, "vAngle")
-    json_object_get_string(spawn, "group", spawnGroup, 31)
+    json_object_get_string(spawn, "group", arrSpawn[sp_group], charsmax(arrSpawn[sp_group]))
 
-    for (new i; i < sizeof(origin); i++) {
-        origin[i] = json_array_get_real(arrOrigin, i)
+    for (new i; i < sizeof(arrSpawn[sp_origin]); i++) {
+        arrSpawn[sp_origin][i] = json_array_get_real(arrOrigin, i)
         if (i < 2) {
-            angle[i] = json_array_get_real(arrAngle, i)
-            vAngle[i] = json_array_get_real(arrVAngle, i)
+            arrSpawn[sp_angle][i] = json_array_get_real(arrAngle, i)
+            arrSpawn[sp_vAngle][i] = json_array_get_real(arrVAngle, i)
         }
     }
 
