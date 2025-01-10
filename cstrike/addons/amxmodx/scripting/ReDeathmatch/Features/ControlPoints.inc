@@ -33,14 +33,14 @@ enum {
     _pev_capturingTeam = pev_team,
     _pev_isCapturing = pev_iuser2,
     _pev_teamInZone = pev_iuser3,
+    _pev_hPoint = pev_iuser4,
     _pev_owningTeam = pev_owner,
     _pev_pointIdx = pev_modelindex,
     _pev_bBlocked = pev_bInDuck,
     _pev_bActive = pev_controller_0,
-    _pev_hPoint = pev_controller_1,
     
     // TODO: rework it later 
-    _pev_teamData = pev_noise, // perTeamData_s[] 
+    _pev_teamData = pev_gamestate, // perTeamData_s[] 
 }
 
 static Float: g_sequenceRate = 0.8
@@ -90,15 +90,27 @@ CapturePoints_Init() {
     Create_ConVars()
 
 #if 1
-    server_cmd("mp_auto_join_team 1; humans_join_team t; redm_randomspawn 1; mp_freeforall 0; yb_chat 0; yb_quota 2")
+    // For testing purposes only
+    server_cmd("mp_auto_join_team 1; humans_join_team t; redm_randomspawn 1; mp_freeforall 0; yb_chat 0; yb_quota 2; bot_quota 0")
 #endif
+
+#if 1
+    // For testing purposes only
+    register_concmd("radio1", "@test")
+#endif
+}
+
+static bool: test 
+@test(p) {
+    test = !test
+
+    return PLUGIN_HANDLED
 }
 
 static Create_ConVars() {
     bind_pcvar_float(
         create_cvar(
-
-            "redm_capture_spawn_time", "1.0",
+            "redm_capture_spawn_time", "10.0",
             .has_min = true, .min_val = 0.0,
             .flags = _FCVAR_FLOAT,
             .description = "Time to capture spawn point. (0 - instantly)"
@@ -167,15 +179,16 @@ static Create_ConVars() {
 }
 
 ControlPoints_SpawnsLoaded(&JSON: arrSpawns) {
+    assert (arrSpawns != Invalid_JSON)
+
     collectSpawnPoints(arrSpawns)
 }
 
-ControlPoints_IsSpawnAvailable(spawnIdx, TeamName: targetTeam) {
-    // WTF: player without team can't use this spawn!
-    if (targetTeam != TEAM_TERRORIST && targetTeam != TEAM_CT)
-        return 1
+ControlPoints_IsSpawnAvailable(const spawn[SpawnProps_s], TeamName: targetTeam) {
+    assert (targetTeam == TEAM_TERRORIST || targetTeam == TEAM_CT)
+    assert (spawn[sp_index] >= 0)
 
-    new controlPoint = ___GetPointBySpawn(spawnIdx)
+    new controlPoint = ___GetPointBySpawn(spawn[sp_index])
     if (!is_entity(controlPoint))
         return 1
 
@@ -205,18 +218,27 @@ ___GetPointBySpawn(const spawnIdx) {
 
 
 static collectSpawnPoints(&JSON: arrSpawns) {
-    new spawnCount = json_array_get_count(arrSpawns) 
-    for (new i; i < spawnCount; i++) {
+    new entity = MaxClients
+    while ((entity = fm_find_ent_by_class(entity, g_pointClassname))) {
+        engfunc(EngFunc_RemoveEntity, entity)
+    }
+
+    new spawnCount = json_array_get_count(arrSpawns)
+    for (new spawnIdx; spawnIdx < spawnCount; spawnIdx++) {
+        new JSON: objSpawn = json_array_get_value(arrSpawns, spawnIdx)
+
         new spawn[SpawnProps_s]
-        GetSpawnFromObject(i, spawn)
+        GetSpawnFromObject(objSpawn, spawn)
+
+        json_free(objSpawn)
 
         spawn[sp_origin][2] += SPAWN_POINT_OFFSET
-        
-        // UNDONE: другой метод
-        // if ((spawnTeam == 1 && numTerroristSpawns++ < redm_capture_spawn_static) || (spawnTeam == 2 && numCTSpawns++ < redm_capture_spawn_static)) {
-        //     continue
-        // }
-        
+
+        new entity = CTriggerAreaCapture__Spawn(spawn)
+
+        set_pev(entity, _pev_hPoint, spawn[sp_index])
+    }
+}
 
 Point_SetRender(entity, renderState_s: _state = rs_Reset) {
     switch (_state) {
@@ -303,12 +325,10 @@ CTriggerAreaCapture__Spawn(const spawn[SpawnProps_s]) {
         set_pev(entity, _pev_owningTeam, spawn[sp_team])
         set_pev(entity, _pev_captureTime, redm_capture_spawn_time)
 
-        new m_TeamData[MAX_CAPTURE_TEAMS][perTeamData_s]
-        for ( new TeamName: t = TEAM_UNASSIGNED; t < MAX_CAPTURE_TEAMS; t++ ) {
-            if ( m_TeamData[t][iNumRequiredToCap] < 1)
-                m_TeamData[t][iNumRequiredToCap] = 1
-        }
-        set_pev(entity, _pev_teamData, m_TeamData)
+        new canCapture[MAX_CAPTURE_TEAMS]
+        canCapture[TEAM_TERRORIST] = bool: spawn[sp_canCapture][TEAM_TERRORIST]
+        canCapture[TEAM_CT] = bool: spawn[sp_canCapture][TEAM_CT]
+        CED_SetArray(entity, "canCapture", canCapture, sizeof(canCapture))
     }
 
 
@@ -364,14 +384,14 @@ public CTriggerAreaCapture__AreaTouch(const entity, const other) {
     new TeamName: owningTeam = TeamName: pev(entity, _pev_owningTeam)
     new TeamName: playerTeam = TeamName: get_ent_data(player, "CBasePlayer", "m_iTeam")
     if (playerTeam != owningTeam) {
-        new m_TeamData[MAX_CAPTURE_TEAMS][perTeamData_s]
-        pev(entity, _pev_teamData, m_TeamData, (_: MAX_CAPTURE_TEAMS * _: perTeamData_s))
+        #if 0
+        new bool: canCaptureT = pev(entity, _pev_canCaptureT)
+        new bool: canCaptureCT = pev(entity, _pev_canCaptureCT)
 
         if (m_TeamData[playerTeam][bCanCap]) {
-            #if 0
                 DisplayCapHintTo(player)
-            #endif
         }
+        #endif
     }
     
     #if 0
@@ -400,6 +420,9 @@ public CTriggerAreaCapture__AreaTouch(const entity, const other) {
         new Float: lastReductionTime;   pev(entity, _pev_lastReductionTime, lastReductionTime)
         new Float: captureTime;         pev(entity, _pev_captureTime, captureTime)
 
+        new bool: canCapture[MAX_CAPTURE_TEAMS]
+        CED_GetArray(entity, "canCapture", canCapture, sizeof(canCapture))
+
         new buffer[512]
         formatex(buffer, charsmax(buffer), "^n\
             (%.1f) touch `trigger_capture_area` ^n\
@@ -408,6 +431,8 @@ public CTriggerAreaCapture__AreaTouch(const entity, const other) {
             %.1f | %-16.16s^n\
             %.1f | %-16.16s^n\
             %.1f | %-16.16s^n\
+            %i   | %-16.16s^n\
+            %i   | %-16.16s^n\
             %i   | %-16.16s^n\
             %i   | %-16.16s^n\
             %i   | %-16.16s^n\
@@ -421,7 +446,10 @@ public CTriggerAreaCapture__AreaTouch(const entity, const other) {
             pev(entity, _pev_isCapturing), "isCapturing", 
             pev(entity, _pev_owningTeam), "owningTeam", 
             pev(entity, _pev_teamInZone), "teamInZone", 
-            pev(entity, _pev_capturingTeam), "capturingTeam"
+            pev(entity, _pev_capturingTeam), "capturingTeam",
+
+            canCapture[TEAM_TERRORIST], "canCapture[t]",
+            canCapture[TEAM_CT], "canCapture[ct]"
         )
 
         show_hudmessage(player, buffer)
@@ -496,7 +524,7 @@ public CTriggerAreaCapture__CaptureThink(const entity) {
     set_pev(entity, _pev_teamInZone, TEAM_UNASSIGNED)
 
     new m_TeamData[MAX_CAPTURE_TEAMS][perTeamData_s]
-    pev(entity, _pev_teamData, m_TeamData, (_: MAX_CAPTURE_TEAMS * _: perTeamData_s))
+    // pev(entity, _pev_teamData, m_TeamData, (_: MAX_CAPTURE_TEAMS * _: perTeamData_s))
 
     for (new TeamName: t = TEAM_TERRORIST; t <= TEAM_CT; t++) {
         iNumPlayers[t] *= mp_simulatemultiplecappers
@@ -514,8 +542,14 @@ public CTriggerAreaCapture__CaptureThink(const entity) {
             set_pev(entity, _pev_teamInZone, t)
         }
 
-        set_pev(entity, _pev_teamData, m_TeamData)
+        // set_pev(entity, _pev_teamData, m_TeamData)
     }
+
+    #if 1
+    if (test) {
+        iTeamsInZone = 2
+    }
+    #endif
 
     if (iTeamsInZone > 1) {
         set_pev(entity, _pev_teamInZone, TEAM_UNASSIGNED)
@@ -633,12 +667,16 @@ public CTriggerAreaCapture__CaptureThink(const entity) {
 
         new TeamName: owningTeam = TeamName: pev(entity, _pev_owningTeam)
         
+        new bool: canCapture[MAX_CAPTURE_TEAMS]
+        CED_GetArray(entity, "canCapture", canCapture, sizeof(canCapture))
+
         for (new TeamName: t = TEAM_TERRORIST; t <= TEAM_CT; t++) {
             if (owningTeam == t)
                 continue
 
-            // if (!m_TeamData[t][bCanCap])
-            //     continue
+            // TODO: rework structure
+            if (!canCapture[t])
+                continue
 
             // server_print("^n^nowningTeam:%i == t:%i, m_TeamData[][iNumTouching]:%i",
             //     owningTeam, t,
