@@ -18,7 +18,8 @@ static MENU_FLAG = ADMIN_MAP
 
 static g_mapName[MAX_MAPNAME_LENGTH]
 
-static const g_spawnClassname[] = "view_spawn" 
+static const g_baseSpawnClassname[] = "info_target"
+static const g_spawnClassname[] = "info_deathmatch_spawn" 
 
 static bool: g_editorEnabled = false
 
@@ -28,20 +29,21 @@ enum HullVacant_s {
     hull_Invalid,
 }
 
-enum EditorProps_s {
-    TeamName: ep_team,
-    ep_focusEntity,
-    ep_gravityPreset,
-    ep_group[32]
-}
-
 enum _: SpawnProps_s {
+    sp_index,
     Float: sp_origin[3],
     Float: sp_angle[3],
     Float: sp_vAngle[3],
     TeamName: sp_team,
     sp_group[32],
+    bool: sp_canCapture[TeamName],
 }
+
+enum EditorProps_s {
+    ep_gravityPreset,
+    ep_spawn[SpawnProps_s],
+}
+
 
 static g_editorProps[MAX_PLAYERS + 1][EditorProps_s]
 
@@ -221,10 +223,10 @@ static Editor_ReloadSpawns() {
 }
 
 static Editor_ResetProps(const player) {
-    g_editorProps[player][ep_focusEntity] = FM_NULLENT
-    g_editorProps[player][ep_team] = TEAM_UNASSIGNED
     g_editorProps[player][ep_gravityPreset] = 0
-    g_editorProps[player][ep_group][0] = EOS
+    g_editorProps[player][ep_spawn][sp_index] = NULLENT
+    g_editorProps[player][ep_spawn][sp_team] = TEAM_UNASSIGNED
+    g_editorProps[player][ep_spawn][sp_group][0] = EOS
 }
 
 public CBasePlayer_UseEmpty(const player) {
@@ -243,7 +245,7 @@ public CBasePlayer_UseEmpty(const player) {
 static Editor_Focus(const player) {
     new entity = FindEntityByAim(player)
     if (entity != FM_NULLENT) {
-        if (g_editorProps[player][ep_focusEntity] != FM_NULLENT)
+        if (g_editorProps[player][ep_spawn][sp_index] != FM_NULLENT)
             Editor_ClearEntityFocus(player)
 
         Editor_SetEntityFocus(player, entity)
@@ -251,7 +253,7 @@ static Editor_Focus(const player) {
         return
     }
 
-    entity = g_editorProps[player][ep_focusEntity]
+    entity = g_editorProps[player][ep_spawn][sp_index]
     if (entity != FM_NULLENT) {
         Editor_ClearEntityFocus(player)
     }
@@ -303,26 +305,28 @@ static bool: Editor_SetEntityFocus(const player, const entity = FM_NULLENT) {
         .amount = 20
     )
 
-    g_editorProps[player][ep_focusEntity] = entity
-    g_editorProps[player][ep_team] = TeamName: pev(entity, pev_team)
+    g_editorProps[player][ep_spawn][sp_index] = entity
+    g_editorProps[player][ep_spawn][sp_team] = TeamName: pev(entity, pev_team)
+    g_editorProps[player][ep_spawn][sp_canCapture][TEAM_TERRORIST] = pev(entity, pev_iuser2)
+    g_editorProps[player][ep_spawn][sp_canCapture][TEAM_CT] = pev(entity, pev_iuser3)
 
     pev(entity, pev_netname,
-        g_editorProps[player][ep_group],
-        charsmax(g_editorProps[][ep_group])
+        g_editorProps[player][ep_spawn][sp_group],
+        31
     )
 
     return true
 }
 
 static Editor_ClearEntityFocus(const player) {
-    new entity = g_editorProps[player][ep_focusEntity]
+    new entity = g_editorProps[player][ep_spawn][sp_index]
     new bool: inDuck = bool: (pev(entity, pev_flags) & FL_DUCKING)
     
     fm_animate_entity(entity, inDuck ? ACT_CROUCHIDLE : ACT_IDLE)
     fm_set_rendering(entity)
 
-    g_editorProps[player][ep_focusEntity] = FM_NULLENT
-    g_editorProps[player][ep_group][0] = EOS
+    g_editorProps[player][ep_spawn][sp_index] = FM_NULLENT
+    g_editorProps[player][ep_spawn][sp_group][0] = EOS
 }
 
 static Menu_Editor(const player/* , const level */) {
@@ -338,7 +342,7 @@ static Menu_Editor(const player/* , const level */) {
     if (!callback)
         callback = menu_makecallback("MenuCallback_Editor")
 
-    new focusEntity = g_editorProps[player][ep_focusEntity] 
+    new focusEntity = g_editorProps[player][ep_spawn][sp_index] 
 
     new spawnIndex = -1
     if (focusEntity != FM_NULLENT)
@@ -356,13 +360,25 @@ static Menu_Editor(const player/* , const level */) {
         .callback = callback
     )
 
-    new TeamName: team = g_editorProps[player][ep_team]
+    new TeamName: team = g_editorProps[player][ep_spawn][sp_team]
     menu_additem(menu, fmt("Team: %s", g_teamName[team]))
     menu_additem(menu, "Teleport", .callback = callback)
     menu_additem(menu, "Delete", .callback = callback)
     new gravityPreset = g_editorProps[player][ep_gravityPreset]
     menu_additem(menu, fmt("Gravity: %.2f", g_gravityValues[gravityPreset]), .callback = callback)
-    menu_additem(menu, fmt("Group: %s", g_editorProps[player][ep_group]), .callback = callback)
+    // menu_additem(menu, fmt("Group: %s", g_editorProps[player][ep_spawn][sp_group]), .callback = callback)
+    menu_additem(menu,
+        fmt("Can capture by T: %s",
+            g_editorProps[player][ep_spawn][sp_canCapture][TEAM_TERRORIST] ? "YES" : "\rNO\w"
+        ),
+        .callback = callback
+    )
+    menu_additem(menu,
+        fmt("Can capture by CT: %s",
+            g_editorProps[player][ep_spawn][sp_canCapture][TEAM_CT] ? "YES" : "\rNO\w"
+        ),
+        .callback = callback
+    )    
 
     new stats[_: TeamName - 1]
     new total = Editor_GetStats(stats)
@@ -382,7 +398,7 @@ static Menu_Editor(const player/* , const level */) {
 public MenuCallback_Editor(const player, const menu, const item) {
     switch(item) {
         case 2, 3: {
-            if (g_editorProps[player][ep_focusEntity] == FM_NULLENT)
+            if (g_editorProps[player][ep_spawn][sp_index] == FM_NULLENT)
                 return ITEM_DISABLED
         }
     }
@@ -397,9 +413,10 @@ public MenuHandler_Editor(const player, const menu, const item) {
         return PLUGIN_HANDLED
     }
 
+    new entity = g_editorProps[player][ep_spawn][sp_index]
+
     switch (item) {
         case 0: {
-            new entity = g_editorProps[player][ep_focusEntity]
             if (entity != FM_NULLENT) {
                 Spawn_Update(player, entity)
             } else {
@@ -407,25 +424,21 @@ public MenuHandler_Editor(const player, const menu, const item) {
             }
         }
         case 1: {
-            g_editorProps[player][ep_team]++
-            g_editorProps[player][ep_team] = g_editorProps[player][ep_team] % TeamName: (sizeof(g_spawnViewModels) - 1)
+            g_editorProps[player][ep_spawn][sp_team]++
+            g_editorProps[player][ep_spawn][sp_team] = g_editorProps[player][ep_spawn][sp_team] % TeamName: (sizeof(g_spawnViewModels) - 1)
 
-            new entity = g_editorProps[player][ep_focusEntity]
+            new entity = g_editorProps[player][ep_spawn][sp_index]
             if (entity != FM_NULLENT)
-                Spawn_SetTeam(player, entity, g_editorProps[player][ep_team])
+                Spawn_SetTeam(player, entity, g_editorProps[player][ep_spawn][sp_team])
         }
         case 2: {
-            new entity = g_editorProps[player][ep_focusEntity]
-
             new Float: origin[3], Float: angle[3], Float: vAngle[3]
             Spawn_EntityGetPosition(entity, origin, angle, vAngle)
             Spawn_EntitySetPosition(player, origin, angle, vAngle)
         }
         case 3: {
-            new entity = g_editorProps[player][ep_focusEntity]
-
             Spawn_Delete(entity)
-            g_editorProps[player][ep_focusEntity] = FM_NULLENT
+            g_editorProps[player][ep_spawn][sp_index] = FM_NULLENT
         }
         case 4: {
             ++g_editorProps[player][ep_gravityPreset]
@@ -437,8 +450,18 @@ public MenuHandler_Editor(const player, const menu, const item) {
                 g_gravityValues[g_editorProps[player][ep_gravityPreset]]
             )
         }
+        // case 5: {
+        //     client_cmd(player, "messagemode enter_spawnGroup")
+        // }
         case 5: {
-            client_cmd(player, "messagemode enter_spawnGroup")
+            g_editorProps[player][ep_spawn][sp_canCapture][TEAM_TERRORIST] ^= 1
+            if (entity != FM_NULLENT)
+                set_pev(entity, pev_iuser2, g_editorProps[player][ep_spawn][sp_canCapture][TEAM_TERRORIST])
+        }
+        case 6: {
+            g_editorProps[player][ep_spawn][sp_canCapture][TEAM_CT] ^= 1
+            if (entity != FM_NULLENT)
+                set_pev(entity, pev_iuser3, g_editorProps[player][ep_spawn][sp_canCapture][TEAM_CT])
         }
     }
 
@@ -460,9 +483,9 @@ public ClCmd_EnterSpawnGroup(const player, const level, const commandId) {
       return PLUGIN_HANDLED
     }
 
-    copy(g_editorProps[player][ep_group], charsmax(g_editorProps[][ep_group]), spawnGroup)
+    copy(g_editorProps[player][ep_spawn][sp_group], 31, spawnGroup)
 
-    new entity = g_editorProps[player][ep_focusEntity]
+    new entity = g_editorProps[player][ep_spawn][sp_index]
     if (entity != FM_NULLENT)
         set_pev(entity, pev_netname, spawnGroup)
 
@@ -487,30 +510,36 @@ static Editor_GetStats(stats[_: TeamName - 1]) {
 }
 
 static bool: Spawn_Add(const player) {
-    new Float: origin[3], Float: angle[3], Float: vAngle[3]
-    Spawn_EntityGetPosition(player, origin, angle, vAngle)
-    origin[2] += 0.1
+    new spawn[SpawnProps_s]
+    GetSpawnFromPEV(player, spawn)
 
-    new TeamName: team = g_editorProps[player][ep_team]
+    xs_vec_add(spawn[sp_origin], Float: { 0.0, 0.0, 0.1 }, spawn[sp_origin])
+    spawn[sp_team] = TeamName: g_editorProps[player][ep_spawn][sp_team]
+    copy(spawn[sp_group], charsmax(spawn[sp_group]), g_editorProps[player][ep_spawn][sp_group])
+    spawn[sp_canCapture][TEAM_TERRORIST] = g_editorProps[player][ep_spawn][sp_canCapture][TEAM_TERRORIST]
+    spawn[sp_canCapture][TEAM_CT] = g_editorProps[player][ep_spawn][sp_canCapture][TEAM_CT]
 
-    return Add(origin, angle, vAngle, team, g_editorProps[player][ep_group])
+    new entity = CSpawnPoint_Spawn(spawn)
+    return is_entity(entity)
 }
 
-static bool: Add(const Float: origin[3], const Float: angle[3], const Float: vAngle[3], const TeamName: team, const group[]) {
-    new entity = fm_create_entity("info_target")
+static CSpawnPoint_Spawn(const spawn[SpawnProps_s]) {
+    new entity = fm_create_entity(g_baseSpawnClassname)
     set_pev(entity, pev_classname, g_spawnClassname)
 
-    if (!Spawn_EntitySetPosition(entity, origin, angle, vAngle)) {
+    new HullVacant_s: res = CheckHullVacant(spawn[sp_origin], .ignoreEnt = entity, .ignorePlayers = g_editorEnabled)
+    if (res == hull_Invalid) {
+        client_print_color(0, print_team_red, "^3Invalid place!^1")
+
         Spawn_Delete(entity)
-        return false
+        return NULLENT
     }
 
-    set_pev(entity, pev_team, team)
-    set_pev(entity, pev_netname, group)
     set_pev(entity, pev_solid, SOLID_BBOX)
-    engfunc(EngFunc_SetModel, entity, g_spawnViewModels[team])
 
-    return true
+    SetSpawnToPEV(entity, spawn)
+
+    return entity
 }
 
 static Spawn_Update(const player, const entity) {
@@ -603,34 +632,16 @@ static Editor_AddViewSpawns(const JSON: arrSpawns) {
     }
 
     for (new idx, size = json_array_get_count(arrSpawns); idx < size; idx++) {
-        new JSON: spawn = json_array_get_value(arrSpawns, idx)
-         
-        new Float: origin[3], Float: angle[3], Float: vAngle[3]
-        new TeamName: team = TeamName: json_object_get_number(spawn, "team")
-        new JSON: arrOrigin = json_object_get_value(spawn, "origin")
-        new JSON: arrAngle = json_object_get_value(spawn, "angle")
-        new JSON: arrVAngle = json_object_get_value(spawn, "vAngle")
+        new JSON: objSpawn = json_array_get_value(arrSpawns, idx)
+        
+        new spawn[SpawnProps_s]
+        GetSpawnFromObject(objSpawn, spawn)
 
-        new group[32]
-        json_object_get_string(spawn, "group", group, charsmax(group))
-
-        for (new i; i < sizeof(origin); i++) {
-            origin[i] = json_array_get_real(arrOrigin, i)
-            if (i < 2) {
-                angle[i] = json_array_get_real(arrAngle, i)
-                vAngle[i] = json_array_get_real(arrVAngle, i)
-            }
-        }
-
-        if (!Add(origin, angle, vAngle, team, group)) {
+        if (!CSpawnPoint_Spawn(spawn)) {
             LogMessageEx(Warning, "Editor_AddViewSpawns: Can't add spawn `%i`!", idx)
         }
 
-        json_free(arrOrigin)
-        json_free(arrAngle)
-        json_free(arrVAngle)
-
-        json_free(spawn)
+        json_free(objSpawn)
     }
 }
 
@@ -639,42 +650,23 @@ static Editor_SaveSpawns() {
 
     new entity = FM_NULLENT
     while ((entity = fm_find_ent_by_class(entity, g_spawnClassname))) {
-        new JSON: spawn = json_init_object()
+        new spawn[SpawnProps_s]
+        spawn[sp_index] = json_array_get_count(arrSpawns)
 
-        new Float: origin[3], Float: angle[3], Float: vAngle[3]
-        pev(entity, pev_origin, origin)
-        pev(entity, pev_angles, angle)
-        pev(entity, pev_v_angle, vAngle)
-        new team = pev(entity, pev_team)
-        new group[32]
-        pev(entity, pev_netname, group, charsmax(group))
+        pev(entity, pev_origin, spawn[sp_origin])
+        pev(entity, pev_angles, spawn[sp_angle])
+        pev(entity, pev_v_angle, spawn[sp_vAngle])
+        pev(entity, pev_netname, spawn[sp_group], charsmax(spawn[sp_group]))
+        spawn[sp_team] = TeamName: pev(entity, pev_team)
 
-        json_object_set_number(spawn, "team", team)
-        json_object_set_string(spawn, "group", group)
+        spawn[sp_canCapture][TEAM_TERRORIST] = pev(entity, pev_iuser2)
+        spawn[sp_canCapture][TEAM_CT] = pev(entity, pev_iuser3)
 
-        new JSON: arrOrigin = json_init_array()
-        new JSON: arrAngle = json_init_array()
-        new JSON: arrVAngle = json_init_array()
- 
-        for (new i; i < 3; i++) {
-            json_array_append_real(arrOrigin, origin[i])
-            if (i < 2) {
-                json_array_append_real(arrAngle, angle[i])
-                json_array_append_real(arrVAngle, vAngle[i])
-            }
-        }
+        new JSON: objSpawn = json_init_object()
+        SetSpawnToObject(spawn, objSpawn)
+        json_array_append_value(arrSpawns, objSpawn)
 
-        json_object_set_value(spawn, "origin", arrOrigin)
-        json_object_set_value(spawn, "angle", arrAngle)
-        json_object_set_value(spawn, "vAngle", arrVAngle)
-
-        json_free(arrOrigin)
-        json_free(arrAngle)
-        json_free(arrVAngle)
-        
-        json_array_append_value(arrSpawns, spawn)
-
-        json_free(spawn)
+        json_free(objSpawn)
     }
 
     new JSON: objSpawns = json_init_object()
@@ -982,7 +974,7 @@ public bool: SpawnPreset_DefaultPreset(const player) {
 }
 
 static bool: Player_MoveToSpawn(const player, const count) {
-    new TeamName: team = mp_freeforall ? TEAM_UNASSIGNED : get_member(player, m_iTeam)
+    new TeamName: targetTeam = mp_freeforall ? TEAM_UNASSIGNED : get_member(player, m_iTeam)
 
     new bestSpawnIdx = -1
     for (new attempt; attempt <= 2 && bestSpawnIdx == -1; attempt++) {
@@ -997,8 +989,14 @@ static bool: Player_MoveToSpawn(const player, const count) {
                 potentialSpawnIdx = 0
             }
 
-            // TODO: optimize that!
-            new spawnResult = Spawn_CheckConditions(player, team, potentialSpawnIdx, attempt)
+            // TODO: optimize that! 
+
+            new JSON: objSpawn = json_array_get_value(g_arrSpawns, potentialSpawnIdx)
+            new spawn[SpawnProps_s]
+            GetSpawnFromObject(objSpawn, spawn)
+            json_free(objSpawn)
+            new spawnResult = Spawn_CheckConditions(player, targetTeam, spawn, attempt)
+
             if (spawnResult == 0) {
                 bestSpawnIdx = potentialSpawnIdx
                 break
@@ -1009,15 +1007,40 @@ static bool: Player_MoveToSpawn(const player, const count) {
     }
 
     if (bestSpawnIdx == -1) {
-        LogMessageEx(Warning, "Player %n can't found good spawn point",
+        #if 0
+        /*
+            TODO: it doesn't work yet, but need to implement
+
+            Idea: if at the moment there is no
+                suitable point for trespawn - make a delayed
+                respawn for 0.5..2.0 seconds.
+        */
+        {
+            new cantFoundSpawnMethod = 0
+            if (cantFoundSpawnMethod) {
+                LogMessageEx(Warning, "Player `%n` can't find a good (suitable) spawn point and will therefore be spawned later (for 3 seconds).",
+                    player
+                )
+
+                set_member(player, m_flRespawnPending, get_gametime() + 3.0)
+
+                return true
+            }
+        }
+        #endif
+
+        LogMessageEx(Warning, "Player `%n` can't find a good (suitable) spawn point and so uses the standard map respawn.",
             player
         )
 
         return false
     }
 
+    new JSON: objSpawn = json_array_get_value(g_arrSpawns, bestSpawnIdx)
     new spawn[SpawnProps_s]
-    GetSpawnFromObject(bestSpawnIdx, spawn)
+    GetSpawnFromObject(objSpawn, spawn)
+
+    json_free(objSpawn)
 
     new bool: res = Spawn_EntitySetPosition(player, spawn[sp_origin], spawn[sp_angle], spawn[sp_vAngle])
     if (!res) {
@@ -1030,11 +1053,8 @@ static bool: Player_MoveToSpawn(const player, const count) {
     return res
 }
 
-static Spawn_CheckConditions(const target, const TeamName: targetTeam, const spawnIdx, const attempt) {
-    new spawn[SpawnProps_s]
-    GetSpawnFromObject(spawnIdx, spawn)
-
-    new bool: isSpawnAvailable = ControlPoints_IsSpawnAvailable(spawnIdx, targetTeam) != 0
+static Spawn_CheckConditions(const target, const TeamName: targetTeam, const spawn[SpawnProps_s], const attempt) {
+    new bool: isSpawnAvailable = ControlPoints_IsSpawnAvailable(spawn, targetTeam) != 0
     // server_print("------- attempt:#%i, isSpawnAvailable:%i",
     //     attempt, isSpawnAvailable
     // )
@@ -1087,26 +1107,104 @@ static Spawn_CheckConditions(const target, const TeamName: targetTeam, const spa
     return 0
 }
 
-GetSpawnFromObject(const spawnIdx, arrSpawn[SpawnProps_s]) {
-    new JSON: spawn = json_array_get_value(g_arrSpawns, spawnIdx)
-    arrSpawn[sp_team] = TeamName: json_object_get_number(spawn, "team")
-    new JSON: arrOrigin = json_object_get_value(spawn, "origin")
-    new JSON: arrAngle = json_object_get_value(spawn, "angle")
-    new JSON: arrVAngle = json_object_get_value(spawn, "vAngle")
-    json_object_get_string(spawn, "group", arrSpawn[sp_group], charsmax(arrSpawn[sp_group]))
+JSON: SetSpawnToObject(const spawn[SpawnProps_s], &JSON: objSpawn) {
+    assert(objSpawn != Invalid_JSON)
 
-    for (new i; i < sizeof(arrSpawn[sp_origin]); i++) {
-        arrSpawn[sp_origin][i] = json_array_get_real(arrOrigin, i)
-        if (i < 2) {
-            arrSpawn[sp_angle][i] = json_array_get_real(arrAngle, i)
-            arrSpawn[sp_vAngle][i] = json_array_get_real(arrVAngle, i)
+
+    json_object_set_number(objSpawn, "index", spawn[sp_index])
+    json_object_set_number(objSpawn, "team", _: spawn[sp_team])
+    json_object_set_string(objSpawn, "group", spawn[sp_group])
+
+    {
+        new JSON: arrOrigin = json_init_array()
+        new JSON: arrAngle = json_init_array()
+        new JSON: arrVAngle = json_init_array()
+
+        for (new i; i < 3; i++) {
+            json_array_append_real(arrOrigin, spawn[sp_origin][i])
+            if (i < 2) {
+                json_array_append_real(arrAngle, spawn[sp_angle][i])
+                json_array_append_real(arrVAngle, spawn[sp_vAngle][i])
+            }
         }
+
+        json_object_set_value(objSpawn, "origin", arrOrigin)
+        json_object_set_value(objSpawn, "angle", arrAngle)
+        json_object_set_value(objSpawn, "vAngle", arrVAngle)
+
+        json_free(arrOrigin)
+        json_free(arrAngle)
+        json_free(arrVAngle)
     }
 
-    json_free(arrOrigin)
-    json_free(arrAngle)
-    json_free(arrVAngle)
-    json_free(spawn)
+    json_object_set_bool(objSpawn, "capture.canCaptureT", bool: spawn[sp_canCapture][TEAM_TERRORIST], .dot_not = true)
+    json_object_set_bool(objSpawn, "capture.canCaptureCT", bool: spawn[sp_canCapture][TEAM_CT], .dot_not = true)
+}
+
+GetSpawnFromObject(const &JSON: objSpawn, spawn[SpawnProps_s]) {
+    assert(objSpawn != Invalid_JSON)
+
+    spawn[sp_index] = json_object_get_number(objSpawn, "index")
+    spawn[sp_team] = TeamName: json_object_get_number(objSpawn, "team")
+    json_object_get_string(objSpawn, "group", spawn[sp_group], charsmax(spawn[sp_group]))
+
+    {    
+        new JSON: arrOrigin = json_object_get_value(objSpawn, "origin")
+        new JSON: arrAngle = json_object_get_value(objSpawn, "angle")
+        new JSON: arrVAngle = json_object_get_value(objSpawn, "vAngle")
+
+        for (new i; i < sizeof(spawn[sp_origin]); i++) {
+            spawn[sp_origin][i] = json_array_get_real(arrOrigin, i)
+            if (i < 2) {
+                spawn[sp_angle][i] = json_array_get_real(arrAngle, i)
+                spawn[sp_vAngle][i] = json_array_get_real(arrVAngle, i)
+            }
+        }
+
+        json_free(arrOrigin)
+        json_free(arrAngle)
+        json_free(arrVAngle)
+    }
+
+    spawn[sp_canCapture][TEAM_TERRORIST] = json_object_get_bool(objSpawn, "capture.canCaptureT", .dot_not = true)
+    spawn[sp_canCapture][TEAM_CT] = json_object_get_bool(objSpawn, "capture.canCaptureCT", .dot_not = true)
+}
+
+SetSpawnToPEV(const entity, const spawn[SpawnProps_s]) {
+    assert (is_entity(entity))
+
+    set_pev(entity, pev_iuser1, spawn[sp_index])
+    set_pev(entity, pev_origin, spawn[sp_origin])
+    set_pev(entity, pev_angles, spawn[sp_angle])
+    set_pev(entity, pev_v_angle, spawn[sp_vAngle])
+    set_pev(entity, pev_team, spawn[sp_team])
+    set_pev(entity, pev_netname, spawn[sp_group])
+
+    set_pev(entity, pev_iuser2, spawn[sp_canCapture][TEAM_TERRORIST])
+    set_pev(entity, pev_iuser3, spawn[sp_canCapture][TEAM_CT])
+
+    //
+    engfunc(EngFunc_SetOrigin, entity, spawn[sp_origin])
+    engfunc(EngFunc_SetModel, entity, g_spawnViewModels[spawn[sp_team]])
+
+    set_pev(entity, pev_fixangle, 1)
+    set_pev(entity, pev_velocity, Float: {0.0, 0.0, 0.0})
+    set_pev(entity, pev_punchangle, Float: {0.0, 0.0, 0.0})
+    set_pev(entity, pev_avelocity, Float: {0.0, 0.0, 0.0})
+}
+
+GetSpawnFromPEV(const entity, spawn[SpawnProps_s]) {
+    assert (is_entity(entity))
+
+    spawn[sp_index] = pev(entity, pev_iuser1)
+    pev(entity, pev_origin, spawn[sp_origin])
+    pev(entity, pev_angles, spawn[sp_angle])
+    pev(entity, pev_v_angle, spawn[sp_vAngle])
+    spawn[sp_team] = TeamName: pev(entity, pev_team)
+    pev(entity, pev_netname, spawn[sp_group], charsmax(spawn[sp_group]))
+
+    spawn[sp_canCapture][TEAM_TERRORIST] = pev(entity, pev_iuser2)
+    spawn[sp_canCapture][TEAM_CT] = pev(entity, pev_iuser3)
 }
 
 // TODO: for optimize
