@@ -78,7 +78,7 @@ static Float: redm_capture_spawn_penalty
 static Float: redm_capture_spawn_distance
 static redm_capture_spawn_changelevel
 static redm_capture_spawn_static
-
+static Float: redm_capture_capdeteriorate_time
 
 CapturePoints_Init() {
     //  RegisterHookChain(RG_CBasePlayer_TakeDamage, "CBasePlayer_TakeDamage", .post = true)
@@ -153,6 +153,16 @@ static Create_ConVars() {
             .description = "The number of static spawns of commands that are not subject to capture"
         ),
         redm_capture_spawn_static
+    )
+    bind_pcvar_float(
+        create_cvar(
+            "redm_capture_capdeteriorate_time", "15",
+            .has_min = true, .min_val = 0.0,
+            .has_max = true, .max_val = 256.0,
+            .flags = _FCVAR_FLOAT,
+            .description = "<>"
+        ),
+        redm_capture_capdeteriorate_time
     )
 }
 
@@ -574,17 +584,14 @@ public CTriggerAreaCapture__CaptureThink(const entity) {
         } else {
             // Caps deteriorate over time
             #if 1
-                if ( /* TeamplayRoundBasedRules() && m_hPoint && TeamplayRoundBasedRules()->TeamMayCapturePoint(m_nCapturingTeam,m_hPoint->GetPointIndex()) */ true ) {
-                    static Float: mp_capdeteriorate_time = 15.0
-
-                    new Float: flDecrease = (flTotalTimeToCap / mp_capdeteriorate_time) * flTimeDelta
-                    if ( /* TeamplayRoundBasedRules() && TeamplayRoundBasedRules()->InOvertime() */ false ) {
-                        flDecrease *= 6
-                    }
-                    // server_print("22222222 (%.2f + %.2f):%.2f", 
-                    //     timeRemaining, flDecrease,
-                    //     timeRemaining + flDecrease
-                    // )
+                new bool: TeamMayCapturePoint = true
+                if ( /* TeamplayRoundBasedRules() && m_hPoint && TeamplayRoundBasedRules()->TeamMayCapturePoint(m_nCapturingTeam,m_hPoint->GetPointIndex()) */ TeamMayCapturePoint ) {
+                    new Float: flDecrease = (flTotalTimeToCap / redm_capture_capdeteriorate_time) * flTimeDelta
+                    #if 0
+                        if (TeamplayRoundBasedRules() && TeamplayRoundBasedRules()->InOvertime()) {
+                            flDecrease *= 6
+                        }
+                    #endif
     
                     CTriggerAreaCapture__SetCapTimeRemaining(entity, timeRemaining + flDecrease )
                 }
