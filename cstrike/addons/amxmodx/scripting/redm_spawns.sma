@@ -8,6 +8,7 @@
 #include <reapi>
 #include <redm>
 #include <rog>
+#include <customentdata>
 
 //////////////////////////////////////////////////
 // #define DEBUG_SPAWNS_TRANCUATE_COUNT 20
