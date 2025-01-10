@@ -11,6 +11,12 @@ static const g_pointClassname[] = "trigger_capture_area"
 
 const Float: AREA_THINK_TIME = 0.1
 
+enum renderState_s {
+    rs_Reset,
+    rs_Start,
+    rs_inProgress,
+}
+
 enum perTeamData_s {
     iNumRequiredToCap,
     iNumTouching,
@@ -201,27 +207,77 @@ static collectSpawnPoints(&JSON: arrSpawns) {
         //     continue
         // }
         
-        CTriggerAreaCapture__Spawn(
-            spawn[sp_origin],
-            spawn[sp_angle],
-            g_ControlPointsModels[spawn[sp_team]],
-            spawn[sp_team]
-        )
+
+Point_SetRender(entity, renderState_s: _state = rs_Reset) {
+    switch (_state) {
+        case rs_Reset: {
+            fm_animate_entity(entity, ACT_IDLE)
+
+            set_pev(entity, pev_rendermode, kRenderTransAlpha)
+            set_pev(entity, pev_renderfx, kRenderFxNone)
+            set_pev(entity, pev_renderamt, /* g_renderAmount / 3 */ 10.0)
+            set_pev(entity, pev_rendercolor, g_color[TEAM_SPECTATOR])
+        }
+        case rs_Start: {
+            fm_animate_entity(entity, ACT_WALK, g_sequenceRate)
+
+            set_pev(entity, pev_rendermode, kRenderTransColor)
+            set_pev(entity, pev_renderfx, kRenderFxGlowShell)
+            set_pev(entity, pev_renderamt, g_renderAmount / 3)
+            set_pev(entity, pev_rendercolor, g_color[TeamName: pev(entity, _pev_owningTeam)])
+        }
+        case rs_inProgress: {
+            new Float: captureTime; pev(entity, _pev_captureTime, captureTime)
+            new Float: timeRemaining; pev(entity, _pev_timeRemaining, timeRemaining)
+            new TeamName: owningTeam = TeamName: pev(entity, _pev_owningTeam)
+
+            new Float: percentage = ((captureTime - timeRemaining) / captureTime) * 100
+            new Float: remainingPercentage = timeRemaining / captureTime
+
+            static Float: renderColor[3]
+            xs_vec_mul_scalar(g_color[owningTeam], remainingPercentage, renderColor)
+            set_pev(entity, pev_rendercolor, renderColor)
+
+            set_pev(entity, pev_renderamt, g_renderAmount * remainingPercentage)
+
+            #if 1
+            new TeamName: teamInZone = TeamName: pev(entity, _pev_teamInZone)
+            static bool: clearProgress[MAX_PLAYERS + 1]
+            for (new p = 1; p <= MaxClients; p++) {
+                if (!is_user_connected(p))
+                    continue
+
+                if (clearProgress[p]) {
+                    rg_send_bartime(p, 0, .observer = true)
+                }
+
+                clearProgress[p] = true
+                if (!is_user_alive(p))
+                    continue
+                
+                if (get_member(p, m_iTeam) != teamInZone)
+                    continue
+                
+                new Float: distance = fm_entity_range(entity, p)
+                if (distance > redm_capture_spawn_distance)
+                    continue
+
+                rg_send_bartime2(p, floatround(captureTime), (captureTime - timeRemaining), .observer = true)
+                clearProgress[p] = false
+            }
+            #endif
+        }
     }
 }
 
-CTriggerAreaCapture__Spawn(const Float: origin[3], const Float: angles[3], const model[], const TeamName: team) {
+CTriggerAreaCapture__Spawn(const spawn[SpawnProps_s]) {
     new entity = fm_create_entity(g_pointBaseClassname)
     set_pev(entity, pev_classname, g_pointClassname)
 
-    fm_set_rendering(entity, kRenderFxNone, 0, 0, 0, kRenderTransAdd, 255)
-    fm_animate_entity(entity, ACT_IDLE)
-
-    set_pev(entity, pev_origin, origin)
-    set_pev(entity, pev_model, model)
+    Point_SetRender(entity, rs_Reset)
     
-    // engfunc(EngFunc_SetModel, entity, model)
-    // engfunc(EngFunc_SetOrigin, entity, origin)
+    engfunc(EngFunc_SetModel, entity, g_ControlPointsModels[spawn[sp_team]])
+    engfunc(EngFunc_SetOrigin, entity, spawn[sp_origin])
 
     dllfunc(DLLFunc_Spawn, entity)
 
@@ -230,11 +286,11 @@ CTriggerAreaCapture__Spawn(const Float: origin[3], const Float: angles[3], const
 
     // Prevent CBaseTrigger::InitTrigger() actions
     set_pev(entity, pev_effects, pev(entity, pev_effects) & ~EF_NODRAW)
-    set_pev(entity, pev_angles, angles)
+    set_pev(entity, pev_angles, spawn[sp_angle])
 
 
     {
-        set_pev(entity, _pev_owningTeam, team)
+        set_pev(entity, _pev_owningTeam, spawn[sp_team])
         set_pev(entity, _pev_captureTime, redm_capture_spawn_time)
 
         new m_TeamData[MAX_CAPTURE_TEAMS][perTeamData_s]
@@ -544,21 +600,7 @@ public CTriggerAreaCapture__CaptureThink(const entity) {
 
         #if 1
             { // TODO: team_control_point WORK
-                new Float: renderColor[3]
-
-                // new Float: percentage = ((captureTime - timeRemaining) / captureTime) * 100
-                new Float: remainingPercentage = timeRemaining / captureTime
-
-                // server_print("progress: %f, remainingPercentage:%f, seqRate: %f",
-                //     percentage, remainingPercentage, (g_sequenceRate * remainingPercentage)
-                // )
-
-                xs_vec_mul_scalar(g_color[owningTeam], remainingPercentage, renderColor)
-
-                set_pev(entity, pev_rendercolor, renderColor)
-                set_pev(entity, pev_renderamt, g_renderAmount * remainingPercentage)
-
-                // set_pev(entity, pev_framerate, (g_sequenceRate * remainingPercentage))
+                Point_SetRender(entity, rs_inProgress)
             }
         #endif
 
@@ -613,17 +655,9 @@ CTriggerAreaCapture__StartCapture(const entity, const TeamName: team /* , const 
 
     #if 1
     { // TODO: team_control_point WORK
-        fm_animate_entity(entity, ACT_WALK, g_sequenceRate)
-        // set_pev(entity, pev_avelocity, Float: {0.0, 0.0, 0.0})
-
-        set_pev(entity, pev_rendermode, kRenderTransAdd)
-        set_pev(entity, pev_renderamt, 80.0)
-
-        set_pev(entity, pev_renderfx, kRenderFxGlowShell)
-        set_pev(entity, pev_rendercolor, g_color[TeamName: pev(entity, _pev_owningTeam)])
-
+        Point_SetRender(entity, rs_Start)
     }
-    #endif
+   #endif
 
     set_pev(entity, _pev_capturingTeam, team)
     new Float: captureTime; pev(entity, _pev_captureTime, captureTime)
@@ -678,12 +712,7 @@ CTriggerAreaCapture__EndCapture(const entity, const TeamName: team) {
 
     #if 1
     { // TODO: team_control_point WORK
-        fm_animate_entity(entity, ACT_IDLE, 0.0)
-        fm_set_rendering(entity, kRenderFxNone, 0, 0, 0, kRenderTransAdd, 0)
-
-        
-        set_pev(entity, pev_rendermode, kRenderTransAdd)
-        set_pev(entity, pev_renderamt, 80.0)
+        Point_SetRender(entity, rs_Reset)
 
         new TeamName: owningTeam = TeamName: pev(entity, _pev_owningTeam)
         engfunc(EngFunc_SetModel, entity, g_ControlPointsModels[owningTeam])
@@ -697,12 +726,7 @@ CTriggerAreaCapture__BreakCapture(const entity, const bool: notEnoughPlayers) {
     #pragma unused notEnoughPlayers
     #if 1
     { // TODO: team_control_point WORK
-        fm_animate_entity(entity, ACT_IDLE, 0.0)
-        fm_set_rendering(entity, kRenderFxNone, 0, 0, 0, kRenderTransAdd, 0)
-
-        
-        set_pev(entity, pev_rendermode, kRenderTransAdd)
-        set_pev(entity, pev_renderamt, 80.0)
+        Point_SetRender(entity, rs_Reset)
     }
     #endif
 
