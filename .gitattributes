@@ -1,0 +1,7 @@
+# Define .sma, .inc, and .inl files as SourcePawn
+*.sma linguist-language=SourcePawn
+*.inc linguist-language=SourcePawn
+*.inl linguist-language=SourcePawn
+
+# Treat any .txt files within any path containing 'data/lang' as INI
+**/data/lang/**/*.txt linguist-language=INI
