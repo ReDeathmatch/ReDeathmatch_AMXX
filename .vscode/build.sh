@@ -114,4 +114,6 @@ if [ "$needCopyOther" ]; then
     cp -r $srcDir/configs/* $destinationDir/configs/
     print_color $GREEN " - Copying data..."
     cp -r $srcDir/data/* $destinationDir/data/
+    print_color $GREEN " - Copying modules..."
+    cp -r $srcDir/modules/* $destinationDir/modules/
 fi

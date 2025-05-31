@@ -23,8 +23,8 @@ WORKDIR /root/hlds/cstrike
 RUN releaseLink="https://github.com/theAsmodai/metamod-r/releases/download/1.3.0.149/metamod-bin-1.3.0.149.zip" \
     && curl -sSL ${releaseLink} | bsdtar -xf - --exclude='*.dll' --exclude='*.pdb' addons/*
 
-# Install AMXModX 1.9.0
-ARG AMXModX_URL="https://www.amxmodx.org/amxxdrop/1.9/amxmodx-1.9.0-git5294-base-linux.tar.gz"
+# Install AMXModX 1.10
+ARG AMXModX_URL="https://www.amxmodx.org/amxxdrop/1.10/amxmodx-1.10.0-git5467-base-linux.tar.gz"
 RUN curl -sSL ${AMXModX_URL} | bsdtar -xf - addons/  \
     && echo "linux addons/amxmodx/dlls/amxmodx_mm_i386.so" > addons/metamod/plugins.ini
 
